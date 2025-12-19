@@ -4,12 +4,14 @@ interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   label: string;
   rightElement?: React.ReactNode;
   icon?: React.ReactNode;
+  trailingIcon?: React.ReactNode;
 }
 export default function Input({
   label,
   rightElement,
   className,
   icon,
+  trailingIcon,
   ...props
 }: InputProps) {
   return (
@@ -34,6 +36,12 @@ export default function Input({
           className=" w-full bg-transparent  outline-none text-form-text placeholder:text-label-text/40 "
           {...props}
         />
+        {trailingIcon && (
+          <div className="text-accent/60 shrink-0 flex items-center justify-center cursor-pointer hover:text-accent transition-colors">
+            {trailingIcon}
+          </div>
+        )}
+        
       </div>
     </div>
   );
