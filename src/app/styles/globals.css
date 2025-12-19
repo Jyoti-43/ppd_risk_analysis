@@ -1,0 +1,78 @@
+@import "tailwindcss";
+
+:root {
+  --background: #FCEEF0;
+  --foreground: #171717;
+  /* cardbg and google login button background */
+  --card-background: #ffffff;
+  /* text color */
+  --heading-text: #333333;
+  --sub-text: #8e6969;
+  --form-text: #eb8b9e;
+  --form-lable: #ad7f6e;
+  /* buttons bg , hover, border  */
+  --button-background: #ed738b;
+  --button-hover: #e16888;
+  --button-text-color: #ffffff;
+  --google-button-background: #ffffff;
+  --google-button-border: #f5b9c5;
+  --background-hover: #f8f8f8;
+  --google-button-text: #333333;
+  --input-hover-background:rgb(255, 250, 253);
+  --input-hover:rgb(247, 226, 237);
+  /* seperator color */
+  --seperator-color: #805c5cc5;
+  /* input fields */
+  --input-background: #ffffff;
+  --input-focus-border: #eb8b9e;
+  --placeholder-text-color: #999999;
+  --icon-color: #eb8b9e;
+  /* links text color */
+  --link-text-color: #eb8b9e;
+  /* privacy statement   */
+  --pravicy-text-color: #999999;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-primary: var(--font-geist-sans);
+  --font-secondary: var(--font-geist-sans);
+  --color-card: var(--card-background);
+  --color-heading: var(--heading-text);
+  --color-sub: var(--sub-text);
+  --color-accent: var(--form-text);
+  --color-button: var(--button-background);
+  --color-button-hover: var(--button-hover);
+  --color-background-hover: var(--background-hover);
+  --color-google-border: var(--google-button-border);
+  --color-link: var(--link-text-color);
+  --color-background-input: var(--input-hover-background);
+  --color-label-text: var(--form-lable);
+  --color-seperator: var(--seperator-color);
+}
+
+@media (prefers-color-scheme: light) {
+  :root {
+    --background: #fceef0;
+    --foreground: #333333;
+  }
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: Nunito Sans, sans-serif;
+}
+
+
+/* blob animation */
+@keyframes float {
+  0% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(-20px) rotate(5deg); }
+  100% { transform: translateY(0px) rotate(0deg); }
+}
+
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
