@@ -11,21 +11,21 @@ const ForgotPassword = () => {
   return (
     <div className=" relative flex flex-col justify-center items-center md:pt-7 mt-2 md:my-0  h-svh md:h-screen font-sans background px-2 overflow-y-auto md:overflow-y-hidden">
       {/* for header section, logo emergency support contact */}
-      <div className="flex  flex-row justify-between items-center w-full max-w-6xl mb-4  px-3">
+      <nav className="flex  flex-row justify-between items-center w-full max-w-6xl mb-4  px-3">
         <div className="text-lg font-semibold font-seperator text-primary">
           Logo
         </div>
-        <div className=" flex flex-row gap-2 text-sm font-medium text-accent">
+        <div className=" flex flex-row gap-2 text-sm font-semibold text-accent">
           <span>
             {" "}
             <Headset size={18} />
           </span>
           Need Help? Call{" "}
         </div>
-      </div>
+      </nav>
      <BlobBackground />
       {/* this dev for the container of login page welcome message plus form  */}
-      <div className="flex flex-col gap-2 justify-center flex-1">
+      <main className="flex flex-col gap-2 justify-center flex-1">
         {/* <div className="mb-8 flex flex-col gap-2"> */}
           <div className="mt-2  flex flex-col items-center justify-center rounded-4xl w-auto max-h-fit gap-2 md:gap-3 bg-card/70 backdrop-blur-md md:w-md  ">
             <div className="w-full h-1 mt-0.5  bg-linear-to-r from-transparent via-accent/40 to-transparent"></div>
@@ -86,7 +86,7 @@ const ForgotPassword = () => {
             </div>
           </div>
           
-        </div>
+        </main>
         {/* login form here */}
       </div>
     // </div>

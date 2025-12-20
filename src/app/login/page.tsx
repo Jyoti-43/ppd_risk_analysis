@@ -1,11 +1,11 @@
-'use client';
+"use client";
 import React from "react";
 import Input from "../common/ui/input";
 import Button from "../common/ui/button";
 import { Headset, LockKeyhole, Mail } from "lucide-react";
 // import { FcGoogle } from "react-icons/fc";
 // import { FaArrowRight } from "react-icons/fa";
-import { IoHeartCircle } from "react-icons/io5";
+
 import dynamic from "next/dynamic";
 
 import BlobBackground from "../common/ui/backgroundblob";
@@ -23,22 +23,22 @@ const LoginPage = () => {
   return (
     <div className=" relative flex flex-col  items-center justify-center md:pt-7 md:my-0  gap-3 min-h-svh md:h-screen font-sans background px-4  overflow-y-auto md:overflow-y-hidden ">
       {/* for header section, logo emergency support contact */}
-      <div className="flex  flex-row justify-between items-center w-full max-w-6xl  mt-  px-3 md:mb-2 md:mt-2">
+      <nav className="flex  flex-row justify-between items-center w-full max-w-6xl  mt-  px-3 md:mb-2 md:mt-2">
         <div className="text-lg font-semibold font-seperator text-primary">
           Logo
         </div>
-        <div className=" flex flex-row gap-2 text-sm font-medium text-accent">
+        <div className=" flex flex-row gap-2 text-sm font-medium text-accent/90  ">
           <span>
             {" "}
             <Headset size={18} />
           </span>
           Need Help? Call{" "}
         </div>
-      </div>
+      </nav>
 
       <BlobBackground />
       {/* this dev for the container of login page welcome message plus form  */}
-      <div className="flex-1 flex flex-col gap-1 md:gap-2 ">
+      <main className="flex-1 flex flex-col gap-1 md:gap-2 ">
         <div className="mb-5  flex flex-col gap-1 md:gap-2 md:mb-3">
           <div className="flex flex-col gap-2 md:gap-2 mb-4 md:mb-3 text-center items-center justify-center">
             <h1 className="text-3xl md:text-4xl font-bold font-primary tracking-tight text-heading">
@@ -104,11 +104,11 @@ const LoginPage = () => {
             <div className="flex flex-col items-center justify-center text-sm mt-2 pt-3 pb-2 md:pt-5 md:pb-3 rounded-b-4xl border-t-0.5 border-google-border bg-[#fae4eb]  w-full">
               <p>
                 {" "}
-                New here?
+                New ?
                 <span>
                   <a href="#" className="text-link hover:underline font-bold ">
                     {" "}
-                    Join our Community!
+                    Register Here!
                   </a>
                 </span>
               </p>
@@ -121,7 +121,7 @@ const LoginPage = () => {
             <span> Your data is safe and completely private.</span>
           </div>
         </div>
-      </div>
+      </main>
     </div>
   );
 };

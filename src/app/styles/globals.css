@@ -1,17 +1,17 @@
 @import "tailwindcss";
 
 :root {
-  --background: #FCEEF0;
+  --background: #fcf4f5;
   --foreground: #171717;
   /* cardbg and google login button background */
   --card-background: #ffffff;
   /* text color */
   --heading-text: #333333;
   --sub-text: #8e6969;
-  --form-text: #eb8b9e;
-  --form-lable: #ad7f6e;
+  --form-text: #C62842;
+  --form-lable: #7e6359;
   /* buttons bg , hover, border  */
-  --button-background: #ed738b;
+  --button-background: #e03c5d;
   --button-hover: #e16888;
   --button-text-color: #ffffff;
   --google-button-background: #ffffff;
@@ -28,7 +28,7 @@
   --placeholder-text-color: #999999;
   --icon-color: #eb8b9e;
   /* links text color */
-  --link-text-color: #eb8b9e;
+  --link-text-color: #ea7088;
   /* privacy statement   */
   --pravicy-text-color: #999999;
 }

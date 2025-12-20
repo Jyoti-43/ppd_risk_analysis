@@ -14,23 +14,23 @@ const ResetPassword = () => {
   return (
     <div className=" relative flex flex-col justify-center items-center md:pt-5 mt-2 md:my-0  h-svh md:h-screen font-sans background px-2 overflow-y-auto md:overflow-y-hidden">
       {/* for header section, logo emergency support contact */}
-      <div className="flex  flex-row justify-between items-center w-full max-w-6xl mb-4  px-3">
+      <nav className="flex  flex-row justify-between items-center w-full max-w-6xl mb-4  px-3">
         <div className="text-lg font-semibold font-seperator text-primary">
           Logo
         </div>
         <div className=" flex flex-row gap-2 text-sm font-medium text-seperator">
-          <Button className="flex flex-row w-full py-2 px-3 mt-2 md:mt-4 mb-2 md:font-semibold font-normal bg-white/30 gap-3 md:text-md  text-seperator hover:text-white ">
+          <Button className="flex flex-row w-full py-2 px-3 mt-2 md:mt-4 mb-2 md:font-semibold font-normal bg-white/70 gap-3 md:text-md  text-sub hover:text-white ">
             <span>
               <ArrowLeft size={18} />
             </span>
             Back to Login
           </Button>
         </div>
-      </div>
+      </nav>
       <BlobBackground />
 
       {/* this dev for the container of login page welcome message plus form  */}
-      <div className="flex flex-col gap-2 justify-center flex-1">
+      <main className="flex flex-col gap-2 justify-center flex-1">
         
         {/* <div className="mb-8 flex flex-col gap-2"> */}
         <div className="flex flex-col gap-2 md:gap-2 mb-4 md:mb-3 text-center items-center justify-center">
@@ -63,7 +63,7 @@ const ResetPassword = () => {
             </Button>
           </div>
         </div>
-      </div>
+      </main>
       {/* login form here */}
     </div>
     // </div>

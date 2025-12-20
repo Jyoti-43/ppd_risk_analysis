@@ -24,7 +24,7 @@ export default function Input({
       </div>
 
       {/* Container for the halo effect */}
-      <div className="flex items-center gap-3 group rounded-full w-full  border border-google-border  bg-background-input px-4 py-3   transition-all focus-within:border-button  focus-within:ring-2 focus-within:ring-pink-200"> 
+      <div className="flex items-center gap-3 group rounded-full w-full  border border-google-border  bg-card/30 backdrop-blur-lg px-4 py-2 md:px-4 md:py-3   transition-all focus-within:border-button  focus-within:ring-2 focus-within:ring-pink-200"> 
         {/* render the icon if available */}
         {icon && (
           <div className="text-accent/60 shrink-0  flex items-center justify-center">
@@ -33,7 +33,7 @@ export default function Input({
         )}
 
         <input
-          className=" w-full bg-transparent  outline-none text-form-text placeholder:text-label-text/40 "
+          className=" w-full  outline-none text-form-text placeholder:text-label-text/60 "
           {...props}
         />
         {trailingIcon && (
