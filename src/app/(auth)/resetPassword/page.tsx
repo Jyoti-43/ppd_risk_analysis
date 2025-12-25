@@ -1,6 +1,4 @@
 import React from "react";
-import Input from "../common/ui/input";
-import Button from "../common/ui/button";
 import {
   ArrowLeft,
   Eye,
@@ -8,7 +6,9 @@ import {
   ShieldCheck,
 } from "lucide-react";
 
-import BlobBackground from "../common/ui/backgroundblob";
+import BlobBackground from "../../../common/ui/backgroundblob";
+import Input from "../../../common/ui/input";
+import Button from "../../../common/ui/button";
 
 const ResetPassword = () => {
   return (

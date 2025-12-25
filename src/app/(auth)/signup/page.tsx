@@ -1,11 +1,11 @@
 "use client";
 import React from "react";
-import Input from "../common/ui/input";
-import Button from "../common/ui/button";
+import Input from "../../../common/ui/input";
+import Button from "../../../common/ui/button";
 import { Headset, LockKeyhole, Mail } from "lucide-react";
 import dynamic from "next/dynamic";
 
-import BlobBackground from "../common/ui/backgroundblob";
+import BlobBackground from "../../../common/ui/backgroundblob";
 
 const FcGoogle = dynamic(
   () => import("react-icons/fc").then((m) => m.FcGoogle),

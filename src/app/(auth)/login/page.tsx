@@ -1,14 +1,16 @@
 "use client";
 import React from "react";
-import Input from "../common/ui/input";
-import Button from "../common/ui/button";
-import { Headset, LockKeyhole, Mail } from "lucide-react";
+import { Headset, LockKeyhole, Mail, MailIcon } from "lucide-react";
 // import { FcGoogle } from "react-icons/fc";
 // import { FaArrowRight } from "react-icons/fa";
 
 import dynamic from "next/dynamic";
+import BlobBackground from "../../common/ui/backgroundblob";
+import { Label } from "@radix-ui/react-label";
+import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/input-group";
+import { Button } from "@/components/ui/button";
 
-import BlobBackground from "../common/ui/backgroundblob";
+
 
 const FcGoogle = dynamic(
   () => import("react-icons/fc").then((m) => m.FcGoogle),
@@ -54,7 +56,17 @@ const LoginPage = () => {
             <div className="w-full h-1 mt-0.5 bg-linear-to-r from-transparent via-accent/40 to-transparent"></div>
             {/* <div className="absolute top-0 left-0 w-full h-1 bg-[#e28e9b] from-transparent via-accent to-transparent opacity-50"></div> */}
             <div className="flex flex-col pt-3 pl-4 pr-4 gap-3 md:gap-4 w-full max-w-sm">
-              <Input
+              
+              <Label htmlFor="email">Email Address</Label>
+            
+            <InputGroup>
+              <InputGroupInput type="email" placeholder="preeti@gmail.com" />
+              <InputGroupAddon>
+                <MailIcon  size={18}
+                    className="flex text-center justify-center w-full" />
+              </InputGroupAddon>
+            </InputGroup>
+              {/* <Input
                 label="Email Address"
                 placeholder="preeti@gmail.com"
                 icon={
@@ -63,10 +75,20 @@ const LoginPage = () => {
                     className="flex text-center justify-center w-full"
                   />
                 }
-              ></Input>
-              <Input
+              ></Input> */}
+              <Label htmlFor="password">Password</Label>
+            
+            <InputGroup>
+              <InputGroupInput type="password" placeholder="••••••••" />
+              <InputGroupAddon>
+                <LockKeyhole  size={20}
+                    className="flex text-center justify-center w-full" />
+              </InputGroupAddon>
+            </InputGroup> 
+
+              {/* <Input
                 label="Password"
-                placeholder="••••••••"
+                placeholder=
                 icon={<LockKeyhole size={20} />}
                 rightElement={
                   <a
@@ -76,7 +98,7 @@ const LoginPage = () => {
                     Forgot password?
                   </a>
                 }
-              ></Input>
+              ></Input> */}
               <Button className="w-full  mt-1 mb-2 font-bold  gap-3 text-white ">
                 Log in{" "}
                 <span>
@@ -93,7 +115,7 @@ const LoginPage = () => {
                 <div className="grow border-t border-accent/50"></div>
               </div>
 
-              <Button variant="google" className="w-full pt-2 pb-2 py-3">
+              <Button variant="link" className="w-full pt-2 pb-2 py-3">
                 <FcGoogle size={20} />
                 Continue with Google
               </Button>
