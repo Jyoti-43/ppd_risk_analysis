@@ -1,16 +1,16 @@
 "use client"
-
-import { useState } from "react"
 import { cn } from "@/lib/utils"
-import { BookOpenCheck, ListPlus, UsersRound } from "lucide-react"
 
-export function CommunityTabs() {
-  const [activeTab, setActiveTab] = useState("feed")
+interface CommunityTabsProps {
+  activeTab: string
+  onTabChange: (tab: string) => void
+}
 
+export function CommunityTabs({ activeTab, onTabChange }: CommunityTabsProps) {
   const tabs = [
-    { id: "feed", label: "Feed", icon: <ListPlus strokeWidth={3} size={18} /> },
-    { id: "groups", label: "Groups", icon:  <UsersRound  strokeWidth={3} size={18} /> },
-    { id: "stories", label: "Stories", icon:  <BookOpenCheck strokeWidth={3} size={18} /> },
+    { id: "feed", label: "Feed", icon: "dynamic_feed" },
+    { id: "groups", label: "Groups", icon: "groups" },
+    { id: "stories", label: "Stories", icon: "auto_stories" },
   ]
 
   return (
@@ -19,7 +19,7 @@ export function CommunityTabs() {
         {tabs.map((tab) => (
           <button
             key={tab.id}
-            onClick={() => setActiveTab(tab.id)}
+            onClick={() => onTabChange(tab.id)}
             className={cn(
               "flex items-center gap-2 pb-3.5 border-b-2 transition-all font-semibold text-[15px]",
               activeTab === tab.id
