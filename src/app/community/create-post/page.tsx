@@ -8,10 +8,10 @@ import { Input } from "@/components/ui/input"
 import { Checkbox } from "@/components/ui/checkbox"
 import { createGroup, createPost, saveDraft } from "../firebase-actions"
 import { auth } from "@/lib/firebaseConfig"
-import { SiteHeader } from "../../component/community/layout/site-header"
+import { SiteHeader } from "../../common/layout/site-header"
 import { RichTextEditor } from "../../component/community/rich-text-editor"
 import { TopicSelector } from "../../component/community/topic-selector"
-import { SiteFooter } from "../../component/community/layout/site-footer"
+import { SiteFooter } from "../../common/layout/site-footer"
 
 export default function CreatePostPage() {
   const router = useRouter()

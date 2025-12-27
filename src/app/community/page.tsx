@@ -4,7 +4,7 @@ import { useEffect, useState } from "react"
 
 import { Button } from "@/components/ui/button"
 import { fetchPosts } from "./firebase-actions"
-import { SiteHeader } from "../component/community/layout/site-header"
+import { SiteHeader } from "../common/layout/site-header"
 import { CommunityHero } from "../component/community/community-hero"
 import { CommunityTabs } from "../component/community/community-tabs"
 import { CommunityFilters } from "../component/community/community-filters"
@@ -14,7 +14,7 @@ import { GroupCard } from "../component/community/group-card"
 import { FeaturedStoryCard } from "../component/community/featured-story-card"
 import { SecondaryStoryCard } from "../component/community/secondary-story-card"
 import { StoryCard } from "../component/community/story-card"
-import { SiteFooter } from "../component/community/layout/site-footer"
+import { SiteFooter } from "../common/layout/site-footer"
 
 export default function CommunityPage() {
   const [activeTab, setActiveTab] = useState("feed")
@@ -55,7 +55,7 @@ export default function CommunityPage() {
 
   return (
     <div className="relative flex min-h-screen flex-col overflow-x-hidden bg-background">
-      <SiteHeader />
+      {/* <SiteHeader /> */}
 
       <main className="flex-grow">
         <div className="container max-w-[1040px] mx-auto px-6 py-4">
@@ -288,7 +288,7 @@ export default function CommunityPage() {
         </div>
       </main>
 
-      <SiteFooter />
+      {/* <SiteFooter /> */}
     </div>
   )
 }
