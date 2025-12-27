@@ -3,6 +3,8 @@ import React from 'react'
 import { HomeHero } from './component/home-page/home-her';
 import { TrustSection } from './component/home-page/trust-section';
 import { ProcessSection } from './component/home-page/process-section';
+import { TestimonialsSection } from './component/home-page/testimonials-section';
+import { FinalCTA } from './component/home-page/final-CTA';
 
 
 export default function Home() {
@@ -12,6 +14,8 @@ export default function Home() {
         <HomeHero />
         <TrustSection />
         <ProcessSection />
+        <TestimonialsSection />
+        <FinalCTA />
         
       </main>
     </div>
