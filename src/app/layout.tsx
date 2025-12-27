@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./styles/globals.css";
+import { AnonymousAuthInit } from "./anon-auth-init";
 
 // const geistSans = Geist({
 //   variable: "--font-geist-sans",
@@ -56,6 +57,8 @@ export default function RootLayout({
         />
       </head>
       <body className={`${inter.className} font-sans antialiased`}>
+        {/* Initialize anonymous auth so Firestore writes pass rules */}
+        <AnonymousAuthInit />
         {children}
       </body>
     </html>
