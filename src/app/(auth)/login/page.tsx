@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { useEffect } from "react";
 import { Headset, LockKeyhole, Mail, MailIcon } from "lucide-react";
 // import { FcGoogle } from "react-icons/fc";
 // import { FaArrowRight } from "react-icons/fa";
@@ -23,6 +23,19 @@ const FaArrowRight = dynamic(
   () => import("react-icons/fa").then((m) => m.FaArrowRight),
   { ssr: false }
 );
+
+
+
+useEffect(() => {
+
+  
+},[]);
+
+
+
+const handleSubmit = () => {
+  // Handle form submission logic here
+}
 
 const LoginPage = () => {
   return (
@@ -59,55 +72,69 @@ const LoginPage = () => {
             <div className="w-full h-1 mt-0.5 bg-linear-to-r from-transparent via-accent/40 to-transparent"></div>
             {/* <div className="absolute top-0 left-0 w-full h-1 bg-[#e28e9b] from-transparent via-accent to-transparent opacity-50"></div> */}
             <div className="flex flex-col pt-3 pl-4 pr-4 gap-2 md:gap-3 w-full max-w-sm">
-              <div className="flex flex-col gap-2 md:gap-2 ">
-                <Label htmlFor="email" className="light:text-popover font-semibold">
-                  Email Address
-                </Label>
+              <form action="post" onSubmit={(e)=>handleSubmit()}>
+                <div className="flex flex-col gap-2 md:gap-2 ">
+                  <Label
+                    htmlFor="email"
+                    className="light:text-popover font-semibold"
+                  >
+                    Email Address
+                  </Label>
 
-                <InputGroup>
-                  <InputGroupInput
-                    type="email"
-                    placeholder="preeti@gmail.com"
-                  />
-                  <InputGroupAddon>
-                    <MailIcon
-                      size={18}
-                      className="flex text-center justify-center w-full"
+                  <InputGroup>
+                    <InputGroupInput
+                      type="email"
+                      placeholder="preeti@gmail.com"
                     />
-                  </InputGroupAddon>
-                </InputGroup>
-              </div>
-              <div>
-                <div className="flex flex-row  justify-between gap-2 md:gap-2 ">
-                <Label
-                  htmlFor="password"
-                  className="light:text-card/60 font-semibold"
-                >
-                  Password
-                </Label>
-                <div><Link href="/forgotPassword" className="text-primary font-normal text-sm hover:underline"> Forgot password?</Link></div>
+                    <InputGroupAddon>
+                      <MailIcon
+                        size={18}
+                        className="flex text-center justify-center w-full"
+                      />
+                    </InputGroupAddon>
+                  </InputGroup>
+                </div>
+                <div>
+                  <div className="flex flex-row  justify-between gap-2 md:gap-2 ">
+                    <Label
+                      htmlFor="password"
+                      className="light:text-card/60 font-semibold"
+                    >
+                      Password
+                    </Label>
+                    <div>
+                      <Link
+                        href="/forgotPassword"
+                        className="text-primary font-normal text-sm hover:underline"
+                      >
+                        {" "}
+                        Forgot password?
+                      </Link>
+                    </div>
+                  </div>
+
+                  <InputGroup>
+                    <InputGroupInput type="password" placeholder="••••••••" />
+                    <InputGroupAddon>
+                      <LockKeyhole
+                        size={20}
+                        className="flex text-center justify-center w-full"
+                      />
+                    </InputGroupAddon>
+                  </InputGroup>
                 </div>
 
-                <InputGroup>
-                  <InputGroupInput type="password" placeholder="••••••••" />
-                  <InputGroupAddon>
-                    <LockKeyhole
-                      size={20}
-                      className="flex text-center justify-center w-full"
-                    />
-                  </InputGroupAddon>
-                </InputGroup>
-              </div>
-              <Button
-                variant="default"
-                className="w-full  mt-1 mb-2 font-bold  gap-3 text-white "
-              >
-                Log in{" "}
-                <span>
-                  {" "}
-                  <FaArrowRight size={16} />
-                </span>{" "}
-              </Button>
+                <Button
+                  variant="default"
+                  className="w-full  mt-1 mb-2 font-bold  gap-3 text-white "
+                >
+                  Log in{" "}
+                  <span>
+                    {" "}
+                    <FaArrowRight size={16} />
+                  </span>{" "}
+                </Button>
+              </form>
 
               <div className="relative flex py-1 items-center mb-1">
                 <div className="grow border-t border-black-200/50 mr-2"></div>
