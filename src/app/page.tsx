@@ -1,6 +1,8 @@
 'use client';
 import React from 'react'
 import { HomeHero } from './component/home-page/home-her';
+import { TrustSection } from './component/home-page/trust-section';
+import { ProcessSection } from './component/home-page/process-section';
 
 
 export default function Home() {
@@ -8,6 +10,8 @@ export default function Home() {
     <div className="flex min-h-screen items-center justify-center font-sans background">
       <main className="flex min-h-screen w-full max-w-7xl flex-col items-center justify-center   ">
         <HomeHero />
+        <TrustSection />
+        <ProcessSection />
         
       </main>
     </div>
