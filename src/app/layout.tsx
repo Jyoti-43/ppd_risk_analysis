@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./styles/globals.css";
-import { SiteHeader } from "./common/layout/site-header";
-import { SiteFooter } from "./common/layout/site-footer";
+import { LayoutShell } from "./common/layout/layout-shell";
 
 // const geistSans = Geist({
 //   variable: "--font-geist-sans",
@@ -57,11 +56,9 @@ export default function RootLayout({
           rel="stylesheet"
         />
       </head>
-      <SiteHeader />
       <body className={`${inter.className} font-sans antialiased`}>
-        {children}
+        <LayoutShell>{children}</LayoutShell>
       </body>
-      <SiteFooter />
     </html>
   );
 }
