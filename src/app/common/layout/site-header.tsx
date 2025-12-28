@@ -15,7 +15,7 @@ export function SiteHeader() {
           <span className="text-[17px] font-bold leading-none tracking-tight">MotherCare</span>
         </Link>
 
-        <SiteNav />
+        <SiteNavAuth />
       </div>
 
       <div className="flex items-center gap-3">

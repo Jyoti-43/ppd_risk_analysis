@@ -84,7 +84,7 @@ export default function CreatePostPage() {
 
   return (
     <div className="relative flex min-h-screen flex-col overflow-x-hidden bg-background">
-      <SiteHeader />
+      {/* <SiteHeader /> */}
 
       <main className="flex-grow">
         <div className="container max-w-[1200px] mx-auto px-6 py-8">
@@ -238,7 +238,7 @@ export default function CreatePostPage() {
         </div>
       </main>
 
-      <SiteFooter />
+      {/* <SiteFooter /> */}
     </div>
   )
 }
