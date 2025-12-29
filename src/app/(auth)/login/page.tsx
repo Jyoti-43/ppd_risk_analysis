@@ -1,5 +1,6 @@
 "use client";
-import React, { useEffect } from "react";
+import React, { FormEvent, useEffect, useState } from "react";
+
 import { Headset, LockKeyhole, Mail, MailIcon } from "lucide-react";
 // import { FcGoogle } from "react-icons/fc";
 // import { FaArrowRight } from "react-icons/fa";
@@ -14,6 +15,7 @@ import {
 } from "@/components/ui/input-group";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import axios from "axios";
 
 const FcGoogle = dynamic(
   () => import("react-icons/fc").then((m) => m.FcGoogle),
@@ -24,20 +26,12 @@ const FaArrowRight = dynamic(
   { ssr: false }
 );
 
-
-
-useEffect(() => {
-
-  
-},[]);
-
-
-
-const handleSubmit = () => {
-  // Handle form submission logic here
-}
-
 const LoginPage = () => {
+  const router = require("next/navigation").useRouter();
+
+  useEffect(() => {}, []);
+
+
   return (
     <div className=" relative flex flex-col  items-center justify-center md:pt-7 md:my-0  gap-3 min-h-svh md:h-screen font-sans bg-accent-foreground/3 px-4  overflow-y-auto md:overflow-y-hidden ">
       {/* for header section, logo emergency support contact */}
@@ -69,10 +63,10 @@ const LoginPage = () => {
           {/*   login form section */}
 
           <div className="mt-2 flex flex-col items-center justify-center rounded-4xl w-auto max-h-fit gap-3 bg-card/70 shadow-md backdrop-blur-md md:gap-3 md:w-auto">
-            <div className="w-full h-1 mt-0.5 bg-linear-to-r from-transparent via-accent/40 to-transparent"></div>
+            <div className="w-full h-1 mt-0.5 bg-linear-to-r from-transparent via-primary/30 to-transparent rounded-4xl"></div>
             {/* <div className="absolute top-0 left-0 w-full h-1 bg-[#e28e9b] from-transparent via-accent to-transparent opacity-50"></div> */}
-            <div className="flex flex-col pt-3 pl-4 pr-4 gap-2 md:gap-3 w-full max-w-sm">
-              <form action="post" onSubmit={(e)=>handleSubmit()}>
+            <form action="post" onSubmit={handleSubmit} className="w-full px-8">
+              <div className="flex flex-col pt-3  gap-2 md:gap-3 w-full max-w-md">
                 <div className="flex flex-col gap-2 md:gap-2 ">
                   <Label
                     htmlFor="email"
@@ -83,6 +77,7 @@ const LoginPage = () => {
 
                   <InputGroup>
                     <InputGroupInput
+                      name="email"
                       type="email"
                       placeholder="preeti@gmail.com"
                     />
@@ -94,35 +89,38 @@ const LoginPage = () => {
                     </InputGroupAddon>
                   </InputGroup>
                 </div>
-                <div>
-                  <div className="flex flex-row  justify-between gap-2 md:gap-2 ">
-                    <Label
-                      htmlFor="password"
-                      className="light:text-card/60 font-semibold"
-                    >
-                      Password
-                    </Label>
-                    <div>
-                      <Link
-                        href="/forgotPassword"
-                        className="text-primary font-normal text-sm hover:underline"
-                      >
-                        {" "}
-                        Forgot password?
-                      </Link>
-                    </div>
-                  </div>
 
-                  <InputGroup>
-                    <InputGroupInput type="password" placeholder="••••••••" />
-                    <InputGroupAddon>
-                      <LockKeyhole
-                        size={20}
-                        className="flex text-center justify-center w-full"
-                      />
-                    </InputGroupAddon>
-                  </InputGroup>
+                <div className="flex flex-row  justify-between gap-2 md:gap-2 ">
+                  <Label
+                    htmlFor="password"
+                    className="light:text-card/60 font-semibold"
+                  >
+                    Password
+                  </Label>
+                  <div>
+                    <Link
+                      href="/forgotPassword"
+                      className="text-primary font-normal text-sm hover:underline"
+                    >
+                      {" "}
+                      Forgot password?
+                    </Link>
+                  </div>
                 </div>
+
+                <InputGroup>
+                  <InputGroupInput
+                    name="password"
+                    type="password"
+                    placeholder="••••••••"
+                  />
+                  <InputGroupAddon>
+                    <LockKeyhole
+                      size={20}
+                      className="flex text-center justify-center w-full"
+                    />
+                  </InputGroupAddon>
+                </InputGroup>
 
                 <Button
                   variant="default"
@@ -134,36 +132,36 @@ const LoginPage = () => {
                     <FaArrowRight size={16} />
                   </span>{" "}
                 </Button>
-              </form>
 
-              <div className="relative flex py-1 items-center mb-1">
-                <div className="grow border-t border-black-200/50 mr-2"></div>
-                <span className="shrink-0  text-xs font-semi-bold text-gray-400 uppercase">
-                  or log in with email
-                </span>
-                <div className="grow border-t  border-black-200/50 ml-2"></div>
+                <div className="relative flex py-1 items-center mb-1">
+                  <div className="grow border-t border-black-200/50 mr-2"></div>
+                  <span className="shrink-0  text-xs font-semi-bold text-gray-400 uppercase">
+                    or log in with email
+                  </span>
+                  <div className="grow border-t  border-black-200/50 ml-2"></div>
+                </div>
+
+                <Button variant="google" className="w-full pt-2 pb-2 py-3">
+                  <FcGoogle size={20} />
+                  Continue with Google
+                </Button>
+
+                {/* footer of login page */}
               </div>
-
-              <Button variant="google" className="w-full pt-2 pb-2 py-3">
-                <FcGoogle size={20} />
-                Continue with Google
-              </Button>
-
-              {/* footer of login page */}
-            </div>
+            </form>
 
             <div className="flex flex-col items-center justify-center text-sm mt-2 pt-3 pb-2 md:pt-5 md:pb-3 md:mt-3 rounded-b-4xl border-t-0.5 border-google-border bg-[#f9ebef]  w-full">
               <p>
                 {" "}
                 New ?
                 <span>
-                  <a
-                    href="#"
+                  <Link
+                    href="/signup"
                     className="text-primary hover:underline font-bold "
                   >
                     {" "}
                     Register Here!
-                  </a>
+                  </Link>
                 </span>
               </p>
             </div>
