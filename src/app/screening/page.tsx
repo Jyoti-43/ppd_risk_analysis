@@ -5,7 +5,7 @@ import Link from "next/link"
 export default function ScreeningPage() {
   return (
     <div className="min-h-screen flex flex-col">
-      {/* <SiteHeader /> */}
+   
 
       <main className="flex-1">
         {/* Hero Section */}
@@ -14,10 +14,10 @@ export default function ScreeningPage() {
             <div className="flex flex-col lg:flex-row items-center gap-12 lg:gap-16">
               {/* Left Content */}
               <div className="flex-1 space-y-8">
-                <div className="inline-flex items-center gap-2 bg-primary/10 px-4 py-2 rounded-full">
+                {/* <div className="inline-flex items-center gap-2 bg-primary/10 px-4 py-2 rounded-full">
                   <span className="material-symbols-outlined text-primary text-[18px]">info</span>
                   <span className="text-sm font-semibold text-primary uppercase tracking-wide">Step 1 of 5</span>
-                </div>
+                </div> */}
 
                 <div className="space-y-4">
                   <h1 className="text-4xl lg:text-6xl font-bold text-foreground leading-tight">
@@ -121,7 +121,7 @@ export default function ScreeningPage() {
         </section>
       </main>
 
-      {/* <SiteFooter /> */}
+    
     </div>
   )
 }
