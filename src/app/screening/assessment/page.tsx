@@ -45,7 +45,7 @@ export default function AssessmentPage() {
     <div className="min-h-screen flex flex-col bg-[#fef5f9]">
    
 
-      <main className="flex-1 px-6 lg:px-10 py-8 lg:py-12">
+      <main className="flex-1 px-6 lg:px-10 py-6 lg:py-12">
         <div className="max-w-4xl mx-auto space-y-8">
           {/* Progress Bar */}
           <div className="bg-white rounded-2xl p-6 lg:p-8 shadow-sm">
@@ -60,7 +60,7 @@ export default function AssessmentPage() {
           />
 
           {/* Navigation */}
-          <div className="flex items-center justify-between gap-4 pt-4">
+          <div className="flex items-center justify-between gap-3 pt-3">
             <Button
               variant="ghost"
               onClick={handleBack}
