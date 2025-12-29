@@ -30,7 +30,28 @@ const LoginPage = () => {
   const router = require("next/navigation").useRouter();
 
   useEffect(() => {}, []);
+// login function
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+   
+    try {
+      const formData = new FormData(event.currentTarget);
+      const email = formData.get("email");
+      const password = formData.get("password");
 
+      const response = await axios.post(
+        "https://ppd-risk-analysis.onrender.com/login",
+        {email , password }
+      );
+
+      if (response.status === 200) router.push("/");
+      console.log("Login successful");
+      console.log(response.status);
+      console.log(response.data);
+    } catch (error: any) {
+      console.error("Error during login:", error.message);
+    }
+  }
 
   return (
     <div className=" relative flex flex-col  items-center justify-center md:pt-7 md:my-0  gap-3 min-h-svh md:h-screen font-sans bg-accent-foreground/3 px-4  overflow-y-auto md:overflow-y-hidden ">
