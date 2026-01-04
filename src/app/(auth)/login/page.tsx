@@ -37,13 +37,11 @@ const LoginPage = () => {
 
   const [loginUser, { data, isSuccess, isError, error }] =
     useLoginUserMutation();
-  // const { currentUser, isLoggedIn, status } = useSelector(
-  //   (state: RootState) => state.user
-  // );
+  
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    try {
+  
       if (email && password) {
         await loginUser({ email, password });
         router.push("/");
@@ -51,13 +49,6 @@ const LoginPage = () => {
         setEmail("");
         setPassword("");
       }
-
-      // Login successful, redirect or show success message
-    } catch (err) {
-      // Handle error
-      toast.error("Login failed. Please try again.");
-      console.error("Login failed:", err);
-    }
   };
 
   useEffect(() => {
@@ -65,6 +56,7 @@ const LoginPage = () => {
       toast.success("Login Successful");
       dispatch(setCredientials({
         userId: data.userId,
+        userName: data.userName,
         access_token: data.access_token,
         refreshToken: data.refreshToken,
         email: data.email

@@ -5,7 +5,7 @@ import axios from "axios";
 interface UserState {
   currentUser: {
     userId: string | null;
-    // userName: string | null;
+    userName: string | null;
     email: string | null;
     access_token: string | null;
     refreshToken: string | null;
@@ -18,7 +18,7 @@ interface UserState {
 const initialState: UserState = {
   currentUser: {
     userId: null,
-    // userName: null,
+    userName: null,
     email: null,
     access_token: null,
     refreshToken: null,
@@ -65,7 +65,7 @@ export const UserSlice = createSlice({
       state,
       action: PayloadAction<{
         userId: string;
-        // userName: string;
+        userName: string ;
         email: string;
         access_token: string;
         refreshToken: string;
