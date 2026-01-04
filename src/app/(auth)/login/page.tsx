@@ -1,8 +1,9 @@
 "use client";
-import React from "react";
+import React, { useEffect } from "react";
 import { Provider, useDispatch, useSelector } from "react-redux";
 import { Headset, LockKeyhole, Mail, MailIcon } from "lucide-react";
 
+import {  toast } from 'react-toastify'
 import dynamic from "next/dynamic";
 import BlobBackground from "../../common/ui/backgroundblob";
 import { Label } from "@radix-ui/react-label";
@@ -14,8 +15,9 @@ import {
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 
-import { userLogin } from "../../redux/feature/user/userSlice";
-import { AppDispatch, RootState } from "../../redux/store";
+import { useLoginUserMutation } from "../../redux/services/authApi";
+import { useAppDispatch } from "../../Hooks/hook";
+import { setCredientials } from "../../redux/feature/user/userSlice";
 
 const FcGoogle = dynamic(
   () => import("react-icons/fc").then((m) => m.FcGoogle),
@@ -31,32 +33,50 @@ const LoginPage = () => {
   const [password, setPassword] = React.useState("");
 
   const router = require("next/navigation").useRouter();
-  const dispatch = useDispatch<AppDispatch>();
-  const { currentUser, isLoggedIn, status, error } = useSelector(
-    (state: RootState) => state.user
-  );
+  const dispatch = useAppDispatch();
+
+  const [loginUser, { data, isSuccess, isError, error }] =
+    useLoginUserMutation();
+  // const { currentUser, isLoggedIn, status } = useSelector(
+  //   (state: RootState) => state.user
+  // );
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-
     try {
-      await dispatch(userLogin({ email, password })).unwrap();
-      router.push("/");
-      console.log("Login successful");
-      setEmail("");
-      setPassword("");
+      if (email && password) {
+        await loginUser({ email, password });
+        router.push("/");
+        console.log("Login successful");
+        setEmail("");
+        setPassword("");
+      }
+
       // Login successful, redirect or show success message
     } catch (err) {
       // Handle error
+      toast.error("Login failed. Please try again.");
       console.error("Login failed:", err);
     }
   };
 
+  useEffect(() => {
+    if(isSuccess){
+      toast.success("Login Successful");
+      dispatch(setCredientials({
+        userId: data.userId,
+        access_token: data.access_token,
+        refreshToken: data.refreshToken,
+        email: data.email
+      }));
+       
+      router.push("/");
+    }
+  
+  }, [ isSuccess]);
+
   return (
     <>
-      {status === "loading" && <p>Loading...</p>}
-      {error && <p>Error: {error}</p>}
-      {isLoggedIn && <p>Welcome, !</p>}
       <div className=" relative flex flex-col  items-center justify-center md:pt-7 md:my-0  gap-3 min-h-svh md:h-screen font-sans bg-accent-foreground/3 px-4  overflow-y-auto md:overflow-y-hidden ">
         {/* for header section, logo emergency support contact */}
         <nav className="flex  flex-row justify-between items-center w-full max-w-6xl  mt-  px-3 md:mb-2 md:mt-2">

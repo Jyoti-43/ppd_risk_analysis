@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/input-group";
 import { Button } from "@/components/ui/button";
 
-import axios from 'axios';
+import axios from "axios";
 
 const FcGoogle = dynamic(
   () => import("react-icons/fc").then((m) => m.FcGoogle),
@@ -22,32 +22,35 @@ const FaArrowRight = dynamic(
   () => import("react-icons/fa").then((m) => m.FaArrowRight),
   { ssr: false }
 );
+const initialState = {
+  name: "",
+  email: "",
+  password: "",
+  confirmPassword: "",
+};
 
 const SignupForm = () => {
+  const [formValue, setFormValue] = React.useState(initialState);
+  const { name, email, password, confirmPassword } = formValue;
+
   const router = require("next/navigation").useRouter();
-// signup
-  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  
+
+   const handleSubmit = async (event: FormEvent<HTMLFormElement>)=>{
     event.preventDefault();
     // Handle form submission logic here
     try {
-      const formData = new FormData(event.currentTarget);
-      const name = formData.get("name");
-      const email = formData.get("email");
-      const password = formData.get("password");
-      const confirmPassword = formData.get("confirmPassword");
-
-      const response = await axios.post(
-        "https://ppd-risk-analysis.onrender.com/signup",
-        { name, email, password, confirmPassword }
-      );
-
-      if (response.status === 200) router.push("/");
-      console.log("Signup successful");
-      console.log(response.status);
-      console.log(response.data);
+      
+    
+      
     } catch (error: any) {
-      console.error("Error during signup:", error.message);
+      
     }
+  }
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) =>{
+    setFormValue({...formValue, [e.target.name]: e.target.value})
+
   }
 
   return (
@@ -99,7 +102,13 @@ const SignupForm = () => {
               </Label>
 
               <InputGroup>
-                <InputGroupInput type="text" name="name" placeholder="Preeti Sharma" />
+                <InputGroupInput
+                value={name}
+                onChange={handleChange }
+                  type="text"
+                  name="name"
+                  placeholder="Preeti Sharma"
+                />
                 <InputGroupAddon>
                   <MailIcon
                     size={18}
@@ -118,7 +127,13 @@ const SignupForm = () => {
               </Label>
 
               <InputGroup>
-                <InputGroupInput type="email" name="email" placeholder="preeti@gmail.com" />
+                <InputGroupInput
+                 value={email}
+                onChange={handleChange }
+                  type="email"
+                  name="email"
+                  placeholder="preeti@gmail.com"
+                />
                 <InputGroupAddon>
                   <MailIcon
                     size={18}
@@ -137,7 +152,13 @@ const SignupForm = () => {
               </Label>
 
               <InputGroup>
-                <InputGroupInput type="password" name="password" placeholder="••••••••" />
+                <InputGroupInput
+                 value={password}
+                onChange={handleChange }
+                  type="password"
+                  name="password"
+                  placeholder="••••••••"
+                />
                 <InputGroupAddon>
                   <LockKeyhole
                     size={20}
@@ -157,6 +178,8 @@ const SignupForm = () => {
 
               <InputGroup>
                 <InputGroupInput
+                 value={confirmPassword}
+                onChange={handleChange }
                   type="password"
                   name="confirmPassword"
                   placeholder="••••••••"

@@ -7,6 +7,9 @@ import SignupForm from "../../component/auth/signup";
 
 
 export default function SignupPage() {
+
+
+
   return (
     <div className="min-h-screen bg-[#fdf2f7] flex flex-col">
       {/* Header */}
