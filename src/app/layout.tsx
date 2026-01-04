@@ -3,6 +3,9 @@ import { Inter } from "next/font/google";
 import "./styles/globals.css";
 import { LayoutShell } from "./common/layout/layout-shell";
 
+import { store } from "./redux/store";
+import { Providers } from "./provider/provider";
+
 // const geistSans = Geist({
 //   variable: "--font-geist-sans",
 //   subsets: ["latin"],
@@ -57,7 +60,11 @@ export default function RootLayout({
         />
       </head>
       <body className={`${inter.className} font-sans antialiased`}>
-        <LayoutShell>{children}</LayoutShell>
+        <Providers>
+          <LayoutShell>
+            {children}
+            </LayoutShell>
+        </Providers>
       </body>
     </html>
   );

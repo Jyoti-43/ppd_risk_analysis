@@ -28,7 +28,7 @@ export default function AssessmentPage() {
   const handleNext = () => {
     if (isLastQuestion) {
       localStorage.setItem("screeningAnswers", JSON.stringify(answers))
-    //   router.push("/screening/results")
+      // router.push("/screening/results")
     alert("Screening completed! Your responses have been recorded. Soon redirected to results page. Thank You!")
     } else {
       setCurrentQuestionIndex((prev) => prev + 1)
