@@ -1,6 +1,8 @@
+"use client";
 
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
+import ProtectedRoute from "../component/auth/ProtectedRoute/ProtectedRoute";
 
 export default function ScreeningPage() {
   return (

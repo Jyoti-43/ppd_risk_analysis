@@ -5,42 +5,42 @@ import { cn } from "@/lib/utils"
 
 interface PostCardProps {
   id: string
-  category: string
+  topic: string
   author: string
   timeAgo: string
   title: string
   excerpt: string
-  imageUrl: string
-  likes: number
-  comments: number
+  // imageUrl: string
+  // likes: number
+  // comments: number
   isSensitive?: boolean
 }
 
 export function PostCard({
-  category,
+  topic,
   author,
   timeAgo,
   title,
   excerpt,
-  imageUrl,
-  likes,
-  comments,
+  // imageUrl,
+  // likes,
+  // comments,
   isSensitive,
 }: PostCardProps) {
   return (
     <article className="flex flex-col md:flex-row gap-6 p-5 bg-white rounded-[20px] border border-border shadow-sm hover:shadow-md transition-shadow">
       {/* Image Container */}
       <div className="relative w-full md:w-[280px] shrink-0 aspect-[4/3] rounded-xl overflow-hidden bg-muted">
-        <Image
+        {/* <Image
           src={imageUrl || "/placeholder.svg"}
           alt={title}
           fill
           className={cn("object-cover", isSensitive && "blur-2xl opacity-60")}
-        />
+        /> */}
         {/* Category Badge */}
         <div className="absolute top-3 left-3">
           <Badge className="bg-white/90 hover:bg-white text-foreground/80 text-[11px] font-bold px-2 py-0.5 border-none shadow-sm backdrop-blur-sm rounded-md">
-            {category}
+            {topic}
           </Badge>
         </div>
 
@@ -87,14 +87,14 @@ export function PostCard({
         {/* Footer Actions */}
         <div className="flex items-center justify-between mt-auto">
           <div className="flex items-center gap-4">
-            <button className="flex items-center gap-2 group transition-colors">
+            {/* <button className="flex items-center gap-2 group transition-colors">
               <span className="material-symbols-outlined text-[20px] text-primary fill">favorite</span>
               <span className="text-sm font-bold text-foreground/80">{likes}</span>
             </button>
             <button className="flex items-center gap-2 group transition-colors">
               <span className="material-symbols-outlined text-[20px] text-muted-foreground">chat_bubble</span>
               <span className="text-sm font-bold text-foreground/80">{comments}</span>
-            </button>
+            </button> */}
           </div>
 
           <Link

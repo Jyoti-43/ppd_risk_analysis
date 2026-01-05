@@ -15,15 +15,30 @@ interface UserState {
   error: string | null;
 }
 
+// Helper function to get user from localStorage
+const getUserFromStorage = () => {
+  if (typeof window !== "undefined") {
+    try {
+      const stored = localStorage.getItem("user");
+      return stored ? JSON.parse(stored) : null;
+    } catch {
+      return null;
+    }
+  }
+  return null;
+};
+
+const storedUser = getUserFromStorage();
+
 const initialState: UserState = {
   currentUser: {
-    userId: null,
-    userName: null,
-    email: null,
-    access_token: null,
-    refreshToken: null,
+    userId: storedUser?.userId || null,
+    userName: storedUser?.userName || null,
+    email: storedUser?.email || null,
+    access_token: storedUser?.access_token || null,
+    refreshToken: storedUser?.refreshToken || null,
   },
-  isLoggedIn: false,
+  isLoggedIn: !!storedUser?.access_token,
   status: "idle",
   error: null,
 };
@@ -65,7 +80,7 @@ export const UserSlice = createSlice({
       state,
       action: PayloadAction<{
         userId: string;
-        userName: string ;
+        userName?: string; // Optional since API might not return it
         email: string;
         access_token: string;
         refreshToken: string;
@@ -78,10 +93,25 @@ export const UserSlice = createSlice({
           access_token: action.payload.access_token,
           refreshToken: action.payload.refreshToken,
           userId: action.payload.userId,
+          // ...(action.payload.userName && { userName: action.payload.userName }), // Only save if provided
         })
       );
-      state.currentUser = action.payload;
+      state.currentUser = {
+        ...action.payload,
+        userName: action.payload.userName || null, // Default to null if not provided
+      };
       state.isLoggedIn = true;
+    },
+    logout: (state) => {
+      localStorage.removeItem("user");
+      state.currentUser = {
+        userId: null,
+        userName: null,
+        email: null,
+        access_token: null,
+        refreshToken: null,
+      };
+      state.isLoggedIn = false;
     },
   },
   // extraReducers: (builder) => {
@@ -110,8 +140,10 @@ export const UserSlice = createSlice({
   // },
 });
 
-export const selectAuth = (state: RootState) => state.authUser;
+export const selectAuth = (state: RootState) => state.user;
+export const selectIsLoggedIn = (state: RootState) => state.user.isLoggedIn;
+export const selectCurrentUser = (state: RootState) => state.user.currentUser;
 
-export const { setCredientials } = UserSlice.actions;
+export const { setCredientials, logout } = UserSlice.actions;
 
 export default UserSlice.reducer;

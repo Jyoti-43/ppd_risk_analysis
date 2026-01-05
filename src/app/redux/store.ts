@@ -2,11 +2,13 @@ import { configureStore } from "@reduxjs/toolkit";
 import  UserSliceReducer  from "./feature/user/userSlice";
 import { authUserAPI } from "./services/authApi";
 import { setupListeners } from "@reduxjs/toolkit/query/react";
+import { createPostSlice } from "./feature/community/createPostSlice";
 
 export const store = configureStore({
   reducer:{
     user: UserSliceReducer,
      [authUserAPI.reducerPath]: authUserAPI.reducer,
+     createPost: createPostSlice.reducer,
   },
    middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware().concat(authUserAPI.middleware),

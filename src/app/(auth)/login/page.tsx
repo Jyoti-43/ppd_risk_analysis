@@ -3,7 +3,7 @@ import React, { useEffect } from "react";
 import { Provider, useDispatch, useSelector } from "react-redux";
 import { Headset, LockKeyhole, Mail, MailIcon } from "lucide-react";
 
-import {  toast } from 'react-toastify'
+import { toast } from "react-toastify";
 import dynamic from "next/dynamic";
 import BlobBackground from "../../common/ui/backgroundblob";
 import { Label } from "@radix-ui/react-label";
@@ -18,6 +18,7 @@ import Link from "next/link";
 import { useLoginUserMutation } from "../../redux/services/authApi";
 import { useAppDispatch } from "../../Hooks/hook";
 import { setCredientials } from "../../redux/feature/user/userSlice";
+import { useSearchParams } from "next/navigation";
 
 const FcGoogle = dynamic(
   () => import("react-icons/fc").then((m) => m.FcGoogle),
@@ -37,35 +38,43 @@ const LoginPage = () => {
 
   const [loginUser, { data, isSuccess, isError, error }] =
     useLoginUserMutation();
-  
+
+  const searchParams = useSearchParams();
+  const callbackUrl = searchParams.get("callbackUrl") || "/"; // default to dashboard
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-  
-      if (email && password) {
-        await loginUser({ email, password });
-        router.push("/");
-        console.log("Login successful");
-        setEmail("");
-        setPassword("");
-      }
+
+    if (email && password) {
+      await loginUser({ email, password });
+      // Don't navigate here - let useEffect handle it after success
+    }
   };
 
   useEffect(() => {
-    if(isSuccess){
+    if (isSuccess && data) {
       toast.success("Login Successful");
-      dispatch(setCredientials({
-        userId: data.userId,
-        userName: data.userName,
-        access_token: data.access_token,
-        refreshToken: data.refreshToken,
-        email: data.email
-      }));
-       
-      router.push("/");
+      dispatch(
+        setCredientials({
+          userId: data.userId,
+          userName: data.userName,
+          access_token: data.access_token,
+          refreshToken: data.refreshToken,
+          email: data.email,
+        })
+      );
+
+      setEmail("");
+      setPassword("");
+      console.log("Login successful, redirecting...");
+      router.push(callbackUrl);
+      // router.push("/");
     }
-  
-  }, [ isSuccess]);
+
+    if (isError) {
+      toast.error("Login failed. Please try again.");
+    }
+  }, [isSuccess, isError, data, error, dispatch, router]);
 
   return (
     <>
@@ -75,12 +84,14 @@ const LoginPage = () => {
           <div className="text-lg font-semibold font-seperator text-primary">
             Logo
           </div>
-          <div className=" flex flex-row gap-2 text-sm font-medium text-accent/90  ">
-            <span>
-              {" "}
-              <Headset size={18} />
-            </span>
-            Need Help? Call{" "}
+          <div className=" flex flex-row gap-2 text-sm font-medium   ">
+            <span> {/* <Headset size={18} /> */}</span>
+            <Link
+              href="/"
+              className="flex items-center gap-1 text-primary hover:underline"
+            >
+              Back to Home{" "}
+            </Link>
           </div>
         </nav>
 

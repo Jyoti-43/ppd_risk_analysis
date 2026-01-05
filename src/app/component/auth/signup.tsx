@@ -46,19 +46,16 @@ const SignupForm = () => {
     event.preventDefault();
     if (password !== confirmPassword) {
       console.log("Passwords do not match");
-      return toast.error("Passwords do not match");
+      return alert("Passwords do not match");
     }
     if (name && email && password && confirmPassword) {
       await registerUser({ name, email, password, confirmPassword });
-      router.push("/");
-      setFormValue(initialState);
-      console.log("Registration successful");
     }
   };
 
   useEffect(() => {
     if (isSuccess) {
-      toast.success("Login Successful");
+      alert("Registration Successful");
       console.log("Registered user data:", data);
       dispatch(
         setCredientials({
@@ -69,7 +66,9 @@ const SignupForm = () => {
           userId: data.userId,
         })
       );
-
+     
+      setFormValue(initialState);
+      console.log("Registration successful");
       router.push("/");
     }
   }, [isSuccess]);
