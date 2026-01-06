@@ -29,6 +29,8 @@ export function LayoutShell({ children }: { children: React.ReactNode }) {
     )
   }
 
+  
+
   // Protected routes: header/footer + authentication required
   return (
     <ProtectedRoute>

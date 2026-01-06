@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import { useAppDispatch, useAppSelector } from "../../Hooks/hook";
 import { authUserAPI } from "../../redux/services/authApi";
 import { selectIsLoggedIn, logout } from "../../redux/feature/user/userSlice";
+import { useEffect, useState } from "react";
 
 export function SiteHeader() {
   const isLoggedIn = useAppSelector(selectIsLoggedIn);
@@ -57,10 +58,25 @@ function SiteNavAuth() {
 
   const router = require("next/navigation").useRouter();
 
+  const [mounted, setMounted] = useState(false);
+  
+    useEffect(() => {
+      setMounted(true);
+    }, []);
+
+  useEffect(() => {}, []);
   const handleLogout = () => {
     dispatch(logout());
     router.push("/");
   };
+  
+   if (!mounted) {
+    return (
+      <nav className="hidden lg:flex items-center gap-9">
+        {/* Render a placeholder or skeleton that matches server output */}
+      </nav>
+    );
+  }
 
   return (
     <nav className="hidden lg:flex  gap-9 wrap lg:items-end-safe">

@@ -5,10 +5,10 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 // import { fetchPosts } from "./firebase-actions"
 import { SiteHeader } from "../common/layout/site-header";
-import { CommunityHero } from "../component/community/community-hero";
-import { CommunityTabs } from "../component/community/community-tabs";
-import { CommunityFilters } from "../component/community/community-filters";
-import { PostCard } from "../component/community/post-card";
+import { CommunityHero } from "../component/community/homaPage/community-hero";
+import { CommunityTabs } from "../component/community/homaPage/community-tabs";
+import { CommunityFilters } from "../component/community/homaPage/community-filters";
+import { PostCard } from "../component/community/homaPage/post/post-card";
 import { CreateGroupCard } from "../component/community/create-group-card";
 import { GroupCard } from "../component/community/group-card";
 import { FeaturedStoryCard } from "../component/community/featured-story-card";
@@ -17,11 +17,12 @@ import { StoryCard } from "../component/community/story-card";
 import { SiteFooter } from "../common/layout/site-footer";
 import { useAppDispatch, useAppSelector } from "../Hooks/hook";
 import {
-  loadPostsFromStorage,
+ 
   selectPosts,
   selectPostStatus,
   selectPostError,
 } from "../redux/feature/community/createPostSlice";
+import { PostsList } from "../component/community/homaPage/post/postList";
 
 export default function CommunityPage() {
   const dispatch = useAppDispatch();
@@ -32,10 +33,6 @@ export default function CommunityPage() {
   const loadingPosts = useAppSelector(selectPostStatus) === "loading";
   const postsError = useAppSelector(selectPostError);
 
-  useEffect(() => {
-    console.log("Loading posts from localStorage...");
-    dispatch(loadPostsFromStorage());
-  }, [dispatch]);
 
   const formatTimeAgo = (timestamp: any) => {
     const date = timestamp?.seconds
@@ -67,7 +64,8 @@ export default function CommunityPage() {
             <>
               {/* Posts Feed */}
               <div className="flex flex-col gap-6 mb-12">
-                {loadingPosts && (
+                <PostsList />
+                {/* {loadingPosts && (
                   <p className="text-sm text-muted-foreground">
                     Loading feed...
                   </p>
@@ -86,18 +84,18 @@ export default function CommunityPage() {
                     <PostCard
                       key={post.id}
                       id={post.id}
-                      topic={post.topics?.[0] || "Community"}
+                      topic={post.title?.[0] || "Community"}
                       // {
                       //   post.tags?.[0] || post.topics?.[0] || "Community"
                       // }
                       author={
-                        post.isAnonymous
+                        post.postType === true
                           ? "Anonymous"
-                          : post.author || "Unknown"
+                          : post.userName || "Unknown"
                       }
                       timeAgo={formatTimeAgo(post.createdAt)}
                       title={post.title || "Untitled"}
-                      excerpt={post.content || ""}
+                      excerpt={post.body || ""}
                       // imageUrl={
                       //   post.imageUrl ||
                       //   "/abstract-illustration-of-diverse-hands-forming-a-c.jpg"
@@ -108,9 +106,9 @@ export default function CommunityPage() {
                       //     : Number(post.likes || 0)
                       // }
                       // comments={post.commentCount ?? post.commentsCount ?? 0}
-                      isSensitive={post.isSensitive}
+                      // isSensitive={post.isSensitive}
                     />
-                  ))}
+                  ))} */}
               </div>
 
               {/* Pagination / Load More */}

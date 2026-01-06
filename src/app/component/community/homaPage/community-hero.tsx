@@ -24,13 +24,13 @@ export function CommunityHero({ activeTab }: CommunityHeroProps) {
       primaryButton: { icon: "add_circle", label: "Create Group", href: "/community/create-post" },
       secondaryButton: { icon: "explore", label: "Discover" },
     },
-    stories: {
-      title: "Community Stories",
-      description:
-        "Welcome to your safe haven. Read inspiring stories from mothers who walked this path, or share your own journey of strength.",
-      primaryButton: { icon: "edit", label: "Share Your Story", href: "/community/create-post" },
-      secondaryButton: { icon: "edit", label: "Guidelines" },
-    },
+    // stories: {
+    //   title: "Community Stories",
+    //   description:
+    //     "Welcome to your safe haven. Read inspiring stories from mothers who walked this path, or share your own journey of strength.",
+    //   primaryButton: { icon: "edit", label: "Share Your Story", href: "/community/create-post" },
+    //   secondaryButton: { icon: "edit", label: "Guidelines" },
+    // },
   }
 
   const currentContent = content[activeTab as keyof typeof content] || content.feed

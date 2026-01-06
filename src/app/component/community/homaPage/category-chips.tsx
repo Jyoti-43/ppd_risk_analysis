@@ -8,7 +8,10 @@ interface CategoryChipProps {
   onClick?: () => void
 }
 
-export function CategoryChip({ label, active, onClick }: CategoryChipProps) {
+export const CategoryChip = ({ label, active, onClick }: CategoryChipProps) => {
+
+
+
   return (
     <button
       onClick={onClick}

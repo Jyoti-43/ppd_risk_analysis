@@ -10,7 +10,7 @@ export function CommunityTabs({ activeTab, onTabChange }: CommunityTabsProps) {
   const tabs = [
     { id: "feed", label: "Feed", icon: "dynamic_feed" },
     { id: "groups", label: "Groups", icon: "groups" },
-    { id: "stories", label: "Stories", icon: "auto_stories" },
+    // { id: "stories", label: "Stories", icon: "auto_stories" },
   ]
 
   return (
