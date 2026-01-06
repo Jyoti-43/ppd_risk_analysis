@@ -9,7 +9,7 @@ interface QuestionCardProps {
   currentAnswer?: number
 }
 
-export function QuestionCard({ question, onAnswer, currentAnswer }: QuestionCardProps) {
+export const QuestionCard =({ question, onAnswer, currentAnswer }: QuestionCardProps)  =>{
   return (
     <div className="bg-white rounded-3xl p-8 lg:p-12 shadow-sm space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
       <div className="space-y-4">
@@ -19,7 +19,7 @@ export function QuestionCard({ question, onAnswer, currentAnswer }: QuestionCard
         </div>
         <h2 className="text-2xl lg:text-3xl font-bold text-foreground leading-tight">{question.text}</h2>
         <p className="text-muted-foreground">
-          Please select the option that comes closest to how you have felt in the past 7 days.
+          Please select the option that comes closest to How you have felt in the past 7 days.
         </p>
       </div>
 

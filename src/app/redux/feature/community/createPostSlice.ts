@@ -47,29 +47,7 @@ const initialState: CreatePostState = {
 
 
 
-// Helper function to get posts from localStorage
-// const getPostsFromStorage = (): Post[] => {
-//   if (typeof window !== "undefined") {
-//     try {
-//       const stored = localStorage.getItem(POSTS_STORAGE_KEY);
-//       return stored ? JSON.parse(stored) : [];
-//     } catch {
-//       return [];
-//     }
-//   }
-//   return [];
-// };
 
-// // Helper function to save posts to localStorage
-// const savePostsToStorage = (posts: Post[]): void => {
-//   if (typeof window !== "undefined") {
-//     try {
-//       localStorage.setItem(POSTS_STORAGE_KEY, JSON.stringify(posts));
-//     } catch {
-//       console.error("Failed to save posts to localStorage");
-//     }
-//   }
-// };
 
 export const createPostSlice = createSlice({
   name: "createPost",

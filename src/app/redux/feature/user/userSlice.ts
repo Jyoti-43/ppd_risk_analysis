@@ -43,34 +43,6 @@ const initialState: UserState = {
   error: null,
 };
 
-// export const userLogin = createAsyncThunk(
-//   "user/login",
-//   async (
-//     credentials: { email: string; password: string },
-//     { rejectWithValue }
-//   ) => {
-//     try {
-//       const response = await axios.post(
-//         `${process.env.NEXT_PUBLIC_API_URL}/login`,
-//         { email: credentials.email, password: credentials.password },
-//         {
-//           headers: {
-//             "Content-Type": "application/json",
-//             Accept: "application/json",
-//           },
-//         }
-//       );
-//       //   console.log("Login successful from slice");
-//       console.log("response data is ", response.data);
-//       console.log(response.data.token);
-//       localStorage.setItem("userToken", response.data.access_token);
-//       //   localStorage.setItem("refreshToken", response.data.refreshToken);
-//       return response.data;
-//     } catch (error: any) {
-//       return rejectWithValue(error.response?.data?.message || "Login failed");
-//     }
-//   }
-// );
 
 export const UserSlice = createSlice({
   name: "authUser",

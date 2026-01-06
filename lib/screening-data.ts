@@ -25,28 +25,39 @@ export const SCREENING_QUESTIONS: Question[] = [
       { label: "Hardly at all", value: 3 },
     ],
   },
+
   {
     id: 3,
-    text: "In the past 7 days, how often have you felt anxious or worried for no good reason?",
+    text: "How often have you  blamed yourself unnecessarily when things went wrong?",
     options: [
-      { label: "Not at all", value: 0 },
-      { label: "Hardly ever", value: 1 },
-      { label: "Sometimes", value: 2 },
-      { label: "Very often", value: 3 },
+      { label: " Yes, most of the time", value: 3 },
+      { label: "Yes, some of the time", value: 2 },
+      { label: "Not very often ", value: 1 },
+      { label: "No, never ", value: 0 },
     ],
   },
   {
     id: 4,
-    text: "How often have you felt scared or panicky for no very good reason?",
+    text: " How often have you felt anxious or worried for no good reason?",
     options: [
-      { label: "Quite a lot", value: 3 },
-      { label: "Sometimes", value: 2 },
-      { label: "Not much", value: 1 },
-      { label: "Not at all", value: 0 },
+      { label: "No, not at all", value: 0 },
+      { label: "Hardly ever, Yes", value: 1 },
+      { label: "Sometimes, Yes", value: 2 },
+      { label: "Very often", value: 3 },
     ],
   },
   {
     id: 5,
+    text: "How often have you felt scared or panicky for no very good reason?",
+    options: [
+      { label: "Yes, quite a lot", value: 3 },
+      { label: "Yes, sometimes", value: 2 },
+      { label: "No, not much", value: 1 },
+      { label: "No, not at all", value: 0 },
+    ],
+  },
+  {
+    id: 6,
     text: "How often have things been getting on top of you?",
     options: [
       { label: "Yes, most of the time I haven't been able to cope at all", value: 3 },
@@ -56,7 +67,7 @@ export const SCREENING_QUESTIONS: Question[] = [
     ],
   },
   {
-    id: 6,
+    id: 7,
     text: "How often have you been so unhappy that you have had difficulty sleeping?",
     options: [
       { label: "Yes, most of the time", value: 3 },
@@ -66,7 +77,7 @@ export const SCREENING_QUESTIONS: Question[] = [
     ],
   },
   {
-    id: 7,
+    id: 8,
     text: "How often have you felt sad or miserable?",
     options: [
       { label: "Yes, most of the time", value: 3 },
@@ -76,7 +87,7 @@ export const SCREENING_QUESTIONS: Question[] = [
     ],
   },
   {
-    id: 8,
+    id: 9,
     text: "How often have you been so unhappy that you have been crying?",
     options: [
       { label: "Yes, most of the time", value: 3 },
@@ -86,7 +97,7 @@ export const SCREENING_QUESTIONS: Question[] = [
     ],
   },
   {
-    id: 9,
+    id: 10,
     text: "How often has the thought of harming yourself occurred to you?",
     options: [
       { label: "Yes, quite often", value: 3 },
@@ -95,14 +106,5 @@ export const SCREENING_QUESTIONS: Question[] = [
       { label: "Never", value: 0 },
     ],
   },
-  {
-    id: 10,
-    text: "How often have you felt overwhelmed by your new responsibilities?",
-    options: [
-      { label: "Very often", value: 3 },
-      { label: "Sometimes", value: 2 },
-      { label: "Hardly ever", value: 1 },
-      { label: "Not at all", value: 0 },
-    ],
-  },
+  
 ]

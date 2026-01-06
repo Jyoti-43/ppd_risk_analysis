@@ -49,6 +49,12 @@ export const communityPost = createApi({
     },
   }),
 
+  // Cache data for 5 minutes (300 seconds) - won't refetch if data exists
+  keepUnusedDataFor: 300,
+  
+  // Tag types for cache invalidation
+  tagTypes: ["Posts", "Categories"],
+
   endpoints: (build) => ({
     uploadImage: build.mutation<{ url: string } | any, FormData>({
       query: (formData) => ({
@@ -64,6 +70,7 @@ export const communityPost = createApi({
         method: "POST",
         body,
       }),
+      invalidatesTags: ["Categories"],
     }),
 
     getCategory: build.query<any, void>({
@@ -71,6 +78,7 @@ export const communityPost = createApi({
         url: "/community/category",
         method: "GET",
       }),
+      providesTags: ["Categories"],
     }),
 
     createPost: build.mutation<
@@ -89,6 +97,8 @@ export const communityPost = createApi({
         method: "POST",
         body,
       }),
+      // Invalidate posts cache when a new post is created
+      invalidatesTags: ["Posts"],
     }),
 
     getPost: build.query<Post[], void>({
@@ -96,6 +106,8 @@ export const communityPost = createApi({
         url: "/community/view-post",
         method: "GET",
       }),
+      // Tag this query so it can be invalidated
+      providesTags: ["Posts"],
     }),
 
     deletePost: build.mutation<any, string>({
@@ -103,6 +115,8 @@ export const communityPost = createApi({
         url: `/community/delete-post/${postId}`,
         method: "DELETE",
       }),
+      // Invalidate posts cache when a post is deleted
+      invalidatesTags: ["Posts"],
     }),
 
     updatePost: build.mutation<
@@ -124,6 +138,8 @@ export const communityPost = createApi({
         method: "PUT",
         body,
       }),
+      // Invalidate posts cache when a post is updated
+      invalidatesTags: ["Posts"],
     }),
   }),
 });

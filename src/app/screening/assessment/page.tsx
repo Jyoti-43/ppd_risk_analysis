@@ -3,17 +3,23 @@
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 
-
 import { Button } from "@/components/ui/button"
 import { SCREENING_QUESTIONS } from "@/lib/screening-data"
 import Link from "next/link"
 import { ProgressBar } from "../../component/screening/progress-bar"
 import { QuestionCard } from "../../component/screening/question-card"
+import { useEpdsScreeningMutation } from "../../redux/services/screeningApi"
+import { useAppDispatch } from "../../Hooks/hook"
+import { setAnswers, setScore, setStatus, setError } from "../../redux/feature/screening/epds/epdsSlice"
 
 export default function AssessmentPage() {
   const router = useRouter()
+  const dispatch = useAppDispatch()
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0)
-  const [answers, setAnswers] = useState<Record<number, number>>({})
+  const [answers, setLocalAnswers] = useState<Record<number, number>>({})
+
+  // RTK Query mutation hook
+  const [submitScreening, { isLoading, isSuccess, isError, error }] = useEpdsScreeningMutation()
 
   const currentQuestion = SCREENING_QUESTIONS[currentQuestionIndex]
   const totalQuestions = SCREENING_QUESTIONS.length
@@ -22,14 +28,50 @@ export default function AssessmentPage() {
   const isAnswered = answers[currentQuestion.id] !== undefined
 
   const handleAnswer = (questionId: number, answer: number) => {
-    setAnswers((prev) => ({ ...prev, [questionId]: answer }))
+    setLocalAnswers((prev) => ({ ...prev, [questionId]: answer }))
   }
 
-  const handleNext = () => {
+  const handleNext = async () => {
     if (isLastQuestion) {
-      localStorage.setItem("screeningAnswers", JSON.stringify(answers))
-      // router.push("/screening/results")
-    alert("Screening completed! Your responses have been recorded. Soon redirected to results page. Thank You!")
+      // Transform answers to the format expected by API (q1, q2, q3, etc.)
+      const formattedAnswers = {
+        q1: answers[1] ?? 0,
+        q2: answers[2] ?? 0,
+        q3: answers[3] ?? 0, // Note: question id 3 is missing in data, using id 4
+        q4: answers[4] ?? 0,
+        q5: answers[5] ?? 0,
+        q6: answers[6] ?? 0,
+        q7: answers[7] ?? 0,
+        q8: answers[8] ?? 0,
+        q9: answers[9] ?? 0,
+        q10: answers[10] ?? 0, // Adjust based on your actual question IDs
+      }
+
+      try {
+        dispatch(setStatus("loading"))
+        
+        // Call the API mutation
+        const result = await submitScreening(formattedAnswers).unwrap()
+        
+        // Store answers in Redux state
+        dispatch(setAnswers(formattedAnswers))
+        dispatch(setStatus("succeeded"))
+        
+        // Calculate total score (sum of all answers)
+        const totalScore = Object.values(answers).reduce((sum, val) => sum + val, 0)
+        dispatch(setScore(totalScore))
+
+        // Also save to localStorage as backup
+        localStorage.setItem("screeningAnswers", JSON.stringify(answers))
+        console.log("Screening submitted successfully:", result)
+        // Navigate to results page
+        router.push("/screening/results")
+      } catch (err) {
+        dispatch(setStatus("failed"))
+        dispatch(setError(err instanceof Error ? err.message : "Submission failed"))
+        alert("Failed to submit screening. Please try again.")
+        console.error("Screening submission error:", err)
+      }
     } else {
       setCurrentQuestionIndex((prev) => prev + 1)
     }
@@ -73,10 +115,10 @@ export default function AssessmentPage() {
 
             <Button
               onClick={handleNext}
-              disabled={!isAnswered}
+              disabled={!isAnswered || isLoading}
               className="rounded-full h-12 px-8 bg-primary hover:bg-[#b50d62] text-white font-semibold shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {isLastQuestion ? "Submit" : "Next Question"}
+              {isLoading ? "Submitting..." : isLastQuestion ? "Submit" : "Next Question"}
               <span className="material-symbols-outlined text-[20px] ml-2">arrow_forward</span>
             </Button>
           </div>
