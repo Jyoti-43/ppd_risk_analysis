@@ -1,0 +1,116 @@
+import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+
+interface Group {
+  groupName: string;
+  groupDescription: string;
+  categoryId: string;
+  imageUrl: string;
+}
+
+export const communityGroup = createApi({
+  reducerPath: "communityGroup",
+
+  baseQuery: fetchBaseQuery({
+    baseUrl: `${process.env.NEXT_PUBLIC_API_URL}`,
+    prepareHeaders: (headers, { endpoint }) => {
+      // Get token from localStorage
+      const userStr = localStorage.getItem("user");
+      if (userStr) {
+        try {
+          const user = JSON.parse(userStr);
+          if (user.access_token) {
+            headers.set("Authorization", `Bearer ${user.access_token}`);
+          }
+        } catch (e) {
+          console.error("Failed to parse user from localStorage", e);
+        }
+      }
+      if (endpoint !== "uploadImage") {
+        headers.set("Content-Type", "application/json");
+      }
+      return headers;
+    },
+  }),
+
+  // Cache data for 5 minutes (300 seconds) - won't refetch if data exists
+  keepUnusedDataFor: 300,
+
+  // Tag types for cache invalidation
+  tagTypes: ["Group"],
+
+  endpoints: (build) => ({
+    uploadImage: build.mutation<{ url: string } | any, FormData>({
+      query: (formData) => ({
+        url: "/community/upload-group-image",
+        method: "POST",
+        body: formData,
+      }),
+    }),
+
+    createGroup: build.mutation<
+      any,
+      {
+        groupName: string;
+        groupDescription: string;
+        categoryId: string;
+        imageUrl: string;
+      }
+    >({
+      query: (body) => ({
+        url: "/create-group",
+        method: "POST",
+        body,
+      }),
+      // Invalidate posts cache when a new post is created
+      invalidatesTags: ["Group"],
+    }),
+
+    getGroup: build.query<Group[], void>({
+      query: () => ({
+        url: "/view-group",
+        method: "GET",
+      }),
+      // Tag this query so it can be invalidated
+      providesTags: ["Group"],
+    }),
+
+    deleteGroup: build.mutation<any, string>({
+      query: (groupId) => ({
+        url: `/delete-group/${groupId}`,
+        method: "DELETE",
+      }),
+      // Invalidate posts cache when a post is deleted
+      invalidatesTags: ["Group"],
+    }),
+
+    updateGroup: build.mutation<
+      any,
+      {
+        GroupId: string;
+        body: {
+          groupName?: string;
+          groupDescription?: string;
+          categoryId?: string;
+
+          image?: string;
+        };
+      }
+    >({
+      query: ({ GroupId, body }) => ({
+        url: `/community/update-post/${GroupId}`,
+        method: "PUT",
+        body,
+      }),
+      // Invalidate posts cache when a post is updated
+      invalidatesTags: ["Group"],
+    }),
+  }),
+});
+
+export const {
+  useUploadImageMutation,
+  useCreateGroupMutation,
+  useGetGroupQuery,
+  useDeleteGroupMutation,
+  useUpdateGroupMutation,
+} = communityGroup;
