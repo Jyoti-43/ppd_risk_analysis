@@ -194,19 +194,26 @@ import type React from "react";
 import { useRef, useState } from "react";
 
 import { useUploadImageMutation } from "@/src/app/redux/services/communityPostApi";
+import { useUploadImageMutation as useGroupImageMutation } from "@/src/app/redux/services/communityPostApi";
 
 interface ImageUploadProps {
   value: string | null;
   onImageUpload: (imageUrl: string | null) => void;
+  uploadType?: "post" | "group"; // optional, defaults to "post"
 }
 
-export default function ImageUpload({ value, onImageUpload }: ImageUploadProps) {
+export default function ImageUpload({
+  value,
+  onImageUpload,
+  uploadType = "post",
+}: ImageUploadProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [preview, setPreview] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
-  const [uploadImage] = useUploadImageMutation();
+  const [uploadPostImage] = useUploadImageMutation();
+  const [uploadGroupImage] = useGroupImageMutation();
 
   const handleFiles = async (files: FileList) => {
     const file = files[0];
@@ -225,8 +232,15 @@ export default function ImageUpload({ value, onImageUpload }: ImageUploadProps) 
       try {
         const formData = new FormData();
         formData.append("file", file);
-        const response = await uploadImage(formData).unwrap();
-        const imageUrl = response?.url ?? response?.data?.url ?? response?.image_url;
+        // const response = await uploadImage(formData).unwrap();
+        let response;
+        if (uploadType === "group") {
+          response = await uploadGroupImage(formData).unwrap();
+        } else {
+          response = await uploadPostImage(formData).unwrap();
+        }
+        const imageUrl =
+          response?.url ?? response?.data?.url ?? response?.image_url;
         if (imageUrl) {
           onImageUpload(imageUrl);
         } else {
@@ -275,7 +289,13 @@ export default function ImageUpload({ value, onImageUpload }: ImageUploadProps) 
           : "border-border hover:border-primary"
       } ${isUploading ? "opacity-50 cursor-wait" : ""}`}
     >
-      {value && <img src={value} alt="Preview" style={{ maxWidth: 200, maxHeight: 200 }} />}
+      {value && (
+        <img
+          src={value}
+          alt="Preview"
+          style={{ maxWidth: 200, maxHeight: 200 }}
+        />
+      )}
       {isUploading ? (
         <div className="space-y-2">
           <div className="text-4xl animate-pulse">📤</div>

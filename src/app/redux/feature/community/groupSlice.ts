@@ -112,11 +112,8 @@ export const selectPostError = (state: RootState) => state.createPost.error;
 export const {
   setTitle,
   setBody,
-
   setCategory,
-
   setImageUrl,
-
   setLoading,
   setGroupSuccess,
   addGroupSuccess,

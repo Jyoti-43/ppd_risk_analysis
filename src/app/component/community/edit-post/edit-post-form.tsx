@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import CreatableSelect from "react-select/creatable";
 import { Button } from "@/components/ui/button";
-import ImageUpload from "../create-post/imgae-uploader";
+import ImageUpload from "../common-component/imgae-uploader";
 import RichTextEditor from "../create-post/rich-text-editor";
 import {
   useCreateCategoryMutation,
@@ -13,16 +13,17 @@ import {
 } from "@/src/app/redux/services/communityPostApi";
 import { useParams } from "next/navigation";
 import { useCustomSelectStyles } from "@/lib/selectStyle";
+import { useCategorySelect } from "@/src/app/Hooks/useCategorySelect";
 
 interface Tag {
   value: string;
   label: string;
 }
 
-interface Category {
-  value: string;
-  label: string;
-}
+// interface Category {
+//   value: string;
+//   label: string;
+// }
 
 const defaultTags: Tag[] = [
   { value: "postpartum-depression", label: "Postpartum Depression" },
@@ -33,9 +34,9 @@ const defaultTags: Tag[] = [
 
 export default function EditPostForm() {
   const [selectedTags, setSelectedTags] = useState<Tag[]>([]);
-  const [selectedCategory, setSelectedCategory] = useState<Category | null>(
-    null
-  );
+  // const [selectedCategory, setSelectedCategory] = useState<Category | null>(
+  //   null
+  // );
 
   // Get postId from URL params
   const params = useParams();
@@ -54,15 +55,20 @@ export default function EditPostForm() {
   const [sensitiveContent, setSensitiveContent] = useState<boolean>(false);
   const [postAnonymously, setPostAnonymously] = useState<boolean>(false);
   const [tags, setTags] = useState<Tag[]>(defaultTags);
-  const [categories, setCategories] = useState<Category[]>([]);
+  // const [categories, setCategories] = useState<Category[]>([]);
   const [updatePost, { isLoading: isUpdatingPost }] = useUpdatePostMutation();
   const numericPostId = String(postId).replace(/^post_/, "");
+  const {
+  categories,
+ 
+  selectedCategory,
+  setSelectedCategory,
+  handleCategoryChange,
+  categoriesLoading,
+  isCreatingCategory,
+} = useCategorySelect();
 
-  // API hooks
-  const { data: categoriesData, isLoading: categoriesLoading } =
-    useGetCategoryQuery();
-  const [createCategory, { isLoading: isCreatingCategory }] =
-    useCreateCategoryMutation();
+
 
   const router = require("next/navigation").useRouter();
 
@@ -90,22 +96,6 @@ export default function EditPostForm() {
     }
   }, [post?.id]);
 
-  // Populate categories from API
-  useEffect(() => {
-    if (categoriesData) {
-      let catArray: any[] = [];
-      if (Array.isArray(categoriesData)) {
-        catArray = categoriesData;
-      } else if (categoriesData?.data && Array.isArray(categoriesData.data)) {
-        catArray = categoriesData.data;
-      }
-      const mapped: Category[] = catArray.map((c: any) => ({
-        value: c.id ?? c._id ?? c.categoryId ?? c.value,
-        label: c.name ?? c.label ?? c.categoryName ?? c.title,
-      }));
-      setCategories(mapped);
-    }
-  }, [categoriesData]);
 
   const handleTagChange = (newValue: any) => {
     if (newValue) {
@@ -131,47 +121,7 @@ export default function EditPostForm() {
     }
   };
 
-  const handleCategoryChange = async (newValue: any) => {
-    if (!newValue) {
-      setSelectedCategory(null);
-      return;
-    }
-
-    // If user is creating a new category
-    if (newValue.__isNew__) {
-      try {
-        const res: any = await createCategory({
-          name: newValue.label,
-        }).unwrap();
-        const createdCategory: Category = {
-          value:
-            res?.id ??
-            res?._id ??
-            res?.categoryId ??
-            res?.data?.id ??
-            res?.data?._id ??
-            newValue.label.toLowerCase().replace(/\s+/g, "-"),
-          label: res?.name ?? res?.data?.name ?? newValue.label,
-        };
-        setCategories((prev) => [...prev, createdCategory]);
-        setSelectedCategory(createdCategory);
-      } catch (error: any) {
-        console.error("Failed to create category:", error);
-        alert(error?.data?.message ?? "Failed to create category");
-        // Fallback: add locally
-        const fallback: Category = {
-          value: newValue.label.toLowerCase().replace(/\s+/g, "-"),
-          label: newValue.label,
-        };
-        setCategories((prev) => [...prev, fallback]);
-        setSelectedCategory(fallback);
-      }
-      return;
-    }
-
-    setSelectedCategory(newValue);
-  };
-  // Image Upload Handler - receives URL from ImageUpload component
+ 
   const handleImageUpload = (imageUrl: string | null) => {
     setUploadedImage(imageUrl);
   };

@@ -53,7 +53,7 @@ export const communityGroup = createApi({
         groupName: string;
         groupDescription: string;
         categoryId: string;
-        imageUrl: string;
+        image: string;
       }
     >({
       query: (body) => ({

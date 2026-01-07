@@ -8,9 +8,9 @@ import { CommunityHero } from "../component/community/homaPage/community-hero";
 import { CommunityTabs } from "../component/community/homaPage/community-tabs";
 import { CommunityFilters } from "../component/community/homaPage/community-filters";
 
-import { CreateGroupCard } from "../component/community/create-group-card";
-import { GroupCard } from "../component/community/group-card";
-import { FeaturedStoryCard } from "../component/community/featured-story-card";
+import { CreateGroupCard } from "../component/community/group/create-group-card";
+import { GroupCard } from "../component/community/group/group-card";
+import { FeaturedStoryCard } from "../component/community/group/featured-story-card";
 import { SecondaryStoryCard } from "../component/community/secondary-story-card";
 import { StoryCard } from "../component/community/story-card";
 
@@ -146,117 +146,7 @@ export default function CommunityPage() {
             </>
           )}
 
-          {activeTab === "stories" && (
-            <>
-              {/* Top Inspiring Stories Section */}
-              <div className="mb-8">
-                <div className="flex items-center gap-2 mb-6">
-                  <span className="material-symbols-outlined text-[24px] text-primary fill">
-                    favorite
-                  </span>
-                  <h2 className="text-[22px] font-black text-foreground">
-                    Top Inspiring Stories
-                  </h2>
-                </div>
-
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                  {/* Large Featured Story */}
-                  <div className="lg:col-span-2">
-                    <FeaturedStoryCard
-                      id="1"
-                      category="Recovery & Hope"
-                      author="Sarah J."
-                      timeAgo="1 day ago"
-                      title="Found myself again after 6 months"
-                      quote="I wanted to share a positive update for anyone currently in the trenches. Today I laughed—really laughed—for the first time in what feels like a lifetime. The fog does lift. It happens slowly, and then all at once."
-                      likes={342}
-                      comments={56}
-                      imageUrl="https://images.unsplash.com/photo-1518005020250-675f0f0fd13b?q=80&w=2002&auto=format&fit=crop"
-                    />
-                  </div>
-
-                  {/* Two Secondary Stories */}
-                  <div className="flex flex-col gap-6">
-                    <SecondaryStoryCard
-                      id="2"
-                      category="Sleep"
-                      title="The 3 AM thoughts that..."
-                      excerpt="I used to dread the sunset knowing wh..."
-                      likes={124}
-                      imageUrl="https://images.unsplash.com/photo-1540518614846-7eded433c457?q=80&w=2070&auto=format&fit=crop"
-                      categoryColor="bg-primary/90"
-                    />
-                    <SecondaryStoryCard
-                      id="3"
-                      category="Partner"
-                      title="Watching her struggle and..."
-                      excerpt="I didn't understand it at first. I thought sh..."
-                      likes={56}
-                      imageUrl="https://images.unsplash.com/photo-1536640712247-c45474d66482?q=80&w=2050&auto=format&fit=crop"
-                      categoryColor="bg-red-500/90"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* Latest Community Stories Section */}
-              <div className="mb-12">
-                <div className="flex items-center justify-between mb-6">
-                  <h2 className="text-[22px] font-black text-foreground">
-                    Latest Community Stories
-                  </h2>
-                  <a
-                    href="#"
-                    className="text-primary hover:text-[#b50d62] text-[13px] font-bold transition-colors"
-                  >
-                    View Archive
-                  </a>
-                </div>
-
-                <div className="flex flex-col gap-6">
-                  <StoryCard
-                    id="4"
-                    category="Severe Anxiety"
-                    author="Anonymous Mother"
-                    timeAgo="5 hours ago"
-                    title="When the intrusive thoughts became too loud"
-                    excerpt="Everything felt dangerous. The stairs, the kitchen knives, the car ride. I couldn't explain why I was so terrified of everything around me. It started as small worries but quickly spiraled into something I couldn't control..."
-                    likes={89}
-                    comments={42}
-                    imageUrl="https://images.unsplash.com/photo-1506126613408-eca07ce68773?q=80&w=1999&auto=format&fit=crop"
-                    isSensitive
-                    categoryColor="bg-white/90"
-                  />
-
-                  <StoryCard
-                    id="5"
-                    category="Community"
-                    author="Maria K."
-                    timeAgo="3 days ago"
-                    title="Why joining a support group saved my sanity"
-                    excerpt="I resisted for the longest time. I thought I could handle it alone, or that talking to strangers wouldn't help. Walking into that room for the first time was the hardest thing I've..."
-                    likes={215}
-                    comments={34}
-                    imageUrl="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?q=80&w=2076&auto=format&fit=crop"
-                    categoryColor="bg-orange-500/90"
-                  />
-                </div>
-              </div>
-
-              {/* Pagination / Load More */}
-              <div className="flex flex-col items-center gap-4 mb-16">
-                <span className="text-[13px] font-medium text-muted-foreground">
-                  Showing top stories for you
-                </span>
-                <Button
-                  variant="outline"
-                  className="h-11 px-10 rounded-xl border-border bg-white font-bold text-foreground hover:bg-muted"
-                >
-                  Load More Stories
-                </Button>
-              </div>
-            </>
-          )}
+        
         </div>
       </main>
 
