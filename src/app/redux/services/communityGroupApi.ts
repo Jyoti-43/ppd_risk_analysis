@@ -5,6 +5,13 @@ interface Group {
   groupName: string;
   groupDescription: string;
   categoryId: string;
+  categoryName: string;
+  category?: {
+    id?: string;
+    name?: string;
+    // ...other category fields...
+  };
+  image?: string;
   imageUrl: string;
 }
 
@@ -92,14 +99,13 @@ export const communityGroup = createApi({
           groupName?: string;
           groupDescription?: string;
           categoryId?: string;
-
           image?: string;
         };
       }
     >({
       query: ({ GroupId, body }) => ({
-        url: `/community/update-post/${GroupId}`,
-        method: "PUT",
+        url: `/update-group/${GroupId}`,
+        method: "PATCH",
         body,
       }),
       // Invalidate posts cache when a post is updated

@@ -37,7 +37,7 @@ export const GroupList = () => {
     // refetchOnReconnect: false,
   });
 
-  console.log("current user id", currentUser?.userId);
+ 
 
   const handleDeleteGroup = async (groupId: string) => {
     if (window.confirm("Are you sure you want to delete this group?")) {
@@ -54,10 +54,10 @@ export const GroupList = () => {
   };
 
   if (isLoading) {
-    console.log(groups);
+   
     return (
-      <div className="flex flex-row gap-6">
-        {[...Array(4)].map((_, i) => (
+      <div className="flex flex-row gap-6 w-max mx-auto">
+        {[...Array(3)].map((_, i) => (
           <PostSkeleton key={i} />
         ))}
       </div>

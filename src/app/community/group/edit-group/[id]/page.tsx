@@ -1,9 +1,23 @@
-import React from 'react'
 
-const page = () => {
+
+import Sidebar from "@/src/app/component/community/create-post/sidebar";
+import EditGroupForm from "@/src/app/component/community/group/edit-group/edit-group-form";
+
+
+
+export default function Page() {
   return (
-    <div>edit group </div>
+    <div className="min-h-screen bg-background">
+     
+      <div className="flex gap-6 max-w-7xl mx-auto px-4 py-8">
+        <main className="flex-1">
+           
+        <EditGroupForm />
+        </main>
+        <aside className="w-80">
+          <Sidebar />
+        </aside>
+      </div>
+    </div>
   )
 }
-
-export default page

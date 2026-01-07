@@ -6,8 +6,7 @@ import { Button } from "@/components/ui/button";
 import ImageUpload from "../common-component/imgae-uploader";
 import RichTextEditor from "../create-post/rich-text-editor";
 import {
-  useCreateCategoryMutation,
-  useGetCategoryQuery,
+  
   useGetPostQuery,
   useUpdatePostMutation,
 } from "@/src/app/redux/services/communityPostApi";
@@ -58,9 +57,9 @@ export default function EditPostForm() {
   // const [categories, setCategories] = useState<Category[]>([]);
   const [updatePost, { isLoading: isUpdatingPost }] = useUpdatePostMutation();
   const numericPostId = String(postId).replace(/^post_/, "");
+  
   const {
   categories,
- 
   selectedCategory,
   setSelectedCategory,
   handleCategoryChange,
