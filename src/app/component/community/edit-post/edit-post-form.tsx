@@ -3,16 +3,16 @@
 import { useEffect, useMemo, useState } from "react";
 import CreatableSelect from "react-select/creatable";
 import { Button } from "@/components/ui/button";
-import ImageUpload from "./imgae-uploader";
-import RichTextEditor from "./rich-text-editor";
+import ImageUpload from "../create-post/imgae-uploader";
+import RichTextEditor from "../create-post/rich-text-editor";
 import {
   useCreateCategoryMutation,
-  useCreatePostMutation,
   useGetCategoryQuery,
+  useGetPostQuery,
+  useUpdatePostMutation,
 } from "@/src/app/redux/services/communityPostApi";
-
+import { useParams } from "next/navigation";
 import { useCustomSelectStyles } from "@/lib/selectStyle";
-const customSelectStyles = useCustomSelectStyles();
 
 interface Tag {
   value: string;
@@ -31,25 +31,64 @@ const defaultTags: Tag[] = [
   { value: "postpartum-ocd", label: "Postpartum OCD" },
 ];
 
-export default function ShareJourneyForm() {
+export default function EditPostForm() {
   const [selectedTags, setSelectedTags] = useState<Tag[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(
     null
   );
-  const [title, setTitle] = useState("");
-  const [story, setStory] = useState("");
+
+  // Get postId from URL params
+  const params = useParams();
+  const postId =
+    typeof params === "object" && "id" in params ? params.id : undefined;
+  console.log("Editing post ID:", postId);
+
+  const customSelectStyles = useCustomSelectStyles();
+  // Fetch all posts and find the one to edit
+  const { data: posts, isLoading: isPostsLoading } = useGetPostQuery();
+  const post = posts?.find((p: any) => String(p.id) === String(postId));
+
+  const [title, setTitle] = useState<string>("");
+  const [story, setStory] = useState<string>("");
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
-  const [sensitiveContent, setSensitiveContent] = useState(false);
-  const [postAnonymously, setPostAnonymously] = useState(false);
+  const [sensitiveContent, setSensitiveContent] = useState<boolean>(false);
+  const [postAnonymously, setPostAnonymously] = useState<boolean>(false);
   const [tags, setTags] = useState<Tag[]>(defaultTags);
   const [categories, setCategories] = useState<Category[]>([]);
-  const [createPost, { isLoading: isCreatingPost }] = useCreatePostMutation();
+  const [updatePost, { isLoading: isUpdatingPost }] = useUpdatePostMutation();
+  const numericPostId = String(postId).replace(/^post_/, "");
 
   // API hooks
   const { data: categoriesData, isLoading: categoriesLoading } =
     useGetCategoryQuery();
   const [createCategory, { isLoading: isCreatingCategory }] =
     useCreateCategoryMutation();
+
+  const router = require("next/navigation").useRouter();
+
+  // Pre-fill form fields when post data loads
+  useEffect(() => {
+    if (post) {
+      setTitle(post.title ?? "");
+      setStory(post.body ?? "");
+      setSelectedTags(
+        Array.isArray(post.tags)
+          ? post.tags.map((tag: string) => ({ value: tag, label: tag }))
+          : []
+      );
+      setSelectedCategory(
+        post.category && post.category.id && post.category.name
+          ? {
+              value: String(post.category.id),
+              label: String(post.category.name),
+            }
+          : null
+      );
+      setUploadedImage(post.image ?? null);
+      setPostAnonymously(!!post.isAnonymous);
+      // Optionally: setSensitiveContent if you store this in post
+    }
+  }, [post?.id]);
 
   // Populate categories from API
   useEffect(() => {
@@ -151,35 +190,40 @@ export default function ShareJourneyForm() {
       return;
     }
 
-    const payload = {
+    const postBody = {
       title: title.trim(),
       body: story,
-      tags: selectedTags.map((t) => t.value),
-      categoryId: selectedCategory.value,
+      tags: selectedTags.map((t) => t.value as string),
+      categoryId: selectedCategory.value as string,
       isAnonymous: postAnonymously,
       image: uploadedImage ?? "",
     };
 
     try {
-      await createPost(payload).unwrap();
-      alert("Story published successfully!");
-      // Reset form
+      await updatePost({ postId: numericPostId, postBody }).unwrap();
+      alert("Story updated successfully!");
+
+      setSelectedCategory(null);
+      setSelectedTags([]);
       setTitle("");
       setStory("");
-      setSelectedTags([]);
-      setSelectedCategory(null);
-      setUploadedImage(null);
-      setSensitiveContent(false);
+    //   setUploadedImage(null);
       setPostAnonymously(false);
+      setSensitiveContent(false);
+      router.push("/community");
+      // Optionally: reset form or redirect
     } catch (error: any) {
-      console.error("Failed to publish:", error);
-      alert(error?.data?.message ?? "Failed to publish story");
+      console.error("Failed to update:", error);
+      console.log(error?.data?.detail);
+      alert(error?.data?.message ?? "Failed to update story");
     }
   };
 
-  <CreatableSelect  styles={customSelectStyles}/>
+  <CreatableSelect styles={customSelectStyles} />;
 
-  const isLoading = isCreatingPost || isCreatingCategory;
+  const isLoading = isUpdatingPost || isCreatingCategory;
+
+  console.log("image url:", uploadedImage);
 
   return (
     <div className="space-y-6">
@@ -199,7 +243,7 @@ export default function ShareJourneyForm() {
         <label className="text-sm font-semibold text-muted-foreground mb-3 block">
           UPLOAD COVER IMAGE
         </label>
-        <ImageUpload value={null} onImageUpload={handleImageUpload} />
+        <ImageUpload value={uploadedImage} onImageUpload={handleImageUpload} />
       </div>
 
       {/* Tags Section */}
@@ -250,6 +294,7 @@ export default function ShareJourneyForm() {
           onChange={(e) => setTitle(e.target.value)}
           placeholder="Give your story a title..."
           className="w-full px-4 py-3 bg-input border border-border rounded-md text-foreground placeholder-muted-foreground focus:outline-none focus:border-primary focus:ring-2 focus:ring-ring/20"
+          disabled={isPostsLoading || !post}
         />
       </div>
 

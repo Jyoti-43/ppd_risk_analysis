@@ -196,10 +196,11 @@ import { useRef, useState } from "react";
 import { useUploadImageMutation } from "@/src/app/redux/services/communityPostApi";
 
 interface ImageUploadProps {
+  value: string | null;
   onImageUpload: (imageUrl: string | null) => void;
 }
 
-export default function ImageUpload({ onImageUpload }: ImageUploadProps) {
+export default function ImageUpload({ value, onImageUpload }: ImageUploadProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [preview, setPreview] = useState<string | null>(null);
@@ -274,6 +275,7 @@ export default function ImageUpload({ onImageUpload }: ImageUploadProps) {
           : "border-border hover:border-primary"
       } ${isUploading ? "opacity-50 cursor-wait" : ""}`}
     >
+      {value && <img src={value} alt="Preview" style={{ maxWidth: 200, maxHeight: 200 }} />}
       {isUploading ? (
         <div className="space-y-2">
           <div className="text-4xl animate-pulse">📤</div>

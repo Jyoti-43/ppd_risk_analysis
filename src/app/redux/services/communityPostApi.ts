@@ -121,7 +121,7 @@ export const communityPost = createApi({
       any,
       {
         postId: string;
-        body: {
+        postBody: {
           title?: string;
           body?: string;
           tags?: string[];
@@ -131,10 +131,10 @@ export const communityPost = createApi({
         };
       }
     >({
-      query: ({ postId, body }) => ({
+      query: ({ postId, postBody }) => ({
         url: `/community/update-post/${postId}`,
-        method: "PUT",
-        body,
+        method: "PATCH",
+        body: postBody,
       }),
       // Invalidate posts cache when a post is updated
       invalidatesTags: ["Posts"],
