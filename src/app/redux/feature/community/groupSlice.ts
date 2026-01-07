@@ -19,7 +19,7 @@ interface CreateGroupState {
     category: string;
     imageUrl?: string;
   };
-  posts: Group[];
+  groups: Group[];
   userName?: string | null;
   status: "idle" | "loading" | "succeeded" | "failed";
   error: string | null;
@@ -32,7 +32,7 @@ const initialState: CreateGroupState = {
     category: "",
     imageUrl: undefined,
   },
-  posts: [],
+  groups: [],
   userName: null,
   status: "idle",
   error: null,
@@ -70,22 +70,22 @@ export const createGroupSlice = createSlice({
       state.error = null;
     },
     setGroupSuccess: (state, action: PayloadAction<Group[]>) => {
-      state.posts = action.payload;
+      state.groups = action.payload;
       state.status = "succeeded";
     },
     addGroupSuccess: (state, action: PayloadAction<Group>) => {
-      state.posts.unshift(action.payload);
+      state.groups.unshift(action.payload);
       state.status = "succeeded";
       state.formData = initialState.formData;
     },
     deleteGroupSuccess: (state, action: PayloadAction<string>) => {
-      state.posts = state.posts.filter((post) => post.id !== action.payload);
+      state.groups = state.groups.filter((group) => group.id !== action.payload);
       state.status = "succeeded";
     },
     updateGroupSuccess: (state, action: PayloadAction<Group>) => {
-      const index = state.posts.findIndex((p) => p.id === action.payload.id);
+      const index = state.groups.findIndex((g) => g.id === action.payload.id);
       if (index !== -1) {
-        state.posts[index] = action.payload;
+        state.groups[index] = action.payload;
       }
       state.status = "succeeded";
     },
@@ -104,10 +104,10 @@ export const createGroupSlice = createSlice({
 });
 
 // Selectors
-export const selectFormData = (state: RootState) => state.createPost.formData;
-export const selectPosts = (state: RootState) => state.createPost.posts;
-export const selectPostStatus = (state: RootState) => state.createPost.status;
-export const selectPostError = (state: RootState) => state.createPost.error;
+export const selectFormData = (state: RootState) => state.createGroup.formData;
+export const selectGroups = (state: RootState) => state.createGroup.groups;
+export const selectGroupStatus = (state: RootState) => state.createGroup.status;
+export const selectGroupError = (state: RootState) => state.createGroup.error;
 
 export const {
   setTitle,

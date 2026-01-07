@@ -63,6 +63,7 @@ export default function ShareJourneyForm() {
       await createGroup(payload).unwrap();
       alert("groupDescription published successfully!");
       router.push("/community");
+      console.log("group:", createGroup);
       // Reset form
       setGroupName("");
       setGroupDescription("");

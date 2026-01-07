@@ -9,27 +9,22 @@ import { CommunityTabs } from "../component/community/homaPage/community-tabs";
 import { CommunityFilters } from "../component/community/homaPage/community-filters";
 
 import { CreateGroupCard } from "../component/community/group/create-group-card";
-import { GroupCard } from "../component/community/group/group-card";
-import { FeaturedStoryCard } from "../component/community/group/featured-story-card";
-import { SecondaryStoryCard } from "../component/community/secondary-story-card";
-import { StoryCard } from "../component/community/story-card";
 
 import { PostsList } from "../component/community/homaPage/post/postList";
 import { useGetPostQuery } from "../redux/services/communityPostApi";
+
+import { GroupList } from "../component/community/group/groupList";
 
 export default function CommunityPage() {
   const [activeTab, setActiveTab] = useState("feed");
   const { data: posts } = useGetPostQuery();
 
-  // Get posts from Redux store
-  const [postsCount, setPostsCount] = useState("0");
+  
 
-  useEffect(() => {
-    if (posts) {
-      const numberOfPosts = Math.max(0, posts.length);
-      setPostsCount(numberOfPosts.toString());
-    }
-  }, [posts]);
+
+ 
+
+ 
 
   return (
     <div className="relative flex min-h-screen flex-col overflow-x-hidden bg-background">
@@ -68,10 +63,12 @@ export default function CommunityPage() {
           {activeTab === "groups" && (
             <>
               {/* Groups Grid */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
-                <CreateGroupCard />
+              {/* <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12"> */}
+                
 
-                <GroupCard
+                <GroupList />
+
+                {/* <GroupCard
                   id="1"
                   name="Postpartum Anxiety Support"
                   description="A safe, non-judgmental space to discuss anxiety symptoms, intrusi..."
@@ -81,9 +78,9 @@ export default function CommunityPage() {
                   icon="flutter_dash"
                   avatars={["1", "2", "3"]}
                   extraAvatarCount={8}
-                />
+                /> */}
 
-                <GroupCard
+                {/* <GroupCard
                   id="2"
                   name="The 3 AM Club"
                   description="For when you're awake and everyone else is asleep. Night..."
@@ -94,9 +91,9 @@ export default function CommunityPage() {
                   avatars={["1", "2", "3"]}
                   extraAvatarCount={12}
                   isJoined
-                />
+                /> */}
 
-                <GroupCard
+                {/* <GroupCard
                   id="3"
                   name="First Time Moms 2024"
                   description="Navigating the first year of new mother. Milestones,..."
@@ -106,9 +103,9 @@ export default function CommunityPage() {
                   icon="child_care"
                   avatars={["1", "2", "3"]}
                   extraAvatarCount={42}
-                />
+                /> */}
 
-                <GroupCard
+                {/* <GroupCard
                   id="4"
                   name="Mindful Recovery"
                   description="Focusing on holistic healing, meditation, and gentle movement..."
@@ -117,9 +114,9 @@ export default function CommunityPage() {
                   backgroundGradient="bg-gradient-to-br from-green-200 via-emerald-200 to-teal-100"
                   icon="self_improvement"
                   avatars={["1", "2"]}
-                />
+                /> */}
 
-                <GroupCard
+                {/* <GroupCard
                   id="5"
                   name="Partners & Dads Support"
                   description="A group for partners supporting new mothers. Share advice, ask..."
@@ -128,11 +125,11 @@ export default function CommunityPage() {
                   backgroundGradient="bg-gradient-to-br from-purple-200 via-violet-200 to-purple-100"
                   icon="diversity_3"
                   avatars={["1"]}
-                />
-              </div>
+                /> */}
+              {/* </div> */}
 
               {/* Pagination / Load More */}
-              <div className="flex flex-col items-center gap-4 mb-16">
+              {/* <div className="flex flex-col items-center gap-4 mb-16">
                 <span className="text-[13px] font-medium text-muted-foreground">
                   Showing 5 of 24 groups
                 </span>
@@ -142,11 +139,9 @@ export default function CommunityPage() {
                 >
                   Load More Groups
                 </Button>
-              </div>
+              </div> */}
             </>
           )}
-
-        
         </div>
       </main>
 

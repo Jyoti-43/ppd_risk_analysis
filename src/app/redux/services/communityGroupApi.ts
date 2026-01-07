@@ -1,6 +1,7 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
 interface Group {
+  id: string;
   groupName: string;
   groupDescription: string;
   categoryId: string;

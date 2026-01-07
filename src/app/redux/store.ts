@@ -25,7 +25,7 @@ export const store = configureStore({
     [screeningAPI.reducerPath]: screeningAPI.reducer,
 
     // createGroupSlice ko detail lai communityGroupDetail vanne naam diyekoo
-    communityGroupDetail: createGroupSlice.reducer,
+    createGroup: createGroupSlice.reducer,
     // yo chai api call ko lagi redux service add gareko
     [communityGroup.reducerPath]: communityGroup.reducer,
 
