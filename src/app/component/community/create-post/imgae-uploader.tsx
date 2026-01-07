@@ -193,25 +193,53 @@ import type React from "react";
 
 import { useRef, useState } from "react";
 
+import { useUploadImageMutation } from "@/src/app/redux/services/communityPostApi";
+
 interface ImageUploadProps {
-  onImageUpload: (imageSrc: string | null) => void;
+  onImageUpload: (imageUrl: string | null) => void;
 }
 
 export default function ImageUpload({ onImageUpload }: ImageUploadProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [preview, setPreview] = useState<string | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+  const [uploadImage] = useUploadImageMutation();
 
-  const handleFiles = (files: FileList) => {
+  const handleFiles = async (files: FileList) => {
     const file = files[0];
     if (file && file.type.startsWith("image/")) {
+      // Show preview immediately
       const reader = new FileReader();
       reader.onload = (e) => {
         const result = e.target?.result as string;
         setPreview(result);
-        onImageUpload(result);
       };
       reader.readAsDataURL(file);
+
+      // Upload to backend
+      setIsUploading(true);
+      setUploadError(null);
+      try {
+        const formData = new FormData();
+        formData.append("file", file);
+        const response = await uploadImage(formData).unwrap();
+        const imageUrl = response?.url ?? response?.data?.url ?? response?.image_url;
+        if (imageUrl) {
+          onImageUpload(imageUrl);
+        } else {
+          setUploadError("Image uploaded but URL not received");
+          onImageUpload(null);
+        }
+      } catch (error: any) {
+        console.error("Failed to upload image:", error);
+        setUploadError(error?.data?.message ?? "Failed to upload image");
+        setPreview(null);
+        onImageUpload(null);
+      } finally {
+        setIsUploading(false);
+      }
     }
   };
 
@@ -244,9 +272,14 @@ export default function ImageUpload({ onImageUpload }: ImageUploadProps) {
         isDragging
           ? "border-primary bg-accent"
           : "border-border hover:border-primary"
-      }`}
+      } ${isUploading ? "opacity-50 cursor-wait" : ""}`}
     >
-      {preview ? (
+      {isUploading ? (
+        <div className="space-y-2">
+          <div className="text-4xl animate-pulse">📤</div>
+          <p className="text-muted-foreground">Uploading image...</p>
+        </div>
+      ) : preview ? (
         <div className="space-y-4">
           <img
             src={preview || "/placeholder.svg"}
@@ -261,6 +294,7 @@ export default function ImageUpload({ onImageUpload }: ImageUploadProps) {
             onClick={(e) => {
               e.stopPropagation();
               setPreview(null);
+              setUploadError(null);
               onImageUpload(null);
             }}
             className="text-primary hover:text-primary/80 text-sm font-medium"
@@ -280,12 +314,18 @@ export default function ImageUpload({ onImageUpload }: ImageUploadProps) {
           </p>
         </div>
       )}
+
+      {uploadError && (
+        <p className="text-destructive text-sm mt-2">{uploadError}</p>
+      )}
+
       <input
         ref={fileInputRef}
         type="file"
         accept="image/*"
         onChange={(e) => e.target.files && handleFiles(e.target.files)}
         className="hidden"
+        disabled={isUploading}
       />
     </div>
   );

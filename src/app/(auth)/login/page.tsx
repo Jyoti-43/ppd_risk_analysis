@@ -1,8 +1,6 @@
 "use client";
 import React, { useEffect } from "react";
-import { Provider, useDispatch, useSelector } from "react-redux";
-import { Headset, LockKeyhole, Mail, MailIcon } from "lucide-react";
-
+import { LockKeyhole, Mail, MailIcon } from "lucide-react";
 import { toast } from "react-toastify";
 import dynamic from "next/dynamic";
 import BlobBackground from "../../common/ui/backgroundblob";
@@ -19,6 +17,7 @@ import { useLoginUserMutation } from "../../redux/services/authApi";
 import { useAppDispatch } from "../../Hooks/hook";
 import { setCredientials } from "../../redux/feature/user/userSlice";
 import { useSearchParams } from "next/navigation";
+
 
 const FcGoogle = dynamic(
   () => import("react-icons/fc").then((m) => m.FcGoogle),
@@ -56,16 +55,17 @@ const LoginPage = () => {
       toast.success("Login Successful");
       dispatch(
         setCredientials({
-          userId: data.userId,
-          userName: data.userName,
+          userId: data.user.id,
+          userName: data.user.name,
+          email: data.user.email,
           access_token: data.access_token,
           refreshToken: data.refreshToken,
-          email: data.email,
         })
       );
 
       setEmail("");
       setPassword("");
+      console.log("Data after login:", data);
       console.log("Login successful, redirecting...");
       router.push(callbackUrl);
       // router.push("/");
@@ -73,6 +73,11 @@ const LoginPage = () => {
 
     if (isError) {
       toast.error("Login failed. Please try again.");
+      alert("login failed. Please try again.");
+      alert(error);
+    }
+
+    if (error) {
     }
   }, [isSuccess, isError, data, error, dispatch, router]);
 

@@ -12,6 +12,8 @@ interface PostCardProps {
   excerpt: string
   imageUrl?: string
   isSensitive?: boolean
+  isOwner?: boolean
+  onDelete?: () => void
 }
 
 export function PostCard({
@@ -23,6 +25,8 @@ export function PostCard({
   excerpt,
   imageUrl,
   isSensitive,
+  isOwner = false,
+  onDelete,
 }: PostCardProps) {
   return (
     <article className="flex flex-col md:flex-row gap-6 p-5 bg-white rounded-[20px] border border-border shadow-sm hover:shadow-md transition-shadow">
@@ -77,7 +81,30 @@ export function PostCard({
 
         {/* Footer Actions */}
         <div className="flex items-center justify-between mt-auto">
-          <div className="flex items-center gap-4"></div>
+          <div className="flex items-center gap-4">
+            {/* Edit/Delete buttons - only show if user owns this post */}
+            {isOwner && (
+              <>
+                <Link
+                  href={`/community/edit-post/${id}`}
+                  className="flex items-center gap-1 text-[13px] font-medium text-muted-foreground hover:text-primary transition-colors"
+                >
+                  <span className="material-symbols-outlined text-[18px]">edit</span>
+                  Edit
+                </Link>
+                <button
+                  onClick={(e) => {
+                    e.preventDefault();
+                    onDelete?.();
+                  }}
+                  className="flex items-center gap-1 text-[13px] font-medium text-muted-foreground hover:text-red-500 transition-colors"
+                >
+                  <span className="material-symbols-outlined text-[18px]">delete</span>
+                  Delete
+                </button>
+              </>
+            )}
+          </div>
           <Link
             href={`/community/post/${id}`}
             className="text-primary hover:text-brand-primary-hover text-[13px] font-bold flex items-center gap-1.5 transition-colors"

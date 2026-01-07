@@ -7,7 +7,7 @@ interface Post {
   image: string;
   tags: string[];
   category: Category;
-  postType: boolean;
+  isAnonymous: boolean;
   user: User;
   postedTime: string;
 }
@@ -21,8 +21,6 @@ interface User {
   id: string;
   name: string;
 }
-
-
 
 export const communityPost = createApi({
   reducerPath: "communityPost",
@@ -51,7 +49,7 @@ export const communityPost = createApi({
 
   // Cache data for 5 minutes (300 seconds) - won't refetch if data exists
   keepUnusedDataFor: 300,
-  
+
   // Tag types for cache invalidation
   tagTypes: ["Posts", "Categories"],
 
@@ -88,7 +86,7 @@ export const communityPost = createApi({
         body: string;
         tags: string[];
         categoryId: string;
-        postType: boolean;
+        isAnonymous: boolean;
         image?: string;
       }
     >({
@@ -128,7 +126,7 @@ export const communityPost = createApi({
           body?: string;
           tags?: string[];
           categoryId?: string;
-          postType?: boolean;
+          isAnonymous?: boolean;
           image?: string;
         };
       }

@@ -3,50 +3,33 @@
 import { useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
-// import { fetchPosts } from "./firebase-actions"
-import { SiteHeader } from "../common/layout/site-header";
+
 import { CommunityHero } from "../component/community/homaPage/community-hero";
 import { CommunityTabs } from "../component/community/homaPage/community-tabs";
 import { CommunityFilters } from "../component/community/homaPage/community-filters";
-import { PostCard } from "../component/community/homaPage/post/post-card";
+
 import { CreateGroupCard } from "../component/community/create-group-card";
 import { GroupCard } from "../component/community/group-card";
 import { FeaturedStoryCard } from "../component/community/featured-story-card";
 import { SecondaryStoryCard } from "../component/community/secondary-story-card";
 import { StoryCard } from "../component/community/story-card";
-import { SiteFooter } from "../common/layout/site-footer";
-import { useAppDispatch, useAppSelector } from "../Hooks/hook";
-import {
- 
-  selectPosts,
-  selectPostStatus,
-  selectPostError,
-} from "../redux/feature/community/createPostSlice";
+
 import { PostsList } from "../component/community/homaPage/post/postList";
+import { useGetPostQuery } from "../redux/services/communityPostApi";
 
 export default function CommunityPage() {
-  const dispatch = useAppDispatch();
   const [activeTab, setActiveTab] = useState("feed");
-  
+  const { data: posts } = useGetPostQuery();
+
   // Get posts from Redux store
-  const posts = useAppSelector(selectPosts);
-  const loadingPosts = useAppSelector(selectPostStatus) === "loading";
-  const postsError = useAppSelector(selectPostError);
+  const [postsCount, setPostsCount] = useState("0");
 
-
-  const formatTimeAgo = (timestamp: any) => {
-    const date = timestamp?.seconds
-      ? new Date(timestamp.seconds * 1000)
-      : new Date();
-    const diff = Date.now() - date.getTime();
-    const minutes = Math.floor(diff / 60000);
-    if (minutes < 1) return "Just now";
-    if (minutes < 60) return `${minutes} min ago`;
-    const hours = Math.floor(minutes / 60);
-    if (hours < 24) return `${hours} hr ago`;
-    const days = Math.floor(hours / 24);
-    return `${days} day${days === 1 ? "" : "s"} ago`;
-  };
+  useEffect(() => {
+    if (posts) {
+      const numberOfPosts = Math.max(0, posts.length);
+      setPostsCount(numberOfPosts.toString());
+    }
+  }, [posts]);
 
   return (
     <div className="relative flex min-h-screen flex-col overflow-x-hidden bg-background">
@@ -65,64 +48,20 @@ export default function CommunityPage() {
               {/* Posts Feed */}
               <div className="flex flex-col gap-6 mb-12">
                 <PostsList />
-                {/* {loadingPosts && (
-                  <p className="text-sm text-muted-foreground">
-                    Loading feed...
-                  </p>
-                )}
-                {postsError && (
-                  <p className="text-sm text-destructive">{postsError}</p>
-                )}
-                {!loadingPosts && !postsError && posts.length === 0 && (
-                  <p className="text-sm text-muted-foreground">
-                    No posts yet. Be the first to share.
-                  </p>
-                )}
-                {!loadingPosts &&
-                  !postsError &&
-                  posts.map((post) => (
-                    <PostCard
-                      key={post.id}
-                      id={post.id}
-                      topic={post.title?.[0] || "Community"}
-                      // {
-                      //   post.tags?.[0] || post.topics?.[0] || "Community"
-                      // }
-                      author={
-                        post.postType === true
-                          ? "Anonymous"
-                          : post.userName || "Unknown"
-                      }
-                      timeAgo={formatTimeAgo(post.createdAt)}
-                      title={post.title || "Untitled"}
-                      excerpt={post.body || ""}
-                      // imageUrl={
-                      //   post.imageUrl ||
-                      //   "/abstract-illustration-of-diverse-hands-forming-a-c.jpg"
-                      // }
-                      // likes={
-                      //   Array.isArray(post.likes)
-                      //     ? post.likes.length
-                      //     : Number(post.likes || 0)
-                      // }
-                      // comments={post.commentCount ?? post.commentsCount ?? 0}
-                      // isSensitive={post.isSensitive}
-                    />
-                  ))} */}
               </div>
 
               {/* Pagination / Load More */}
-              <div className="flex flex-col items-center gap-4 mb-16">
+              {/* <div className="flex flex-col items-center gap-4 mb-16">
                 <span className="text-[13px] font-medium text-muted-foreground">
-                  Showing 4 of 128 updates
+                  Showing 4 of {postsCount} updates
                 </span>
                 <Button
                   variant="outline"
                   className="h-11 px-10 rounded-xl border-border bg-white font-bold text-foreground hover:bg-muted"
                 >
-                  Load More
+                  next Page
                 </Button>
-              </div>
+              </div> */}
             </>
           )}
 

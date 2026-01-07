@@ -7,6 +7,7 @@ interface UserState {
     userId: string | null;
     userName: string | null;
     email: string | null;
+
     access_token: string | null;
     refreshToken: string | null;
   };
@@ -42,7 +43,6 @@ const initialState: UserState = {
   status: "idle",
   error: null,
 };
-
 
 export const UserSlice = createSlice({
   name: "authUser",

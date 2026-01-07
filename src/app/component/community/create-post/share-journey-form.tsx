@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import CreatableSelect from "react-select/creatable";
 import { Button } from "@/components/ui/button";
 import ImageUpload from "./imgae-uploader";
-import  RichTextEditor  from './rich-text-editor';
+import RichTextEditor from "./rich-text-editor";
 import {
   useCreateCategoryMutation,
   useCreatePostMutation,
@@ -40,13 +40,13 @@ export default function ShareJourneyForm() {
   const [postAnonymously, setPostAnonymously] = useState(false);
   const [tags, setTags] = useState<Tag[]>(defaultTags);
   const [categories, setCategories] = useState<Category[]>([]);
+  const [createPost, { isLoading: isCreatingPost }] = useCreatePostMutation();
 
   // API hooks
   const { data: categoriesData, isLoading: categoriesLoading } =
     useGetCategoryQuery();
   const [createCategory, { isLoading: isCreatingCategory }] =
     useCreateCategoryMutation();
-  const [createPost, { isLoading: isCreatingPost }] = useCreatePostMutation();
 
   // Populate categories from API
   useEffect(() => {
@@ -129,9 +129,9 @@ export default function ShareJourneyForm() {
 
     setSelectedCategory(newValue);
   };
-
-  const handleImageUpload = (url: string | null) => {
-    setUploadedImage(url);
+  // Image Upload Handler - receives URL from ImageUpload component
+  const handleImageUpload = (imageUrl: string | null) => {
+    setUploadedImage(imageUrl);
   };
 
   const handlePublish = async () => {
@@ -153,7 +153,7 @@ export default function ShareJourneyForm() {
       body: story,
       tags: selectedTags.map((t) => t.value),
       categoryId: selectedCategory.value,
-      postType: postAnonymously,
+      isAnonymous: postAnonymously,
       image: uploadedImage ?? "",
     };
 
