@@ -1,8 +1,8 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { logout } from "../feature/user/userSlice";
+import ForgotPassword from "../../(auth)/forgotPassword/page";
 
 export const authUserAPI = createApi({
-
   reducerPath: "authUser",
   baseQuery: fetchBaseQuery({ baseUrl: `${process.env.NEXT_PUBLIC_API_URL}` }),
 
@@ -28,6 +28,14 @@ export const authUserAPI = createApi({
       }),
     }),
 
+    // ForgotPassword: build.mutation({
+    //   query: (email: string) => ({
+    //     url: "/forgot-password",
+    //     method: "POST",
+    //     body: { email },
+    //   }),
+    // }),
+
     logoutUser: build.mutation({
       query: () => ({
         url: "/logout",
@@ -47,12 +55,11 @@ export const authUserAPI = createApi({
         }
       },
     }),
-
-    
   }),
 });
 
 export const {
+  // useForgotPasswordMutation,
   useRegisterUserMutation,
   useLoginUserMutation,
   useLogoutUserMutation,

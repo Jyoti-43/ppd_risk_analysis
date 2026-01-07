@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import CreatableSelect from "react-select/creatable";
 import { Button } from "@/components/ui/button";
 import ImageUpload from "./imgae-uploader";
@@ -12,7 +12,6 @@ import {
 } from "@/src/app/redux/services/communityPostApi";
 
 import { useCustomSelectStyles } from "@/lib/selectStyle";
-const customSelectStyles = useCustomSelectStyles();
 
 interface Tag {
   value: string;
@@ -50,7 +49,10 @@ export default function ShareJourneyForm() {
     useGetCategoryQuery();
   const [createCategory, { isLoading: isCreatingCategory }] =
     useCreateCategoryMutation();
+  const customSelectStyles = useCustomSelectStyles();
+  const isLoading = isCreatingPost || isCreatingCategory;
 
+  const router = require("next/navigation").useRouter();
   // Populate categories from API
   useEffect(() => {
     if (categoriesData) {
@@ -163,6 +165,7 @@ export default function ShareJourneyForm() {
     try {
       await createPost(payload).unwrap();
       alert("Story published successfully!");
+      router.push("/community");
       // Reset form
       setTitle("");
       setStory("");
@@ -177,9 +180,7 @@ export default function ShareJourneyForm() {
     }
   };
 
-  <CreatableSelect  styles={customSelectStyles}/>
-
-  const isLoading = isCreatingPost || isCreatingCategory;
+  <CreatableSelect styles={customSelectStyles} />;
 
   return (
     <div className="space-y-6">
