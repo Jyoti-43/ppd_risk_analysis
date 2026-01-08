@@ -8,6 +8,8 @@ import { EpdsResultSlice } from "./feature/screening/epds/epdsSlice";
 import { screeningAPI } from "./services/screeningApi";
 import { createGroupSlice } from "./feature/community/groupSlice";
 import { communityGroup } from "./services/communityGroupApi";
+import { groupPost } from "./services/groupPostApi";
+import { createGroupPostSlice } from "./feature/community/groupPostSlice";
 
 export const store = configureStore({
   reducer: {
@@ -29,6 +31,9 @@ export const store = configureStore({
     // yo chai api call ko lagi redux service add gareko
     [communityGroup.reducerPath]: communityGroup.reducer,
 
+    createGroupPost: createGroupPostSlice.reducer,
+    [groupPost.reducerPath]: groupPost.reducer,
+
   },
 
   // Adding the middleware for the APIs that helps in caching, invalidation, polling, etc.
@@ -37,7 +42,8 @@ export const store = configureStore({
       .concat(authUserAPI.middleware)
       .concat(communityPost.middleware)
       .concat(screeningAPI.middleware)
-      .concat(communityGroup.middleware),
+      .concat(communityGroup.middleware)
+      .concat(groupPost.middleware),
 });
 
 export type RootState = ReturnType<typeof store.getState>;

@@ -19,6 +19,7 @@ interface CreateGroupState {
     category: string;
     imageUrl?: string;
   };
+  currentGroupId?: string | null;
   groups: Group[];
   userName?: string | null;
   status: "idle" | "loading" | "succeeded" | "failed";
@@ -49,11 +50,11 @@ export const createGroupSlice = createSlice({
     setBody: (state, action: PayloadAction<string>) => {
       state.formData.body = action.payload;
     },
-   
+
     setCategory: (state, action: PayloadAction<string>) => {
       state.formData.category = action.payload;
     },
-    
+
     setImageUrl: (state, action: PayloadAction<string | undefined>) => {
       state.formData.imageUrl = action.payload;
     },
@@ -64,6 +65,9 @@ export const createGroupSlice = createSlice({
       state.formData = { ...state.formData, ...action.payload };
     },
 
+    setCurrentGroupId: (state, action: PayloadAction<string | null>) => {
+      state.currentGroupId = action.payload;
+    },
     // Handle API responses
     setLoading: (state) => {
       state.status = "loading";
@@ -79,7 +83,9 @@ export const createGroupSlice = createSlice({
       state.formData = initialState.formData;
     },
     deleteGroupSuccess: (state, action: PayloadAction<string>) => {
-      state.groups = state.groups.filter((group) => group.id !== action.payload);
+      state.groups = state.groups.filter(
+        (group) => group.id !== action.payload
+      );
       state.status = "succeeded";
     },
     updateGroupSuccess: (state, action: PayloadAction<Group>) => {
@@ -114,6 +120,7 @@ export const {
   setBody,
   setCategory,
   setImageUrl,
+  setCurrentGroupId,
   setLoading,
   setGroupSuccess,
   addGroupSuccess,

@@ -28,6 +28,7 @@ interface CreatePostState {
   userName?: string | null;
   status: "idle" | "loading" | "succeeded" | "failed";
   error: string | null;
+   currentPostId?: string | null;
 }
 
 const initialState: CreatePostState = {
@@ -77,6 +78,9 @@ export const createPostSlice = createSlice({
       action: PayloadAction<Partial<CreatePostState["formData"]>>
     ) => {
       state.formData = { ...state.formData, ...action.payload };
+    },
+    setCurrentPostId: (state, action: PayloadAction<string | null>) => {
+      state.currentPostId = action.payload;
     },
 
     // Handle API responses
@@ -133,11 +137,11 @@ export const {
   setImageUrl,
   setFormData,
   setLoading,
-  setPostsSuccess,
-  addPostSuccess,
-  deletePostSuccess,
-  updatePostSuccess,
-  setError,
+  // setPostsSuccess,
+  // addPostSuccess,
+  // deletePostSuccess,
+  // updatePostSuccess,
+  // setError,
   // setErrorromStorage,
   // deletePost,
   resetForm,

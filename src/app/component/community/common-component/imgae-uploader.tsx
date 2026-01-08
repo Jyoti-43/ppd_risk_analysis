@@ -199,7 +199,7 @@ import { useUploadImageMutation as useGroupImageMutation } from "@/src/app/redux
 interface ImageUploadProps {
   value: string | null;
   onImageUpload: (imageUrl: string | null) => void;
-  uploadType?: "post" | "group"; // optional, defaults to "post"
+  uploadType?: "post" | "group" | "groupPost"; // optional, defaults to "post"
 }
 
 export default function ImageUpload({
@@ -283,7 +283,7 @@ export default function ImageUpload({
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
       onClick={handleClick}
-      className={`border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-colors ${
+      className={`border-2 border-dashed rounded-lg p-4 text-center cursor-pointer transition-colors ${
         isDragging
           ? "border-primary bg-accent"
           : "border-border hover:border-primary"
@@ -302,7 +302,7 @@ export default function ImageUpload({
           <p className="text-muted-foreground">Uploading image...</p>
         </div>
       ) : preview ? (
-        <div className="space-y-4">
+        <div className="space-y-2">
           <img
             src={preview || "/placeholder.svg"}
             alt="Preview"
@@ -310,7 +310,7 @@ export default function ImageUpload({
             loading="lazy" // Add this
             // placeholder="blur" // Add this
             // blurDataURL="/placeholder.png"
-            className="w-32 h-32 object-cover mx-auto rounded-lg"
+            className="w-32 h-28 object-cover mx-auto rounded-lg"
           />
           <button
             onClick={(e) => {

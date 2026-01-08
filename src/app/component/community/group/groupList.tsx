@@ -3,7 +3,7 @@
 //
 
 import { useState } from "react";
-import { useAppSelector } from "@/src/app/Hooks/hook";
+import { useAppDispatch, useAppSelector } from "@/src/app/Hooks/hook";
 import { selectCurrentUser } from "@/src/app/redux/feature/user/userSlice";
 import { GroupCard } from "./group-card";
 import {
@@ -11,6 +11,7 @@ import {
   useGetGroupQuery,
 } from "@/src/app/redux/services/communityGroupApi";
 import { PostSkeleton } from "../homaPage/post/postSkeleton";
+import { CreateGroupCard } from "./create-group-card";
 
 const group_PER_PAGE = 4;
 
@@ -24,6 +25,7 @@ export const GroupList = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const currentUser = useAppSelector(selectCurrentUser);
   const [deleteGroup] = useDeleteGroupMutation();
+ 
 
   const {
     data: groups,
@@ -32,7 +34,7 @@ export const GroupList = () => {
     error,
   } = useGetGroupQuery(undefined, {
     // Only fetch on first load or browser refresh, not on component remount
-    refetchOnMountOrArgChange: false,
+    refetchOnMountOrArgChange: true,
     refetchOnFocus: false,
     // refetchOnReconnect: false,
   });
@@ -52,6 +54,9 @@ export const GroupList = () => {
       }
     }
   };
+
+ 
+
 
   if (isLoading) {
    
@@ -99,7 +104,7 @@ export const GroupList = () => {
   return (
     <>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
-        {/* <CreateGroupCard /> */}
+        <CreateGroupCard />
 
         {currentgroup.map((group: any, idx: number) => (
           <GroupCard
@@ -117,6 +122,7 @@ export const GroupList = () => {
               normalizeId(group.createdBy?.id) ===
               normalizeId(currentUser?.userId)
             }
+           
             onDelete={() => handleDeleteGroup(String(group.groupId))}
           />
         ))}

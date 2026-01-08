@@ -1,6 +1,8 @@
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
+import { useAppDispatch, useAppSelector } from "@/src/app/Hooks/hook";
+import { setCurrentGroupId } from "@/src/app/redux/feature/community/groupSlice";
 
 interface GroupCardProps {
   id: string;
@@ -17,6 +19,7 @@ interface GroupCardProps {
   isJoined?: boolean;
   isOwner?: boolean;
   onDelete?: () => void;
+  onClick?: () => void;
 }
 
 export function GroupCard({
@@ -30,8 +33,12 @@ export function GroupCard({
   extraAvatarCount,
   isJoined,
   isOwner = false,
+
   onDelete,
 }: GroupCardProps) {
+
+   const dispatch = useAppDispatch();
+  
   return (
     <div className="flex flex-col rounded-2xl border border-border bg-card overflow-hidden shadow-sm hover:shadow-md transition-shadow">
       {/* Image Header */}
@@ -121,8 +128,10 @@ export function GroupCard({
                 </>
               )}
             </div>
-            
+
+            <Link href={`/community/group/${id}/view-group`}>
               <Button
+               onClick={() => dispatch(setCurrentGroupId(id))}
                 size="sm"
                 variant={isJoined ? "outline" : "default"}
                 className={cn(
@@ -134,7 +143,7 @@ export function GroupCard({
               >
                 {isJoined ? "Joined" : "Join Group"}
               </Button>
-            
+            </Link>
           </div>
         </div>
       </div>

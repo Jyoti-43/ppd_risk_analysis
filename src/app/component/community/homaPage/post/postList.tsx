@@ -29,7 +29,7 @@ export const PostsList = () => {
     isFetching,
   } = useGetPostQuery(undefined, {
     // Only fetch on first load or browser refresh, not on component remount
-    refetchOnMountOrArgChange: false,
+    refetchOnMountOrArgChange: true,
     refetchOnFocus: false,
     // refetchOnReconnect: false,
   });

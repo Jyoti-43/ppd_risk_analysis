@@ -5,22 +5,15 @@ import CreatableSelect from "react-select/creatable";
 import { Button } from "@/components/ui/button";
 import ImageUpload from "../common-component/imgae-uploader";
 import RichTextEditor from "./rich-text-editor";
-import {
-
-  useCreatePostMutation,
- 
-} from "@/src/app/redux/services/communityPostApi";
+import { useCreatePostMutation } from "@/src/app/redux/services/communityPostApi";
 
 import { useCustomSelectStyles } from "@/lib/selectStyle";
 import { useCategorySelect } from "@/src/app/Hooks/useCategorySelect";
-
 
 interface Tag {
   value: string;
   label: string;
 }
-
-
 
 const defaultTags: Tag[] = [
   { value: "postpartum-depression", label: "Postpartum Depression" },
@@ -37,7 +30,7 @@ export default function ShareJourneyForm() {
   const [sensitiveContent, setSensitiveContent] = useState(false);
   const [postAnonymously, setPostAnonymously] = useState(false);
   const [tags, setTags] = useState<Tag[]>(defaultTags);
- 
+
   const [createPost, { isLoading: isCreatingPost }] = useCreatePostMutation();
 
   const {
@@ -48,12 +41,12 @@ export default function ShareJourneyForm() {
     categoriesLoading,
     isCreatingCategory,
   } = useCategorySelect();
- 
+
   const customSelectStyles = useCustomSelectStyles();
   const isLoading = isCreatingPost || isCreatingCategory;
 
   const router = require("next/navigation").useRouter();
-  
+
   const handleTagChange = (newValue: any) => {
     if (newValue) {
       const updatedTags = newValue.map((item: any) => {
@@ -78,7 +71,6 @@ export default function ShareJourneyForm() {
     }
   };
 
- 
   // Image Upload Handler - receives URL from ImageUpload component
   const handleImageUpload = (imageUrl: string | null) => {
     setUploadedImage(imageUrl);
@@ -163,7 +155,6 @@ export default function ShareJourneyForm() {
             styles={customSelectStyles}
             formatCreateLabel={(inputValue) => `Create tag: "${inputValue}"`}
           />
-          
         </div>
 
         {/* Category Section */}
