@@ -21,8 +21,25 @@ interface GroupPost {
   user: User; // Backend adds this
   postedTime: string; // Backend adds this
   groupId: string;
+  // hasLiked: boolean;
+  // likeCount?: string;
+  commentsCount: number;
+  like: LikeResponse;
 }
 
+// For like API request
+interface LikeRequest {
+  
+  postId: string;
+  hasLike: boolean;
+}
+
+// For like API response (if different from your main Like)
+interface LikeResponse {
+  id: string;
+  likeCount: string;
+  hasLiked: boolean;
+}
 interface Category {
   id: string;
   name: string;
@@ -97,7 +114,14 @@ export const groupPost = createApi({
       providesTags: ["Posts"],
     }),
 
-
+    groupPostLike: build.mutation<any, LikeResponse>({
+      query: ({ id, hasLiked }) => ({
+        url: `/group/toggle-like/${id}`,
+        method: hasLiked ? "POST" : "DELETE",
+      }),
+      // Invalidate posts cache when a post is liked/unliked
+      invalidatesTags: ["Posts"],
+    }),
 
     deleteGroupPost: build.mutation<any, string>({
       query: (groupId) => ({

@@ -1,22 +1,28 @@
-'use client';
+"use client";
 import { useGetGroupPostQuery } from "@/src/app/redux/services/groupPostApi";
 import { DiscussionPost } from "./discussion-post";
 import { timeAgo } from "@/utills/timeAgo";
 import { useAppSelector } from "@/src/app/Hooks/hook";
 
-export function DiscussionsSection(  ) {
-  const selectedGroupId = useAppSelector((state) => state.createGroup.currentGroupId);
-
+export function DiscussionsSection() {
+  const selectedGroupId = useAppSelector(
+    (state) => state.createGroup.currentGroupId
+  );
   const { data: posts = [], isLoading, error } = useGetGroupPostQuery();
+
+ 
+  const likeByPostId = useAppSelector((state) => state.createGroupPost.likeByPostId);
+
 
   if (isLoading) return <div>Loading...</div>;
   if (error) return <div>Error loading posts.</div>;
 
-   const filteredPosts = posts.filter(
+  const filteredPosts = posts.filter(
     (post) => post.groupId?.toString() === selectedGroupId?.toString()
   );
 
   if (filteredPosts.length === 0) {
+     console.log("All Posts:", posts);
     return <div>No discussions available for this group.</div>;
   }
 
@@ -36,53 +42,38 @@ export function DiscussionsSection(  ) {
       </div>
 
       {/* Posts */}
-      
+      {filteredPosts.map((post) => {
+        const like = likeByPostId[post.id];
+        const likeCount = like
+          ? parseInt(like.likeCount)
+          : post.like
+          ? parseInt(post.like.likeCount)
+          : 0;
+        const hasLiked = like
+          ? like.hasLiked
+          : post.like && typeof post.like.hasLiked === "boolean"
+          ? post.like.hasLiked
+          : false;
 
-      {filteredPosts.map((post) => (
-        <DiscussionPost
-          key={post.id}
-          author={post.user.name}
-          badge={post.category.name}
-          timeAgo={timeAgo(post.postedTime)}
-          content={post.postBody}
-          tags={
-            post.tags ? post.tags.map((tag) => `#${tag.toLowerCase()}`) : []
-          }
-          
-          // likes={post.likes}
-          // comments={post.comments}
-          hasImage={!!post.image}
-          imageUrl={post.image}
-        />
-      ))}
-
-      {/* <DiscussionPost
-        author="Sarah Jenkins"
-        badge="New Mom"
-        timeAgo="2 hours ago"
-        content="Does anyone else get hit with a wave of anxiety right when the sun goes down? The days are manageable, but as soon as evening hits, I feel this tightness in my chest. 🫂 Would love to hear your evening routines that help calm the nervous system."
-        tags={["#EveningAnxiety", "#NoonHelpHelp"]}
-        likes={24}
-        comments={12}
-      /> */}
-      {/* 
-      <DiscussionPost
-        author="Emily Chen"
-        badge="Mentor"
-        timeAgo="5 hours ago"
-        content="Just wanted to share a breathing technique that my therapist taught me. It's called Box Breathing.
-
-1. Inhale for 4 counts
-2. Hold for 4 counts
-3. Exhale for 4 counts
-4. Hold empty for 4 counts
-
-I made this little guide for you all! 💗"
-        likes={89}
-        comments={34}
-        hasImage={true}
-        imageUrl="/breathing-guide-visual.jpg"
-      /> */}
+        return (
+          <DiscussionPost
+            key={post.id}
+            id={post.id}
+            author={post.user.name}
+            badge={post.category.name}
+            timeAgo={timeAgo(post.postedTime)}
+            content={post.postBody}
+            tags={
+              post.tags ? post.tags
+              .map((tag) => `#${tag.toLowerCase()}`) : []
+            }
+            hasLiked={hasLiked}
+            likeCount={likeCount}
+            hasImage={!!post.image}
+            imageUrl={post.image}
+          />
+        );
+      })}
     </div>
   );
 }

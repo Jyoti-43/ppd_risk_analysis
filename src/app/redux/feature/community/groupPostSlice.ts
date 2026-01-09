@@ -9,6 +9,7 @@ export interface CreateGroupPostPayload {
   isAnonymous: boolean;
   image?: string;
   groupId: string;
+  // likeCount?: number ;
 }
 
 export interface GroupPost {
@@ -20,7 +21,11 @@ export interface GroupPost {
     category: category; // Backend returns full object
     isAnonymous: boolean;
     image?: string;
+    // likeCount?: string ;
+    // hasLiked?: boolean;
   };
+  likeByPostId: { [postId: string]: Like };
+  like?: Like;
   user?: User;
   groupPost: CreateGroupPostPayload[];
   createdAt?: string; // Backend adds this
@@ -34,17 +39,25 @@ interface User {
   id: string;
   name: string;
 }
+interface Like {
+  id: string;
+  likeCount: string;
+  hasLiked: boolean;
+}
 
 const initialState: GroupPost = {
   id: "",
   formData: {
     postTitle: "",
     postBody: "",
-    tags: [],
+   tags: ["general"],
     category: { id: "", name: "" },
     isAnonymous: false,
     image: "",
+    //  likeCount: "",
+    // hasLiked: false,
   },
+  likeByPostId: {},
   groupPost: [],
   groupId: "",
 };
@@ -70,13 +83,17 @@ export const createGroupPostSlice = createSlice({
       state.formData.isAnonymous = action.payload;
     },
     setImageUrl: (state, action: PayloadAction<string | undefined>) => {
-      state.formData.image= action.payload;
+      state.formData.image = action.payload;
     },
     setFormData: (
       state,
       action: PayloadAction<Partial<GroupPost["formData"]>>
     ) => {
       state.formData = { ...state.formData, ...action.payload };
+    },
+    setGroupPostLikes: (state, action: PayloadAction<Like>) => {
+      const { id, likeCount, hasLiked } = action.payload;
+      state.likeByPostId[id] = { id, likeCount, hasLiked };
     },
   },
 });
@@ -89,6 +106,7 @@ export const {
   setPostType,
   setImageUrl,
   setFormData,
+  setGroupPostLikes,
 } = createGroupPostSlice.actions;
 
 export default createGroupPostSlice.reducer;

@@ -1,28 +1,71 @@
 import { Heart, MessageCircle, Share2, MoreVertical } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useAppDispatch, useAppSelector } from "@/src/app/Hooks/hook";
+import { setGroupPostLikes } from "@/src/app/redux/feature/community/groupPostSlice";
+import { use, useEffect, useState } from "react";
 interface DiscussionPostProps {
+  id: string;
   author: string;
   badge?: string;
   timeAgo: string;
   content: string;
   tags?: string[];
-  // likes: number;
+  likeCount: number;
+  hasLiked?: boolean;
   // comments: number;
   hasImage?: boolean;
   imageUrl?: string;
 }
 
 export function DiscussionPost({
+  id,
   author,
   badge,
   timeAgo,
   content,
   tags,
-  // likes,
+  likeCount,
+  hasLiked,
   // comments,
   hasImage,
   imageUrl,
 }: DiscussionPostProps) {
+  const dispatch = useAppDispatch();
+  const [selectedLikedPostId, setSelectedLikedPostId] = useState("");
+  const like = useAppSelector(
+    (state) => state.createGroupPost.likeByPostId[id]
+  );
+
+  const currentLikeCount = like ? parseInt(like.likeCount) : likeCount;
+
+  useEffect(() => {
+    dispatch(
+      setGroupPostLikes({ id, likeCount: likeCount.toString(), hasLiked: true })
+    );
+  }, [hasLiked, id, selectedLikedPostId, dispatch]);
+
+  console.log(tags, imageUrl);
+  const handleLike = () => {
+    if (hasLiked && likeCount>0) {
+      // Unlike: decrement like count and set hasLiked to false
+      dispatch(
+        setGroupPostLikes({
+          id,
+          likeCount: (likeCount - 1).toString(),
+          hasLiked: false,
+        })
+      );
+    } else  {
+      // Like: increment like count and set hasLiked to true
+      dispatch(
+        setGroupPostLikes({
+          id,
+          likeCount: (likeCount + 1).toString(),
+          hasLiked: true,
+        })
+      );
+    }
+  };
   return (
     <>
       <div className="bg-card rounded-lg p-6 mb-6">
@@ -80,9 +123,14 @@ export function DiscussionPost({
 
         {/* Footer */}
         <div className="flex items-center gap-6 pt-4 border-t border-border">
-          <button className="flex items-center gap-2 text-muted-foreground hover:text-primary transition">
+          <button
+            onClick={handleLike}
+            className="flex items-center gap-2 text-muted-foreground hover:text-primary transition"
+          >
             <Heart className="w-5 h-5" />
-            <span className="text-sm">10 Likes</span>
+            <span className="text-sm">
+              {currentLikeCount > 0 ? currentLikeCount : ""} Like
+            </span>
           </button>
           <button className="flex items-center gap-2 text-muted-foreground hover:text-primary transition">
             <MessageCircle className="w-5 h-5" />

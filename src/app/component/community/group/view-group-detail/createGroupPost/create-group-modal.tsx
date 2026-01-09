@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { use, useState } from "react";
 import { X, Users } from "lucide-react";
 import { Avatar, AvatarImage } from "@radix-ui/react-avatar";
 import ImageUpload from "../../../common-component/imgae-uploader";
@@ -59,18 +59,13 @@ export function CreatePostModal({
   );
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
   // Tag and category state (local for select options, Redux for selected values)
-  const [tags, setTags] = useState([
-    { value: "postpartum-depression", label: "Postpartum Depression" },
-    { value: "anxiety", label: "Anxiety" },
-    { value: "postpartum-anxiety", label: "Postpartum Anxiety" },
-    { value: "postpartum-ocd", label: "Postpartum OCD" },
-  ]);
+  const [tags, setTags] = useState<Tag[]>(defaultTags);
+
   // selectedTags from Redux
   const [selectedTags, setSelectedTags] = useState<Tag[]>([]);
   const {
     categories,
     selectedCategory,
-
     handleCategoryChange,
     categoriesLoading,
     isCreatingCategory,
@@ -124,19 +119,18 @@ export function CreatePostModal({
       return;
     }
 
-  
-
-      const cleanGroupId = groupId !== null && groupId !== undefined ? groupId.toString() : null;
+    const cleanGroupId =
+      groupId !== null && groupId !== undefined ? groupId.toString() : null;
 
     console.log("Clean Group ID:", cleanGroupId);
     try {
-      const response =  await createGroupPost({
+      const response = await createGroupPost({
         postTitle: formData.postTitle ?? "",
         postBody: formData.postBody ?? "",
-        tags: formData.tags ?? [],
+        tags: selectedTags.map(tag => tag.value) ?? [],
         categoryId: selectedCategory?.value ?? "",
         isAnonymous: formData.isAnonymous,
-        image: formData.image ?? "",
+        image: uploadedImage ?? "",
         groupId: cleanGroupId ?? "",
       }).unwrap();
       console.log("Api response success", response);
