@@ -33,10 +33,10 @@ interface User {
   name: string;
 }
 
-interface GroupPostResponse {
-  posts: GroupPost[];
-  totalCount: number;
-}
+// interface GroupPostResponse {
+//   posts: GroupPost[];
+//   totalCount: number;
+// }
 
 export const groupPost = createApi({
   reducerPath: "groupPost",
@@ -88,7 +88,7 @@ export const groupPost = createApi({
       invalidatesTags: ["Posts"],
     }),
 
-    getGroupPost: build.query<GroupPostResponse[], void>({
+    getGroupPost: build.query<GroupPost[], void>({
       query: () => ({
         url: "/group/view-post",
         method: "GET",

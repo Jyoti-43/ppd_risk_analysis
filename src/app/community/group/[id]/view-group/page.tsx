@@ -1,5 +1,5 @@
 import Sidebar from "@/src/app/component/community/create-post/sidebar";
-import { DiscussionsSection } from "@/src/app/component/community/group/view-group-detail/discussion-section";
+import { DiscussionsSection } from "@/src/app/component/community/group/view-group-detail/group-post/discussion-section";
 import { GroupHeader } from "@/src/app/component/community/group/view-group-detail/group-header";
 import { PostCreator } from "@/src/app/component/community/group/view-group-detail/createGroupPost/post-creator";
 

@@ -1,6 +1,25 @@
+'use client';
+import { useGetGroupPostQuery } from "@/src/app/redux/services/groupPostApi";
 import { DiscussionPost } from "./discussion-post";
+import { timeAgo } from "@/utills/timeAgo";
+import { useAppSelector } from "@/src/app/Hooks/hook";
 
-export function DiscussionsSection() {
+export function DiscussionsSection(  ) {
+  const selectedGroupId = useAppSelector((state) => state.createGroup.currentGroupId);
+
+  const { data: posts = [], isLoading, error } = useGetGroupPostQuery();
+
+  if (isLoading) return <div>Loading...</div>;
+  if (error) return <div>Error loading posts.</div>;
+
+   const filteredPosts = posts.filter(
+    (post) => post.groupId?.toString() === selectedGroupId?.toString()
+  );
+
+  if (filteredPosts.length === 0) {
+    return <div>No discussions available for this group.</div>;
+  }
+
   return (
     <div>
       {/* Header */}
@@ -17,7 +36,27 @@ export function DiscussionsSection() {
       </div>
 
       {/* Posts */}
-      <DiscussionPost
+      
+
+      {filteredPosts.map((post) => (
+        <DiscussionPost
+          key={post.id}
+          author={post.user.name}
+          badge={post.category.name}
+          timeAgo={timeAgo(post.postedTime)}
+          content={post.postBody}
+          tags={
+            post.tags ? post.tags.map((tag) => `#${tag.toLowerCase()}`) : []
+          }
+          
+          // likes={post.likes}
+          // comments={post.comments}
+          hasImage={!!post.image}
+          imageUrl={post.image}
+        />
+      ))}
+
+      {/* <DiscussionPost
         author="Sarah Jenkins"
         badge="New Mom"
         timeAgo="2 hours ago"
@@ -25,8 +64,8 @@ export function DiscussionsSection() {
         tags={["#EveningAnxiety", "#NoonHelpHelp"]}
         likes={24}
         comments={12}
-      />
-
+      /> */}
+      {/* 
       <DiscussionPost
         author="Emily Chen"
         badge="Mentor"
@@ -43,7 +82,7 @@ I made this little guide for you all! 💗"
         comments={34}
         hasImage={true}
         imageUrl="/breathing-guide-visual.jpg"
-      />
+      /> */}
     </div>
   );
 }

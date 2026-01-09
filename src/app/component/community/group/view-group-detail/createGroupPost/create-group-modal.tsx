@@ -130,7 +130,7 @@ export function CreatePostModal({
 
     console.log("Clean Group ID:", cleanGroupId);
     try {
-      await createGroupPost({
+      const response =  await createGroupPost({
         postTitle: formData.postTitle ?? "",
         postBody: formData.postBody ?? "",
         tags: formData.tags ?? [],
@@ -139,6 +139,7 @@ export function CreatePostModal({
         image: formData.image ?? "",
         groupId: cleanGroupId ?? "",
       }).unwrap();
+      console.log("Api response success", response);
       alert("Story published successfully!");
       router.push("/community");
       setOpen(false);
