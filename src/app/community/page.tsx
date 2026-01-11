@@ -19,13 +19,6 @@ export default function CommunityPage() {
   const [activeTab, setActiveTab] = useState("feed");
   const { data: posts } = useGetPostQuery();
 
-  
-
-
- 
-
- 
-
   return (
     <div className="relative flex min-h-screen flex-col overflow-x-hidden bg-background">
       {/* <SiteHeader /> */}
@@ -64,11 +57,10 @@ export default function CommunityPage() {
             <>
               {/* Groups Grid */}
               {/* <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12"> */}
-                
 
-                <GroupList />
+              <GroupList />
 
-                {/* <GroupCard
+              {/* <GroupCard
                   id="1"
                   name="Postpartum Anxiety Support"
                   description="A safe, non-judgmental space to discuss anxiety symptoms, intrusi..."
@@ -80,7 +72,7 @@ export default function CommunityPage() {
                   extraAvatarCount={8}
                 /> */}
 
-                {/* <GroupCard
+              {/* <GroupCard
                   id="2"
                   name="The 3 AM Club"
                   description="For when you're awake and everyone else is asleep. Night..."
@@ -93,7 +85,7 @@ export default function CommunityPage() {
                   isJoined
                 /> */}
 
-                {/* <GroupCard
+              {/* <GroupCard
                   id="3"
                   name="First Time Moms 2024"
                   description="Navigating the first year of new mother. Milestones,..."
@@ -105,7 +97,7 @@ export default function CommunityPage() {
                   extraAvatarCount={42}
                 /> */}
 
-                {/* <GroupCard
+              {/* <GroupCard
                   id="4"
                   name="Mindful Recovery"
                   description="Focusing on holistic healing, meditation, and gentle movement..."
@@ -116,7 +108,7 @@ export default function CommunityPage() {
                   avatars={["1", "2"]}
                 /> */}
 
-                {/* <GroupCard
+              {/* <GroupCard
                   id="5"
                   name="Partners & Dads Support"
                   description="A group for partners supporting new mothers. Share advice, ask..."

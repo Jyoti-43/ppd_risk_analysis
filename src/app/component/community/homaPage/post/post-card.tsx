@@ -33,10 +33,10 @@ export function PostCard({
       {/* Image Container */}
       <div className="relative w-full md:w-[280px] shrink-0 aspect-[4/3] rounded-xl overflow-hidden bg-muted">
         {imageUrl && (
-          <Image
-            src={imageUrl}
+          <img
+            src={imageUrl || "/placeholder.svg"}
             alt={title}
-            fill
+            // fill
             className={cn("object-cover", isSensitive && "blur-2xl opacity-60")}
           />
         )}

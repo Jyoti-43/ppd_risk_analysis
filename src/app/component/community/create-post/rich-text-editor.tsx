@@ -64,10 +64,48 @@ export default function RichTextEditor({ value, onChange }: RichTextEditorProps)
           <u>U</u>
         </button>
         <div className="border-l border-border mx-2" />
-        <button className="p-2 hover:bg-muted rounded text-foreground" title="List">
+        <button
+          onClick={() => {
+            const textarea = document.querySelector("textarea") as HTMLTextAreaElement;
+            if (textarea) {
+              const start = textarea.selectionStart;
+              const end = textarea.selectionEnd;
+              const text = textarea.value;
+              const beforeText = text.substring(0, start);
+              const selectedText = text.substring(start, end);
+              const afterText = text.substring(end);
+              // Add markdown unordered list style
+              const listText = selectedText
+                ? selectedText.split('\n').map(line => `- ${line || 'list item'}`).join('\n')
+                : '- list item';
+              onChange(`${beforeText}${listText}${afterText}`);
+            }
+          }}
+          className="p-2 hover:bg-muted rounded text-foreground"
+          title="List"
+        >
           ≡
         </button>
-        <button className="p-2 hover:bg-muted rounded text-foreground" title="Quote">
+        <button
+          onClick={() => {
+            const textarea = document.querySelector("textarea") as HTMLTextAreaElement;
+            if (textarea) {
+              const start = textarea.selectionStart;
+              const end = textarea.selectionEnd;
+              const text = textarea.value;
+              const beforeText = text.substring(0, start);
+              const selectedText = text.substring(start, end);
+              const afterText = text.substring(end);
+              // Add markdown blockquote style
+              const quoteText = selectedText
+                ? selectedText.split('\n').map(line => `> ${line}`).join('\n')
+                : '>';
+              onChange(`${beforeText}${quoteText}${afterText}`);
+            }
+          }}
+          className="p-2 hover:bg-muted rounded text-foreground"
+          title="Quote"
+        >
           ❝
         </button>
       </div>

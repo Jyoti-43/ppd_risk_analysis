@@ -2,17 +2,26 @@
 import { useGetGroupPostQuery } from "@/src/app/redux/services/groupPostApi";
 import { DiscussionPost } from "./discussion-post";
 import { timeAgo } from "@/utills/timeAgo";
-import { useAppSelector } from "@/src/app/Hooks/hook";
+import { useAppDispatch, useAppSelector } from "@/src/app/Hooks/hook";
+import { setCurrentGroupId } from "@/src/app/redux/feature/community/groupSlice";
+import { useEffect } from "react";
 
 export function DiscussionsSection() {
+  const dispatch = useAppDispatch();
   const selectedGroupId = useAppSelector(
     (state) => state.createGroup.currentGroupId
   );
   const { data: posts = [], isLoading, error } = useGetGroupPostQuery();
+  const likeByPostId = useAppSelector(
+    (state) => state.createGroupPost.likeByPostId
+  );
 
- 
-  const likeByPostId = useAppSelector((state) => state.createGroupPost.likeByPostId);
-
+  // Set currentGroupId in Redux if not set and posts exist
+  useEffect(() => {
+    if (!selectedGroupId && posts.length > 0 && posts[0].groupId) {
+      dispatch(setCurrentGroupId(posts[0].groupId.toString()));
+    }
+  }, [selectedGroupId, posts, dispatch]);
 
   if (isLoading) return <div>Loading...</div>;
   if (error) return <div>Error loading posts.</div>;
@@ -22,7 +31,7 @@ export function DiscussionsSection() {
   );
 
   if (filteredPosts.length === 0) {
-     console.log("All Posts:", posts);
+    console.log("All Posts:", posts);
     return <div>No discussions available for this group.</div>;
   }
 
@@ -64,8 +73,7 @@ export function DiscussionsSection() {
             timeAgo={timeAgo(post.postedTime)}
             content={post.postBody}
             tags={
-              post.tags ? post.tags
-              .map((tag) => `#${tag.toLowerCase()}`) : []
+              post.tags ? post.tags.map((tag) => `#${tag.toLowerCase()}`) : []
             }
             hasLiked={hasLiked}
             likeCount={likeCount}

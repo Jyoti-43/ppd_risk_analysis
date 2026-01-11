@@ -117,7 +117,7 @@ export const groupPost = createApi({
     groupPostLike: build.mutation<any, LikeResponse>({
       query: ({ id, hasLiked }) => ({
         url: `/group/toggle-like/${id}`,
-        method: hasLiked ? "POST" : "DELETE",
+        method: "POST" ,
       }),
       // Invalidate posts cache when a post is liked/unliked
       invalidatesTags: ["Posts"],
@@ -158,6 +158,7 @@ export const groupPost = createApi({
 });
 
 export const {
+  useGroupPostLikeMutation,
   useUploadImageMutation,
   useCreateGroupPostMutation,
   useGetGroupPostQuery,

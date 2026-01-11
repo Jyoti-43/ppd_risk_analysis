@@ -50,10 +50,10 @@ export function CommunityHero({ activeTab }: CommunityHeroProps) {
       <div className="w-full lg:w-[380px] shrink-0">
         <div className="relative w-full aspect-[4/3] lg:aspect-square rounded-2xl overflow-hidden bg-[#f5e6d3]">
           <Image
-            src="/abstract-illustration-of-diverse-hands-forming-a-c.jpg"
+            src="/assets/image/hands-on-hands-community-image.png"
             alt="Community illustration"
             fill
-            className="object-contain p-8"
+            className="object-cover "
           />
         </div>
       </div>

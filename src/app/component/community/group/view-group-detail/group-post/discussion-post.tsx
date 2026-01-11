@@ -3,6 +3,8 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useAppDispatch, useAppSelector } from "@/src/app/Hooks/hook";
 import { setGroupPostLikes } from "@/src/app/redux/feature/community/groupPostSlice";
 import { use, useEffect, useState } from "react";
+import CreateCommentModal from "../../create-comment-modal";
+import { useGroupPostLikeMutation } from "@/src/app/redux/services/groupPostApi";
 interface DiscussionPostProps {
   id: string;
   author: string;
@@ -30,42 +32,89 @@ export function DiscussionPost({
   hasImage,
   imageUrl,
 }: DiscussionPostProps) {
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const dispatch = useAppDispatch();
   const [selectedLikedPostId, setSelectedLikedPostId] = useState("");
   const like = useAppSelector(
     (state) => state.createGroupPost.likeByPostId[id]
   );
 
-  const currentLikeCount = like ? parseInt(like.likeCount) : likeCount;
+  // Use Redux state if available, otherwise use props
+  const currentLikeCount = like?.likeCount
+    ? parseInt(like.likeCount)
+    : likeCount;
+  const currentHasLiked =
+    like?.hasLiked !== undefined ? like.hasLiked : hasLiked;
 
+  // 1. Initialize from localStorage or prop
+  const [localLikeCount, setLocalLikeCount] = useState(() => {
+    const stored = localStorage.getItem(`likeCount_${id}`);
+    return stored ? parseInt(stored) : likeCount;
+  });
+
+  // 2. Update localStorage whenever localLikeCount changes
   useEffect(() => {
-    dispatch(
-      setGroupPostLikes({ id, likeCount: likeCount.toString(), hasLiked: true })
-    );
-  }, [hasLiked, id, selectedLikedPostId, dispatch]);
-
-  console.log(tags, imageUrl);
-  const handleLike = () => {
-    if (hasLiked && likeCount>0) {
-      // Unlike: decrement like count and set hasLiked to false
+    localStorage.setItem(`likeCount_${id}`, localLikeCount.toString());
+  }, [localLikeCount, id]);
+  useEffect(() => {
+    // Only initialize Redux like state if not already set
+    if (!like) {
       dispatch(
         setGroupPostLikes({
-          id,
-          likeCount: (likeCount - 1).toString(),
-          hasLiked: false,
-        })
-      );
-    } else  {
-      // Like: increment like count and set hasLiked to true
-      dispatch(
-        setGroupPostLikes({
-          id,
-          likeCount: (likeCount + 1).toString(),
-          hasLiked: true,
+          id: id.replace(/^post_/, ""),
+          likeCount: likeCount.toString(),
+          hasLiked: typeof hasLiked === "boolean" ? hasLiked : false,
         })
       );
     }
+  }, [id, dispatch, like, likeCount, hasLiked]);
+
+  const [groupPostLike] = useGroupPostLikeMutation();
+
+  // 3. In handleLike, update localLikeCount after successful like/unlike
+  const handleLike = async () => {
+    try {
+      const response = await groupPostLike({
+        id: id.replace(/^post_/, ""),
+        hasLiked: !currentHasLiked,
+        likeCount: localLikeCount.toString(),
+      }).unwrap();
+
+      dispatch(
+        setGroupPostLikes({
+          id: response.id,
+          likeCount: response.likeCount.toString(),
+          hasLiked: response.hasLiked,
+        })
+      );
+      console.log("Like/unlike response:", response);
+      setLocalLikeCount(parseInt(response.likeCount));
+    } catch (error) {
+      console.error("Error liking/unliking post:", error);
+    }
   };
+
+  // const handleLike = () => {
+  //   if (hasLiked && likeCount > 0) {
+  //     // Unlike: decrement like count and set hasLiked to false
+  //     dispatch(
+  //       setGroupPostLikes({
+  //         id,
+  //         likeCount: (likeCount - 1).toString(),
+  //         hasLiked: false,
+  //       })
+  //     );
+  //   } else {
+  //     // Like: increment like count and set hasLiked to true
+  //     dispatch(
+  //       setGroupPostLikes({
+  //         id,
+  //         likeCount: (likeCount + 1).toString(),
+  //         hasLiked: true,
+  //       })
+  //     );
+  //   }
+  // };
   return (
     <>
       <div className="bg-card rounded-lg p-6 mb-6">
@@ -129,10 +178,13 @@ export function DiscussionPost({
           >
             <Heart className="w-5 h-5" />
             <span className="text-sm">
-              {currentLikeCount > 0 ? currentLikeCount : ""} Like
+              {localLikeCount > 0 ? localLikeCount : ""} Like
             </span>
           </button>
-          <button className="flex items-center gap-2 text-muted-foreground hover:text-primary transition">
+          <button
+            onClick={() => setIsModalOpen(true)}
+            className="flex items-center gap-2 text-muted-foreground hover:text-primary transition"
+          >
             <MessageCircle className="w-5 h-5" />
             <span className="text-sm">5 Comments</span>
           </button>
@@ -141,6 +193,11 @@ export function DiscussionPost({
           </button>
         </div>
       </div>
+
+      <CreateCommentModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+      />
     </>
   );
 }
