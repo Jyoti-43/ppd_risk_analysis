@@ -1,13 +1,20 @@
 "use client";
 
+import { useAppSelector } from '@/src/app/Hooks/hook';
+import { selectCurrentUser, selectIsLoggedIn } from '@/src/app/redux/feature/user/userSlice';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { useAppSelector } from '../../../Hooks/hook';
-import { selectIsLoggedIn } from '../../../redux/feature/user/userSlice';
 
-export default function ProtectedRoute({ children }: { children: React.ReactNode }) {
+
+interface ProtectedRouteProps {
+  children: React.ReactNode;
+  roles: string[]; // allowed roles
+}
+
+export default function ProtectedRoute({ children, roles }: ProtectedRouteProps) {
   const router = useRouter();
   const isLoggedIn = useAppSelector(selectIsLoggedIn);
+  const role = useAppSelector(selectCurrentUser)?.role ?? '';
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -15,15 +22,13 @@ export default function ProtectedRoute({ children }: { children: React.ReactNode
   }, []);
 
   useEffect(() => {
-    if (mounted && !isLoggedIn) {
-      router.push(`/login?callbackUrl=${encodeURIComponent(window.location.href)}`);
-      // router.push('/login');
-      // router.push('/')
+    if (mounted && (!isLoggedIn || !roles.includes(role))) {
+      router.push('/login');
     }
-  }, [mounted, isLoggedIn, router]);
+  }, [mounted, isLoggedIn, router, role, roles]);
 
   // Don't render protected content until we've checked auth on client
-  if (!mounted || !isLoggedIn) {
+  if (!mounted || !isLoggedIn || !roles.includes(role)) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">

@@ -1,26 +1,6 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+import {  Post } from "@/src/app/type";
 
-interface Post {
-  id: string;
-  title: string;
-  body: string;
-  image: string;
-  tags: string[];
-  category: Category;
-  isAnonymous: boolean;
-  user: User;
-  postedTime: string;
-}
-
-interface Category {
-  id: string;
-  name: string;
-}
-
-interface User {
-  id: string;
-  name: string;
-}
 
 export const communityPost = createApi({
   reducerPath: "communityPost",
@@ -48,7 +28,7 @@ export const communityPost = createApi({
   }),
 
   // Cache data for 5 minutes (300 seconds) - won't refetch if data exists
-  keepUnusedDataFor: 300,
+  keepUnusedDataFor: 600,
 
   // Tag types for cache invalidation
   tagTypes: ["Posts", "Categories"],

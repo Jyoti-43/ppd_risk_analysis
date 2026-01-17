@@ -9,6 +9,7 @@ interface UserState {
     email: string | null;
     access_token: string | null;
     refreshToken: string | null;
+    role: string | null;
   };
   isLoggedIn: boolean;
   status: "idle" | "loading" | "succeeded" | "failed";
@@ -47,6 +48,7 @@ const initialState: UserState = {
     email: storedUser?.email || null,
     access_token: storedUser?.access_token || null,
     refreshToken: storedUser?.refreshToken || null,
+    role: storedUser?.role || null,
   },
   isLoggedIn: !!storedUser?.access_token,
   status: "idle",
@@ -115,6 +117,7 @@ export const UserSlice = createSlice({
         email: string;
         access_token: string;
         refreshToken: string;
+        role: string;
       }>
     ) => {
       localStorage.setItem(
@@ -124,6 +127,7 @@ export const UserSlice = createSlice({
           access_token: action.payload.access_token,
           refreshToken: action.payload.refreshToken,
           userId: action.payload.userId,
+          role: action.payload.role,
           // ...(action.payload.userName && { userName: action.payload.userName }), // Only save if provided
         })
       );
@@ -142,6 +146,7 @@ export const UserSlice = createSlice({
         email: null,
         access_token: null,
         refreshToken: null,
+        role: null,
       };
       state.isLoggedIn = false;
     },

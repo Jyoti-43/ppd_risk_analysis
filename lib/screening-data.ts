@@ -2,6 +2,7 @@ export interface Question {
   id: number
   text: string
   options: { label: string; value: number }[]
+  type?: string
 }
 
 export const SCREENING_QUESTIONS: Question[] = [

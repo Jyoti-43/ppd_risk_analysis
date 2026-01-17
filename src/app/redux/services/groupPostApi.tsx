@@ -1,59 +1,11 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-
-interface CreateGroupPostPayload {
-  postTitle: string;
-  postBody: string;
-  tags: string[];
-  categoryId: string; // Send just ID
-  isAnonymous: boolean;
-  image?: string;
-  groupId: string;
-}
-
-interface GroupPost {
-  id: string; // Backend adds this
-  postTitle: string;
-  postBody: string;
-  tags: string[];
-  category: Category; // Backend returns full object
-  isAnonymous: boolean;
-  image?: string;
-  user: User; // Backend adds this
-  postedTime: string; // Backend adds this
-  groupId: string;
-  // hasLiked: boolean;
-  // likeCount?: string;
-  commentsCount: number;
-  like: LikeResponse;
-}
-
-// For like API request
-interface LikeRequest {
-  
-  postId: string;
-  hasLike: boolean;
-}
-
-// For like API response (if different from your main Like)
-interface LikeResponse {
-  id: string;
-  likeCount: string;
-  hasLiked: boolean;
-}
-interface Category {
-  id: string;
-  name: string;
-}
-
-interface User {
-  id: string;
-  name: string;
-}
-
-// interface GroupPostResponse {
-//   posts: GroupPost[];
-//   totalCount: number;
-// }
+import {
+  Category,
+  User,
+  CreateGroupPostPayload,
+  GroupPost,
+  LikeResponse,
+} from "@/src/app/type";
 
 export const groupPost = createApi({
   reducerPath: "groupPost",
@@ -84,7 +36,7 @@ export const groupPost = createApi({
   keepUnusedDataFor: 300,
 
   // Tag types for cache invalidation
-  tagTypes: ["Posts", "Categories"],
+  tagTypes: ["GroupPost", "Categories"],
 
   endpoints: (build) => ({
     uploadImage: build.mutation<{ url: string } | any, FormData>({
@@ -102,7 +54,7 @@ export const groupPost = createApi({
         body: formData,
       }),
       // Invalidate posts cache when a new post is created
-      invalidatesTags: ["Posts"],
+      invalidatesTags: ["GroupPost"],
     }),
 
     getGroupPost: build.query<GroupPost[], void>({
@@ -111,25 +63,25 @@ export const groupPost = createApi({
         method: "GET",
       }),
       // Tag this query so it can be invalidated
-      providesTags: ["Posts"],
+      providesTags: ["GroupPost"],
     }),
 
     groupPostLike: build.mutation<any, LikeResponse>({
       query: ({ id, hasLiked }) => ({
         url: `/group/toggle-like/${id}`,
-        method: "POST" ,
+        method: "POST",
       }),
       // Invalidate posts cache when a post is liked/unliked
-      invalidatesTags: ["Posts"],
+      invalidatesTags: ["GroupPost"],
     }),
 
     deleteGroupPost: build.mutation<any, string>({
       query: (groupId) => ({
-        url: `/community/delete-post/${groupId}`,
+        url: `/group/delete-post/${groupId}`,
         method: "DELETE",
       }),
       // Invalidate posts cache when a post is deleted
-      invalidatesTags: ["Posts"],
+      invalidatesTags: ["GroupPost"],
     }),
 
     updateGroupPost: build.mutation<
@@ -152,7 +104,7 @@ export const groupPost = createApi({
         body: formBody,
       }),
       // Invalidate posts cache when a post is updated
-      invalidatesTags: ["Posts"],
+      invalidatesTags: ["GroupPost"],
     }),
   }),
 });

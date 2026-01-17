@@ -3,11 +3,17 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useAppDispatch, useAppSelector } from "../../Hooks/hook";
 import { authUserAPI } from "../../redux/services/authApi";
-import { selectIsLoggedIn, logout } from "../../redux/feature/user/userSlice";
+import {
+  selectIsLoggedIn,
+  logout,
+  selectCurrentUser,
+} from "../../redux/feature/user/userSlice";
 import { useEffect, useState } from "react";
+import { current } from "@reduxjs/toolkit";
 
 export function SiteHeader() {
   const isLoggedIn = useAppSelector(selectIsLoggedIn);
+  const role = useAppSelector(selectCurrentUser)?.role ?? "";
 
   return (
     <header className="sticky top-0 z-50 flex items-center justify-between border-b border-border bg-white px-6 lg:px-10 py-3">
@@ -29,7 +35,13 @@ export function SiteHeader() {
             MotherCare
           </span>
         </Link>
-        {isLoggedIn ? <SiteNavAuth /> : <SiteNav />}
+        {isLoggedIn && role === "mother" ? (
+          <SiteNavAuth />
+        ) : isLoggedIn && role === "contributor" ? (
+          <SiteNavContributor />
+        ) : (
+          <SiteNav />
+        )}
       </div>
 
       <div className="flex items-center gap-3">
@@ -59,18 +71,18 @@ function SiteNavAuth() {
   const router = require("next/navigation").useRouter();
 
   const [mounted, setMounted] = useState(false);
-  
-    useEffect(() => {
-      setMounted(true);
-    }, []);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {}, []);
   const handleLogout = () => {
     dispatch(logout());
     router.push("/");
   };
-  
-   if (!mounted) {
+
+  if (!mounted) {
     return (
       <nav className="hidden lg:flex items-center gap-9">
         {/* Render a placeholder or skeleton that matches server output */}
@@ -106,6 +118,63 @@ function SiteNavAuth() {
         className="text-[15px] font-medium text-foreground hover:text-primary transition-colors"
       >
         Profile
+      </Link>
+      <button
+        className="text-[15px] font-medium text-foreground hover:text-primary transition-colors p-0"
+        onClick={handleLogout}
+      >
+        Logout
+      </button>
+    </nav>
+  );
+}
+
+function SiteNavContributor() {
+  const dispatch = useAppDispatch();
+
+  const router = require("next/navigation").useRouter();
+
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {}, []);
+  const handleLogout = () => {
+    dispatch(logout());
+    router.push("/");
+  };
+
+  if (!mounted) {
+    return (
+      <nav className="hidden lg:flex items-center gap-9">
+        {/* Render a placeholder or skeleton that matches server output */}
+      </nav>
+    );
+  }
+
+  return (
+    <nav className="hidden lg:flex  gap-9 wrap lg:items-end-safe">
+      <Link
+        href="/"
+        className="text-[15px] font-medium text-foreground hover:text-primary transition-colors"
+      >
+        Home
+      </Link>
+
+      <Link
+        href="/resources"
+        className="text-[15px] font-medium text-foreground hover:text-primary transition-colors"
+      >
+        Resources
+      </Link>
+
+      <Link
+        href="/contributor-dashboard"
+        className="text-[15px] font-medium text-foreground hover:text-primary transition-colors"
+      >
+        Dashboard
       </Link>
       <button
         className="text-[15px] font-medium text-foreground hover:text-primary transition-colors p-0"

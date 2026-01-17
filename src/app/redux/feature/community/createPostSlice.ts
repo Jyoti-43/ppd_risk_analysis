@@ -1,35 +1,8 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { RootState } from "../../store";
+import { CreatePostState, Post } from "@/src/app/type";
 
-export interface Post {
-  id: string;
-  title: string;
-  body: string;
-  tags: string[];
-  category: string;
-  postType: boolean;
-  imageUrl?: string;
-  userId?: string;
-  userEmail?: string;
-  userName?: string;
-  createdAt?: string;
-}
 
-interface CreatePostState {
-  formData: {
-    title: string;
-    body: string;
-    tags: string[];
-    category: string;
-    postType: boolean;
-    imageUrl?: string;
-  };
-  posts: Post[];
-  userName?: string | null;
-  status: "idle" | "loading" | "succeeded" | "failed";
-  error: string | null;
-   currentPostId?: string | null;
-}
 
 const initialState: CreatePostState = {
   formData: {

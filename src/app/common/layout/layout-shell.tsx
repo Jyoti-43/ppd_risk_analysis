@@ -5,7 +5,7 @@ import { SiteHeader } from "./site-header"
 import { SiteFooter } from "./site-footer"
 import ProtectedRoute from "../../component/auth/ProtectedRoute/ProtectedRoute"
 
-const AUTH_PREFIXES = ["/login", "/signup", "/forgotPassword", "/resetPassword", "/(auth)"]
+const AUTH_PREFIXES = ["/login", "/signup", "/forgotPassword", "/resetPassword","/contributor-login", "/(auth)"]
 const PUBLIC_ROUTES = ["/"] // Add public routes that don't need protection
 
 export function LayoutShell({ children }: { children: React.ReactNode }) {
@@ -33,7 +33,7 @@ export function LayoutShell({ children }: { children: React.ReactNode }) {
 
   // Protected routes: header/footer + authentication required
   return (
-    <ProtectedRoute>
+    <ProtectedRoute roles={['mother', 'contributor']}>
       <SiteHeader />
       {children}
       <SiteFooter />

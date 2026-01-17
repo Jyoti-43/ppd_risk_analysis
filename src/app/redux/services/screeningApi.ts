@@ -1,20 +1,7 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-
-interface Question {
-  q1: number;
-  q2: number;
-  q3: number;
-  q4: number;
-  q5: number;
-  q6: number;
-  q7: number;
-  q8: number;
-  q9: number;
-  q10: number;
-}
-
+import { EPDSQuestion, SymptomsQuestion } from "../../type";
 export const screeningAPI = createApi({
-  reducerPath: "epdsScreening",
+  reducerPath: "ppdScreening",
   baseQuery: fetchBaseQuery({
     baseUrl: `${process.env.NEXT_PUBLIC_API_URL}`,
     prepareHeaders: (headers) => {
@@ -36,14 +23,33 @@ export const screeningAPI = createApi({
   }),
 
   endpoints: (build) => ({
-    epdsScreening: build.mutation<Question, Question>({
+    epdsScreening: build.mutation<EPDSQuestion, EPDSQuestion>({
       query: (body) => ({
         url: "/epds-screen",
         method: "POST",
         body,
       }),
     }),
+    
+
+    symptomsQuestion: build.query<SymptomsQuestion[], void>({
+      query: () => ({
+        url: "/symptom/ppd-risk/form",
+        method: "GET",
+      }),
+    }),
+
+     symptomsAssessment: build.mutation<SymptomsAnswer, SymptomsAnswer>({
+      query: (answers) => ({
+        url: "/symptom/ppd-risk/assess",
+        method: "POST",
+        body: answers ,
+      }),
+    }),
+
+
   }),
 });
 
-export const { useEpdsScreeningMutation } = screeningAPI;
+export const { useEpdsScreeningMutation, useSymptomsQuestionQuery, useSymptomsAssessmentMutation } =
+  screeningAPI;

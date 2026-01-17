@@ -10,6 +10,7 @@ import { createGroupSlice } from "./feature/community/groupSlice";
 import { communityGroup } from "./services/communityGroupApi";
 import { groupPost } from "./services/groupPostApi";
 import { createGroupPostSlice } from "./feature/community/groupPostSlice";
+import { SymptomsResultSlice } from "./feature/screening/symptoms/symptomsSlice";
 
 export const store = configureStore({
   reducer: {
@@ -23,6 +24,7 @@ export const store = configureStore({
 
     // Slice ko detail lai epdsResult vanne naam diyekoo
     epdsResult: EpdsResultSlice.reducer,
+    symptomsResult: SymptomsResultSlice.reducer,
     // yo chai api call ko lagi redux service add gareko
     [screeningAPI.reducerPath]: screeningAPI.reducer,
 
@@ -33,7 +35,6 @@ export const store = configureStore({
 
     createGroupPost: createGroupPostSlice.reducer,
     [groupPost.reducerPath]: groupPost.reducer,
-
   },
 
   // Adding the middleware for the APIs that helps in caching, invalidation, polling, etc.

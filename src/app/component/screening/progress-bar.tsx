@@ -4,11 +4,12 @@ interface ProgressBarProps {
   category?: string
 }
 
+// not in use currently
 export function ProgressBar({ current, total, category }: ProgressBarProps) {
   const percentage = ((current-1) / total) * 100
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-2">
       <div className="flex items-center justify-between">
         <div className="space-y-1">
           <span className="text-xs font-bold uppercase tracking-wider text-primary opacity-70">Questionnaire</span>

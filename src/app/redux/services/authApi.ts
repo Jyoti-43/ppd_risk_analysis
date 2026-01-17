@@ -13,6 +13,7 @@ export const authUserAPI = createApi({
         email: string;
         password: string;
         confirmPassword: string;
+        role: string;
       }) => ({
         url: "/signup",
         method: "POST",

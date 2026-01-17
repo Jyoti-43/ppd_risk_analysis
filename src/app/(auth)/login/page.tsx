@@ -60,6 +60,7 @@ const LoginPage = () => {
           email: data.user.email,
           access_token: data.access_token,
           refreshToken: data.refreshToken,
+          role: data.role,
         })
       );
 
