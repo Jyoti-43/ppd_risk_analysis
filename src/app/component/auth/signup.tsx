@@ -3,7 +3,7 @@
 import React, { FormEvent, useEffect } from "react";
 import { Headset, LockKeyhole, Mail, MailIcon, UserCircle, Heart } from "lucide-react";
 import dynamic from "next/dynamic";
-import BlobBackground from "../../../common/ui/backgroundblob";
+import BlobBackground from "../../common/ui/backgroundblob";
 import { Label } from "@radix-ui/react-label";
 import {
   InputGroup,
@@ -16,9 +16,9 @@ import Link from "next/link";
 
 import axios from "axios";
 import { toast } from "react-toastify";
-import { useRegisterUserMutation } from "../../../redux/services/authApi";
-import { useAppDispatch } from "../../../Hooks/hook";
-import { setCredientials } from "../../../redux/feature/user/userSlice";
+import { useRegisterUserMutation } from "../../redux/services/authApi";
+import { useAppDispatch } from "../../Hooks/hook";
+import { setCredientials } from "../../redux/feature/user/userSlice";
 
 const FcGoogle = dynamic(
   () => import("react-icons/fc").then((m) => m.FcGoogle),
@@ -56,24 +56,24 @@ const SignupForm = () => {
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    
+
     if (!role) {
       return alert("Please select your role");
     }
-    
+
     if (password !== confirmPassword) {
       console.log("Passwords do not match");
       return alert("Passwords do not match");
     }
-    
+
     if (name && email && password && confirmPassword && role) {
       await registerUser({ name, email, password, confirmPassword, role });
     }
-if(isError){
+    if (isError) {
       console.log("Error during registration:", error);
       alert(error);
 
-     
+
     }
   };
 
@@ -127,7 +127,7 @@ if(isError){
             className="w-full px-3 md:px-5"
           >
             <div className="flex flex-col pt-2 gap-3 md:gap-3 w-full max-w-full md:max-w-full">
-              
+
               {/* Role Selection Section */}
               <div className="flex flex-col gap-2 md:gap-2">
                 <Label className="light:text-popover font-semibold">
@@ -137,11 +137,10 @@ if(isError){
                   <button
                     type="button"
                     onClick={() => handleRoleSelect("mother")}
-                    className={`flex flex-col items-center justify-center gap-2 p-4 rounded-xl border-2 transition-all ${
-                      role === "mother"
+                    className={`flex flex-col items-center justify-center gap-2 p-4 rounded-xl border-2 transition-all ${role === "mother"
                         ? "border-primary bg-primary/5 shadow-md"
                         : "border-gray-200 hover:border-primary/50"
-                    }`}
+                      }`}
                   >
                     <UserCircle
                       size={32}
@@ -156,11 +155,10 @@ if(isError){
                   <button
                     type="button"
                     onClick={() => handleRoleSelect("contributor")}
-                    className={`flex flex-col items-center justify-center gap-2 p-4 rounded-xl border-2 transition-all ${
-                      role === "contributor"
+                    className={`flex flex-col items-center justify-center gap-2 p-4 rounded-xl border-2 transition-all ${role === "contributor"
                         ? "border-primary bg-primary/5 shadow-md"
                         : "border-gray-200 hover:border-primary/50"
-                    }`}
+                      }`}
                   >
                     <Heart
                       size={32}

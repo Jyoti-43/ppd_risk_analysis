@@ -110,29 +110,27 @@ export default function ResultsPage() {
               <RiskGauge
                 score={displayScore}
                 maxScore={maxScore}
-                snapTo={riskInfo.level}
+                snapTo={riskInfo.level as "high" | "low" | "moderate"}
                 screening="epds"
               />
             </div>
 
             {/* Risk Message */}
             <div
-              className={`p-4 rounded-2xl ${
-                riskInfo.level === "low"
+              className={`p-4 rounded-2xl ${riskInfo.level === "low"
                   ? "bg-green-50 border border-green-200"
                   : riskInfo.level === "moderate"
-                  ? "bg-orange-50 border border-orange-200"
-                  : "bg-red-50 border border-red-200"
-              }`}
+                    ? "bg-orange-50 border border-orange-200"
+                    : "bg-red-50 border border-red-200"
+                }`}
             >
               <p
-                className={`text-sm font-medium ${
-                  riskInfo.level === "low"
+                className={`text-sm font-medium ${riskInfo.level === "low"
                     ? "text-green-700"
                     : riskInfo.level === "moderate"
-                    ? "text-orange-700"
-                    : "text-red-700"
-                }`}
+                      ? "text-orange-700"
+                      : "text-red-700"
+                  }`}
               >
                 {riskInfo.message}
               </p>

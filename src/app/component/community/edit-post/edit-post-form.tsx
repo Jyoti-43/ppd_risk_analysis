@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import ImageUpload from "../common-component/imgae-uploader";
 import RichTextEditor from "../create-post/rich-text-editor";
 import {
-  
+
   useGetPostQuery,
   useUpdatePostMutation,
 } from "@/src/app/redux/services/communityPostApi";
@@ -57,15 +57,15 @@ export default function EditPostForm() {
   // const [categories, setCategories] = useState<Category[]>([]);
   const [updatePost, { isLoading: isUpdatingPost }] = useUpdatePostMutation();
   const numericPostId = String(postId).replace(/^post_/, "");
-  
+
   const {
-  categories,
-  selectedCategory,
-  setSelectedCategory,
-  handleCategoryChange,
-  categoriesLoading,
-  isCreatingCategory,
-} = useCategorySelect();
+    categories,
+    selectedCategory,
+    setSelectedCategory,
+    handleCategoryChange,
+    categoriesLoading,
+    isCreatingCategory,
+  } = useCategorySelect();
 
 
 
@@ -82,15 +82,15 @@ export default function EditPostForm() {
           : []
       );
       setSelectedCategory(
-        post.category && post.category.id && post.category.name
+        post.category && (post.category as any).id && (post.category as any).name
           ? {
-              value: String(post.category.id),
-              label: String(post.category.name),
-            }
+            value: String((post.category as any).id),
+            label: String((post.category as any).name),
+          }
           : null
       );
-      setUploadedImage(post.image ?? null);
-      setPostAnonymously(!!post.isAnonymous);
+      setUploadedImage((post as any).image ?? null);
+      setPostAnonymously(!!(post as any).isAnonymous);
       // Optionally: setSensitiveContent if you store this in post
     }
   }, [post?.id]);
@@ -120,7 +120,7 @@ export default function EditPostForm() {
     }
   };
 
- 
+
   const handleImageUpload = (imageUrl: string | null) => {
     setUploadedImage(imageUrl);
   };
@@ -156,7 +156,7 @@ export default function EditPostForm() {
       setSelectedTags([]);
       setTitle("");
       setStory("");
-    //   setUploadedImage(null);
+      //   setUploadedImage(null);
       setPostAnonymously(false);
       setSensitiveContent(false);
       router.push("/community");

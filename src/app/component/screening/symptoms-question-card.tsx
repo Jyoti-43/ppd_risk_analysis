@@ -10,6 +10,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 
 interface SymptomsQuestionCardProps {
   question: SymptomsQuestion;
@@ -32,22 +33,22 @@ export const SymptomsQuestionCard = ({
     return "";
   })();
   return (
-    <div className="bg-white rounded-3xl p-8 pt-4 mb-2 lg:pt-4 shadow-sm space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-500 flex flex-col h-64">
-      <div className="space-y-2">
-        <div className="inline-flex items-center gap-1 px-3 py-1 bg-secondary rounded-full text-xs font-bold text-primary">
+    <Card className="bg-white rounded-3xl px-3 pt-4 mb-2 lg:pt-4 shadow-sm space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-500 flex flex-col h-64">
+      <CardHeader className="">
+        <div className="inline-flex w-max items-center gap-1 px-3 py-1 bg-secondary rounded-full text-xs font-bold text-primary">
           <span className="material-symbols-outlined text-[12px]">help</span>
           Question: {question.id}
         </div>
-        <h2 className="text-xl lg:text-2xl font-bold text-foreground leading-tight">
+        <h2 className="text-xl md:text-2xl font-bold text-foreground leading-tight">
           {question.label}
         </h2>
         <p className="text-muted-foreground">
           Please select the option that comes closest to you .
         </p>
-      </div>
-    
+      </CardHeader>
 
-      <div className="h-20 flex items-center">
+
+      <CardContent className="mt-auto w-full">
         {/* fixed bottom area for input/select so control appears in same place across cards */}
         {question.type === "dropdown" ? (
           <Select
@@ -59,7 +60,7 @@ export const SymptomsQuestionCard = ({
             </SelectTrigger>
             <SelectContent className=" text-md">
               {question.options?.map((option, idx) => (
-                <SelectItem key={idx} value={option} className="w-15 text-md">
+                <SelectItem key={idx} value={option} className=" text-md">
                   {option}
                 </SelectItem>
               ))}
@@ -111,7 +112,7 @@ export const SymptomsQuestionCard = ({
             </button>
           ))
         )}
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   );
 };

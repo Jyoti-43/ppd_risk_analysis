@@ -1,19 +1,28 @@
+'use client';
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+
 import { useAppDispatch, useAppSelector } from "../../Hooks/hook";
-import { authUserAPI } from "../../redux/services/authApi";
+
 import {
   selectIsLoggedIn,
   logout,
   selectCurrentUser,
 } from "../../redux/feature/user/userSlice";
 import { useEffect, useState } from "react";
-import { current } from "@reduxjs/toolkit";
+
 
 export function SiteHeader() {
-  const isLoggedIn = useAppSelector(selectIsLoggedIn);
-  const role = useAppSelector(selectCurrentUser)?.role ?? "";
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const realIsLoggedIn = useAppSelector(selectIsLoggedIn);
+
+  const realRole = useAppSelector(selectCurrentUser)?.role ?? "";
+
+  const isLoggedIn = mounted ? realIsLoggedIn : false;
+  const role = mounted ? realRole : "";
 
   return (
     <header className="sticky top-0 z-50 flex items-center justify-between border-b border-border bg-white px-6 lg:px-10 py-3">
@@ -76,7 +85,9 @@ function SiteNavAuth() {
     setMounted(true);
   }, []);
 
-  useEffect(() => {}, []);
+  const currentUser = useAppSelector(selectCurrentUser)?.userName ?? "";
+
+  useEffect(() => { }, []);
   const handleLogout = () => {
     dispatch(logout());
     router.push("/");
@@ -114,7 +125,7 @@ function SiteNavAuth() {
         Community
       </Link>
       <Link
-        href="/profile"
+        href={`/dashboard/mother`}
         className="text-[15px] font-medium text-foreground hover:text-primary transition-colors"
       >
         Profile
@@ -133,6 +144,7 @@ function SiteNavContributor() {
   const dispatch = useAppDispatch();
 
   const router = require("next/navigation").useRouter();
+  const role = useAppSelector(selectCurrentUser)?.role ?? "";
 
   const [mounted, setMounted] = useState(false);
 
@@ -140,7 +152,7 @@ function SiteNavContributor() {
     setMounted(true);
   }, []);
 
-  useEffect(() => {}, []);
+  useEffect(() => { }, []);
   const handleLogout = () => {
     dispatch(logout());
     router.push("/");
@@ -171,7 +183,7 @@ function SiteNavContributor() {
       </Link>
 
       <Link
-        href="/contributor-dashboard"
+        href="/dashboard/contributor"
         className="text-[15px] font-medium text-foreground hover:text-primary transition-colors"
       >
         Dashboard

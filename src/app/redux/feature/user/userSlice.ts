@@ -78,8 +78,8 @@ export const forgotPassword = createAsyncThunk<
   } catch (err: any) {
     return rejectWithValue(
       err.response?.data?.detail ||
-        err.message ||
-        "Failed to send reset Password"
+      err.message ||
+      "Failed to send reset Password"
     );
   }
 });
@@ -99,8 +99,8 @@ export const resetPassword = createAsyncThunk<
   } catch (err: any) {
     return rejectWithValue(
       err.response?.data?.detail ||
-        err.message ||
-        "Failed to send reset Password"
+      err.message ||
+      "Failed to send reset Password"
     );
   }
 });
@@ -128,7 +128,7 @@ export const UserSlice = createSlice({
           refreshToken: action.payload.refreshToken,
           userId: action.payload.userId,
           role: action.payload.role,
-          // ...(action.payload.userName && { userName: action.payload.userName }), // Only save if provided
+          ...(action.payload.userName && { userName: action.payload.userName }),
         })
       );
       state.currentUser = {

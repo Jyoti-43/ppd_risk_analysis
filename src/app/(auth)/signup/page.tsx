@@ -2,7 +2,7 @@
 
 
 import Link from "next/link"
-import SignupForm from "../../(user)/component/auth/signup";
+import SignupForm from "../../component/auth/signup";
 
 
 

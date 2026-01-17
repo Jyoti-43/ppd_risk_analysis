@@ -5,7 +5,7 @@ import { Brain, CalendarHeart, FileText, HeartPulse, Info } from "lucide-react";
 import React from "react";
 
 
-const SelectScreeningMethod = () => {
+export default function SelectScreeningMethod() {
   const [selectedMethod, setSelectedMethod] = React.useState<ScreeningMethod | null>(null);
   const router = require("next/navigation").useRouter();
 
@@ -75,4 +75,4 @@ const SelectScreeningMethod = () => {
   );
 };
 
-export default SelectScreeningMethod;
+

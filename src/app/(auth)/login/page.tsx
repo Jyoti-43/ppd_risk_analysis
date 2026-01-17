@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect } from "react";
+import React, { Suspense, useEffect } from "react";
 import { LockKeyhole, Mail, MailIcon } from "lucide-react";
 import { toast } from "react-toastify";
 import dynamic from "next/dynamic";
@@ -28,7 +28,7 @@ const FaArrowRight = dynamic(
   { ssr: false }
 );
 
-const LoginPage = () => {
+const LoginForm = () => {
   const [email, setEmail] = React.useState("");
   const [password, setPassword] = React.useState("");
 
@@ -75,12 +75,12 @@ const LoginPage = () => {
     if (isError) {
       toast.error("Login failed. Please try again.");
       alert("login failed. Please try again.");
-      alert(error);
+      console.error(error); // alert(error) might be object
     }
 
     if (error) {
     }
-  }, [isSuccess, isError, data, error, dispatch, router]);
+  }, [isSuccess, isError, data, error, dispatch, router, callbackUrl]);
 
   return (
     <>
@@ -244,6 +244,14 @@ const LoginPage = () => {
     </>
   );
 };
+
+const LoginPage = () => {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <LoginForm />
+    </Suspense>
+  )
+}
 
 export default LoginPage;
 

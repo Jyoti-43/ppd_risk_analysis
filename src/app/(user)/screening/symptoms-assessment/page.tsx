@@ -154,7 +154,7 @@ const SymptomsAssessmentPage = () => {
   return (
     <div className="min-h-screen flex flex-col bg-[#fef5f9]">
       <main className="flex-1 px-6 lg:px-10 py-6 lg:py-8">
-        <div className="max-w-4xl mx-auto space-y-6">
+        <div className="max-w-5xl mx-auto space-y-6">
           {/* Progress Bar */}
           <div className="bg-white rounded-2xl px-6  py-4 lg:p-4 shadow-sm">
             <ProgressBar

@@ -63,12 +63,12 @@ const PostDetailCard: React.FC<PostDetailCardProps> = ({ postId }) => {
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-full bg-gradient-to-br from-pink-400 to-pink-600"></div>
             <span className="font-medium">
-              {post.user.name}
+              {(post as any).user.name}
               {/* Anonymous Mother */}
             </span>
           </div>
           <span>•</span>
-          <span>{timeAgo(post.postedTime)}3 hours ago</span>
+          <span>{timeAgo((post as any).postedTime)}3 hours ago</span>
           <span>•</span>
           <div className="flex items-center gap-1">
             {/* <MessageCircle className="w-4 h-4" /> */}
@@ -145,9 +145,8 @@ const PostDetailCard: React.FC<PostDetailCardProps> = ({ postId }) => {
         <div className="flex items-center justify-between py-6 border-t border-b border-gray-200 my-8">
           <button
             onClick={toggleHelpful}
-            className={`flex items-center gap-2 ${
-              isHelpful ? "text-pink-600" : "text-gray-600"
-            } hover:text-pink-600 transition`}
+            className={`flex items-center gap-2 ${isHelpful ? "text-pink-600" : "text-gray-600"
+              } hover:text-pink-600 transition`}
           >
             <Heart className={`w-5 h-5 ${isHelpful ? "fill-pink-600" : ""}`} />
             <span className="font-medium">{helpfulCount} Found Helpful</span>
@@ -192,8 +191,8 @@ const PostDetailCard: React.FC<PostDetailCardProps> = ({ postId }) => {
                     type="text"
                     placeholder="Share your thoughts about the post..."
                     className="w-full bg-secondary  text-foreground placeholder-muted-foreground rounded-lg px-2 py-4 border border-primary focus:outline-none focus:ring-2 focus:ring-primary cursor-pointer"
-                    //   onClick={() => setIsModalOpen(true)}
-                    // readOnly
+                  //   onClick={() => setIsModalOpen(true)}
+                  // readOnly
                   />
                 </div>
                 <button className="px-5 py-2 bg-pink-600 text-primary rounded-full font-medium hover:bg-pink-700">

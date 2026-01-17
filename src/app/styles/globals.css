@@ -8,7 +8,7 @@
   /* Brand Colors */
   --color-brand-primary: #d41173;
   --color-brand-primary-hover: #b50d62;
-  
+
   /* Light Mode - adjusted to match the soft pink background in design */
   --background: #fcf8fa;
   --foreground: #1f1f1f;
@@ -83,7 +83,7 @@
 @theme inline {
   --font-sans: 'Inter', 'Inter Fallback', system-ui, sans-serif;
   --font-mono: 'Geist Mono', 'Geist Mono Fallback', monospace;
-  
+
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);

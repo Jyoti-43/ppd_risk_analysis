@@ -1,5 +1,5 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-import { EPDSQuestion, SymptomsQuestion } from "../../type";
+import { EPDSQuestion, SymptomsQuestion, SymptomsAnswer, SymptomsAssessmentResponse } from "../../type";
 export const screeningAPI = createApi({
   reducerPath: "ppdScreening",
   baseQuery: fetchBaseQuery({
@@ -30,7 +30,7 @@ export const screeningAPI = createApi({
         body,
       }),
     }),
-    
+
 
     symptomsQuestion: build.query<SymptomsQuestion[], void>({
       query: () => ({
@@ -39,11 +39,11 @@ export const screeningAPI = createApi({
       }),
     }),
 
-     symptomsAssessment: build.mutation<SymptomsAnswer, SymptomsAnswer>({
+    symptomsAssessment: build.mutation<SymptomsAssessmentResponse, SymptomsAnswer>({
       query: (answers) => ({
         url: "/symptom/ppd-risk/assess",
         method: "POST",
-        body: answers ,
+        body: answers,
       }),
     }),
 

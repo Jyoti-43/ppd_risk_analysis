@@ -1,6 +1,6 @@
-import { ArticleEditor } from "../../(user)/component/contributor/editor/article-editor";
-import { EditorHeader } from "../../(user)/component/contributor/editor/editor-header";
-import { EditorSidebar } from "../../(user)/component/contributor/editor/editor-sidebar";
+import { ArticleEditor } from "../../component/contributor/editor/article-editor";
+import { EditorHeader } from "../../component/contributor/editor/editor-header";
+import { EditorSidebar } from "../../component/contributor/editor/editor-sidebar";
 
 
 export default function NewArticlePage() {

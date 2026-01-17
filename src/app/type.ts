@@ -140,11 +140,20 @@ export interface SymptomsQuestion {
   max?: number;
   default?: number | string;
 }
+export type SymptomsAnswer = Record<string, any>;
+
 export interface SymptomsQuestionsResponse {
   app_title: string;
   description: string;
   fields: SymptomsQuestion[];
   isLoading?: boolean;
+}
+
+export interface SymptomsResultState {
+  answers: SymptomsQuestion | null;
+  score: number | null;
+  status: "idle" | "loading" | "succeeded" | "failed";
+  error: string | null;
 }
 
 export interface SymptomsAssessmentResponse {
