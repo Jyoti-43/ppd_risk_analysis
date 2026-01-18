@@ -201,61 +201,61 @@ export default function ArticleResources() {
           <h2 className="text-2xl font-bold text-foreground mb-6">
             Latest Articles
           </h2>
-          <Link href="/contributor/articles/new-article">
+          <Link href="/new-article">
             <button className="mb-6 inline-flex items-center gap-2 bg-primary hover:bg-primary/90 text-white px-4 py-2 rounded-full font-semibold transition-colors">
               <span className="material-symbols-outlined text-md">add</span>
               Write New Article
             </button>
           </Link>
         </div>
-<Link href="/resources/article-details">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10 mb-10">
-          {articles.map((article) => (
-            <article className="flex flex-col gap-6  p-5 bg-white rounded-[20px] border border-border shadow-sm hover:shadow-md transition-shadow">
-              {/* Image Container */}
+        <Link href="/resources/article-details">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10 mb-10">
+            {articles.map((article) => (
+              <article className="flex flex-col gap-6  p-5 bg-white rounded-[20px] border border-border shadow-sm hover:shadow-md transition-shadow">
+                {/* Image Container */}
 
-              <div className="relative  md:w-full shrink-0  aspect-[4/3]  rounded-xl overflow-hidden bg-muted">
-                <img
-                  src={article.imageGradient || "/placeholder.svg"}
-                  alt="resource image"
-                  style={{ objectFit: "cover" }}
-                />
+                <div className="relative  md:w-full shrink-0  aspect-[4/3]  rounded-xl overflow-hidden bg-muted">
+                  <img
+                    src={article.imageGradient || "/placeholder.svg"}
+                    alt="resource image"
+                    style={{ objectFit: "cover" }}
+                  />
 
-                {/* Category Badge */}
-                <div className="absolute top-3 left-3">
-                  <Badge className="bg-white/90 hover:bg-white text-foreground/80 text-[11px] font-bold px-2 py-0.5 border-none shadow-sm backdrop-blur-sm rounded-md">
-                    {article.tag}
-                  </Badge>
+                  {/* Category Badge */}
+                  <div className="absolute top-3 left-3">
+                    <Badge className="bg-white/90 hover:bg-white text-foreground/80 text-[11px] font-bold px-2 py-0.5 border-none shadow-sm backdrop-blur-sm rounded-md">
+                      {article.tag}
+                    </Badge>
+                  </div>
                 </div>
-              </div>
 
-              {/* Content Section */}
-              <div className="flex flex-col flex-1 py-1">
-                <div className="flex items-center gap-2.5 mb-2.5">
-                  <div className="size-6 rounded-full bg-primary/10 flex items-center justify-center text-primary overflow-hidden">
-                    <span className="material-symbols-outlined text-[16px] fill">
-                      account_circle
+                {/* Content Section */}
+                <div className="flex flex-col flex-1 py-1">
+                  <div className="flex items-center gap-2.5 mb-2.5">
+                    <div className="size-6 rounded-full bg-primary/10 flex items-center justify-center text-primary overflow-hidden">
+                      <span className="material-symbols-outlined text-[16px] fill">
+                        account_circle
+                      </span>
+                    </div>
+                    <span className="text-[13px] font-semibold text-foreground/90">
+                      Author_{article.id}
+                    </span>
+                    <span className="text-[13px] text-muted-foreground">•</span>
+                    <span className="text-[13px] text-muted-foreground">
+                      {article.readTime}
                     </span>
                   </div>
-                  <span className="text-[13px] font-semibold text-foreground/90">
-                    Author_{article.id}
-                  </span>
-                  <span className="text-[13px] text-muted-foreground">•</span>
-                  <span className="text-[13px] text-muted-foreground">
-                    {article.readTime}
-                  </span>
-                </div>
 
-                <h3 className="text-[20px] font-extrabold text-foreground leading-snug mb-3">
-                  {article.title}
-                </h3>
-                <p className="text-sm text-muted-foreground leading-relaxed">
-                  {article.description}
-                </p>
-              </div>
-            </article>
-          ))}
-        </div>
+                  <h3 className="text-[20px] font-extrabold text-foreground leading-snug mb-3">
+                    {article.title}
+                  </h3>
+                  <p className="text-sm text-muted-foreground leading-relaxed">
+                    {article.description}
+                  </p>
+                </div>
+              </article>
+            ))}
+          </div>
         </Link>
 
         {/* Pagination */}

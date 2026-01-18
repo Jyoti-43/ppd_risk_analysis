@@ -28,7 +28,7 @@ const Education: React.FC<EducationProps> = ({
   return (
     <>
       <div className="bg-card/70 rounded-lg shadow-sm border border-[#f0e0e9] overflow-hidden">
-        <div className="p-12  px-8 space-y-8">
+        <div className="py-4  px-8 space-y-8">
           <div className="flex justify-between items-start px-8">
             <div>
               <h2 className="text-2xl pt-4 font-bold text-[#1f1f1f]">
@@ -51,7 +51,7 @@ const Education: React.FC<EducationProps> = ({
                   <Label className="light:text-popover font-semibold">
                     Institution Name
                   </Label>
-                  <InputGroup className="p-0 bg-input" >
+                  <InputGroup className="p-0 bg-input">
                     <InputGroupInput
                       // name="firstName"
                       onChange={() => {}}
@@ -80,7 +80,7 @@ const Education: React.FC<EducationProps> = ({
                     <Label className="light:text-popover font-semibold">
                       Year of Graduation
                     </Label>
-                    <InputGroup className="p-0 bg-input" >
+                    <InputGroup className="p-0 bg-input">
                       <InputGroupInput
                         // name="title"
                         onChange={() => {}}
@@ -118,10 +118,16 @@ const Education: React.FC<EducationProps> = ({
           </div>
         </div>
 
-        <div className=" mt-4 py-8 px-4 bg-gray-100 flex justify-end bg">
+        <div className=" mt-4 py-8 px-8 bg-gray-50 flex justify-between items-center">
+          <button
+            onClick={onPrevious}
+            className="flex items-center gap-2 px-6 py-2 text-gray-500 font-bold hover:text-primary transition-all group"
+          >
+            Previous
+          </button>
           <Button
             onClick={onNext}
-            className="flex items-center gap-2 px-10 py-3.5 bg-[#d41173] text-white bg-primary font-bold rounded-full shadow-xl shadow-[#d41173]/20 hover:bg-[#b50d62] transition-all group"
+            className="flex items-center gap-2 px-10 py-3.5 bg-primary text-white font-bold rounded-full shadow-xl shadow-primary/20 hover:bg-[#b50d62] transition-all group"
           >
             Next Step
             <ArrowRight

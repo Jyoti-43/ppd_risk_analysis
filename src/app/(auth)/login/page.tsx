@@ -18,14 +18,13 @@ import { useAppDispatch } from "../../Hooks/hook";
 import { setCredientials } from "../../redux/feature/user/userSlice";
 import { useSearchParams } from "next/navigation";
 
-
 const FcGoogle = dynamic(
   () => import("react-icons/fc").then((m) => m.FcGoogle),
-  { ssr: false }
+  { ssr: false },
 );
 const FaArrowRight = dynamic(
   () => import("react-icons/fa").then((m) => m.FaArrowRight),
-  { ssr: false }
+  { ssr: false },
 );
 
 const LoginForm = () => {
@@ -61,15 +60,22 @@ const LoginForm = () => {
           access_token: data.access_token,
           refreshToken: data.refreshToken,
           role: data.role,
-        })
+        }),
       );
 
       setEmail("");
       setPassword("");
       console.log("Data after login:", data);
       console.log("Login successful, redirecting...");
-      router.push(callbackUrl);
-      // router.push("/");
+
+      const setupCompleted = localStorage.getItem(
+        `setup_completed_${data.user.id}`,
+      );
+      if (data.role === "contributor" && !setupCompleted) {
+        router.push("/dashboard/contributor/profile-setup");
+      } else {
+        router.push(callbackUrl);
+      }
     }
 
     if (isError) {
@@ -250,8 +256,8 @@ const LoginPage = () => {
     <Suspense fallback={<div>Loading...</div>}>
       <LoginForm />
     </Suspense>
-  )
-}
+  );
+};
 
 export default LoginPage;
 

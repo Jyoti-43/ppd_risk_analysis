@@ -39,7 +39,7 @@ export const ProfileSetup: React.FC<ProfileSetupProps> = ({
   return (
     <>
       <div className="bg-card/70 rounded-lg shadow-sm border border-[#f0e0e9] overflow-hidden">
-        <div className="p-12  px-4 space-y-8">
+        <div className="py-4  px-4 space-y-8">
           <div className="flex justify-between items-start">
             <div>
               <h2 className="text-2xl pt-4 font-bold text-[#1f1f1f]">
@@ -58,16 +58,16 @@ export const ProfileSetup: React.FC<ProfileSetupProps> = ({
             {/* Photo Section */}
             <div className="flex flex-col items-center gap-4">
               <div className="relative group">
-                <div className="w-32 h-32 rounded-full overflow-hidden  ring-8 ring-primary transition-all border-4 border-accent-foreground/20 group-hover:ring-primary/80">
+                <div className="w-32 h-32 rounded-full overflow-hidden  ring-3 ring-primary transition-all border-4 border-accent-foreground/20 group-hover:ring-primary/80">
                   <img
                     src={user.avatar}
                     className="w-full h-full object-cover"
                     alt="Profile"
                   />
                 </div>
-                <div className="absolute top-2 left-1/2 -translate-x-1/2 flex items-center justify-center w-10 h-10 rounded-full bg-white shadow-lg border-2 border-white">
-                  <Button className="w-8 h-8 p-0 flex items-center justify-center bg-primary text-white rounded-full hover:bg-primary/80 transition-colors">
-                    <Pencil size={16} />
+                <div className="absolute bottom-25 left-1/2-translate-x-1/2 flex items-center justify-center w-8 h-8 rounded-full bg-white shadow-lg border-2 border-white">
+                  <Button className="w-6 h-6 p-0 flex items-center justify-center bg-primary text-white rounded-full hover:bg-primary/80 transition-colors">
+                    <Pencil size={10} />
                   </Button>
                 </div>
               </div>
@@ -155,10 +155,10 @@ export const ProfileSetup: React.FC<ProfileSetupProps> = ({
           </div>
         </div>
 
-        <div className=" mt-4 py-8 px-4 bg-gray-100 flex justify-end bg">
+        <div className=" mt-4 py-8 px-8 bg-gray-50 flex justify-end">
           <Button
             onClick={onNext}
-            className="flex items-center gap-2 px-10 py-3.5 bg-[#d41173] text-white bg-primary font-bold rounded-full shadow-xl shadow-[#d41173]/20 hover:bg-[#b50d62] transition-all group"
+            className="flex items-center gap-2 px-10 py-3.5 bg-primary text-white font-bold rounded-full shadow-xl shadow-primary/20 hover:bg-[#b50d62] transition-all group"
           >
             Next Step
             <ArrowRight

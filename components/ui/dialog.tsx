@@ -1,4 +1,6 @@
 import * as React from "react"
+import * as DialogPrimitive from "@radix-ui/react-dialog"
+import { cn } from "@/lib/utils"
 
 interface DialogProps {
   open: boolean
@@ -21,19 +23,42 @@ interface DialogTitleProps {
   className?: string
 }
 
+const DialogContext = React.createContext<{
+  onOpenChange?: (open: boolean) => void
+}>({})
+
 export function Dialog({ open, onOpenChange, children }: DialogProps) {
   if (!open) return null
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center"
-      onClick={() => onOpenChange(false)}
-    >
-      <div className="fixed inset-0 bg-black/50" />
-      <div onClick={(e) => e.stopPropagation()}>
-        {children}
+    <DialogContext.Provider value={{ onOpenChange }}>
+      <div
+        className="fixed inset-0 z-50 flex items-center justify-center"
+        onClick={() => onOpenChange(false)}
+      >
+        <div className="fixed inset-0 bg-black/50" />
+        <div onClick={(e) => e.stopPropagation()}>{children}</div>
       </div>
-    </div>
+    </DialogContext.Provider>
+  )
+}
+
+export function DialogClose({
+  ...props
+}: React.ComponentProps<typeof DialogPrimitive.Close>) {
+  const ctx = React.useContext(DialogContext)
+
+  const handleClick: React.MouseEventHandler<HTMLButtonElement> = (e) => {
+    if (props && typeof (props as any).onClick === "function") {
+      ;(props as any).onClick(e)
+    }
+    if (ctx.onOpenChange) ctx.onOpenChange(false)
+  }
+
+  return (
+    <button data-slot="dialog-close" {...(props as any)} onClick={handleClick}>
+      {(props as any).children}
+    </button>
   )
 }
 
@@ -68,5 +93,18 @@ export function DialogDescription({ children, className = "" }: { children: Reac
     <p className={`text-sm text-muted-foreground ${className}`}>
       {children}
     </p>
+  )
+}
+
+export function DialogFooter({ className, ...props }: React.ComponentProps<"div">) {
+  return (
+    <div
+      data-slot="dialog-footer"
+      className={cn(
+        "flex flex-col-reverse gap-2 sm:flex-row sm:justify-end",
+        className
+      )}
+      {...props}
+    />
   )
 }

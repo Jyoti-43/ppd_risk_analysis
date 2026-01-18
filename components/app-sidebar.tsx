@@ -11,9 +11,11 @@ import {
   Shield,
   HandHeart,
   SquareActivity,
+  KeyRound,
+  LogOut,
 } from "lucide-react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 
 import {
@@ -31,13 +33,32 @@ import {
 } from "@/components/ui/sidebar";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { useAppSelector } from "@/src/app/Hooks/hook";
-import { selectCurrentUser } from "@/src/app/redux/feature/user/userSlice";
+import { useAppSelector, useAppDispatch } from "@/src/app/Hooks/hook";
+import {
+  selectCurrentUser,
+  logout,
+} from "@/src/app/redux/feature/user/userSlice";
+import { EditProfileModal } from "./dashboard/mother/EditProfileModal";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const user = useAppSelector(selectCurrentUser);
   const pathname = usePathname();
+  const router = useRouter();
+  const dispatch = useAppDispatch();
   const role = user?.role || "mother"; // Default to mother if no role
+
+  const handleLogout = () => {
+    dispatch(logout());
+    router.push("/login");
+  };
 
   return (
     <Sidebar
@@ -75,12 +96,27 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           <p className="text-xs text-muted-foreground uppercase tracking-wide mt-1 group-data-[collapsible=icon]:hidden">
             {role.charAt(0).toUpperCase() + role.slice(1)} • Joined Oct '23
           </p>
-          <Button
-            variant="default"
-            className="mt-4 w-full bg-primary hover:bg-[#ff5286] text-white rounded-full h-8 text-sm font-medium shadow-sm group-data-[collapsible=icon]:hidden"
-          >
-            Edit Profile
-          </Button>
+          {role === "mother" && (
+            <EditProfileModal>
+              <Button
+                variant="default"
+                className="mt-4 w-full bg-primary hover:bg-[#ff5286] text-white rounded-full h-8 text-sm font-medium shadow-sm group-data-[collapsible=icon]:hidden"
+              >
+                Edit Profile
+              </Button>
+            </EditProfileModal>
+          )}
+          {role === "contributor" && (
+            <Button
+              asChild
+              variant="default"
+              className="mt-4 w-full bg-primary hover:bg-[#ff5286] text-white rounded-full h-8 text-sm font-medium shadow-sm group-data-[collapsible=icon]:hidden"
+            >
+              <Link href="/dashboard/contributor/edit-profile">
+                Edit Profile
+              </Link>
+            </Button>
+          )}
         </div>
 
         <SidebarSeparator className=" group-data-[collapsible=icon]:hidden" />
@@ -161,17 +197,20 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                     tooltip="Community"
                     className={cn(
                       "text-gray-600 hover:text-gray-900 group-data-[collapsible=icon]:!p-0 group-data-[collapsible=icon]:justify-center",
-                      pathname === "/dashboard/mother/community" &&
+                      pathname === "/dashboard/mother/my-community" &&
                         "bg-[#FFF0F3] text-[#FF6B98] hover:bg-[#ffe0e9] hover:text-[#FF6B98] font-semibold",
                     )}
                   >
-                    <Link href="/dashboard/mother/community" className="flex ">
+                    <Link
+                      href="/dashboard/mother/my-community"
+                      className="flex "
+                    >
                       <div className="flex items-center gap-2 group-data-[collapsible=icon]:justify-center">
                         <HandHeart
                           size={22}
                           className={cn(
                             "text-primary",
-                            pathname === "/dashboard/mother/community" &&
+                            pathname === "/dashboard/mother/my-community" &&
                               "text-[#FF6B98]",
                           )}
                         />
@@ -206,11 +245,15 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                         "bg-[#FFF0F3] text-[#FF6B98] hover:bg-[#ffe0e9] hover:text-[#FF6B98] font-semibold",
                     )}
                   >
-                    <Link
-                      href="/dashboard/contributor"
-                      className="flex items-center justify-center"
-                    >
-                      <LayoutDashboard size={22} />
+                    <Link href="/dashboard/contributor" className="flex ">
+                      <LayoutDashboard
+                        size={22}
+                        className={cn(
+                          "text-primary",
+                          pathname === "/dashboard/contributor" &&
+                            "text-[#FF6B98]",
+                        )}
+                      />
                       <span className="group-data-[collapsible=icon]:hidden">
                         Dashboard
                       </span>
@@ -220,21 +263,28 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 <SidebarMenuItem>
                   <SidebarMenuButton
                     asChild
-                    isActive={pathname === "/dashboard/contributor/new-article"}
-                    tooltip="Create Article"
+                    isActive={pathname === "/dashboard/contributor/my-articles"}
+                    tooltip="My Articles"
                     className={cn(
                       "text-gray-600 hover:text-gray-900 group-data-[collapsible=icon]:!p-0 group-data-[collapsible=icon]:justify-center",
-                      pathname === "/dashboard/contributor/new-article" &&
+                      pathname === "/dashboard/contributor/my-articles" &&
                         "bg-[#FFF0F3] text-[#FF6B98] hover:bg-[#ffe0e9] hover:text-[#FF6B98] font-semibold",
                     )}
                   >
                     <Link
-                      href="/dashboard/contributor/new-article"
-                      className="flex items-center justify-center"
+                      href="/dashboard/contributor/my-articles"
+                      className="flex  w-full group-data-[collapsible=icon]:justify-center"
                     >
-                      <FileText size={22} />
+                      <FileText
+                        size={22}
+                        className={cn(
+                          "text-primary",
+                          pathname === "/dashboard/contributor/my-articles" &&
+                            "text-[#FF6B98]",
+                        )}
+                      />
                       <span className="group-data-[collapsible=icon]:hidden">
-                        Create Article
+                        My Articles
                       </span>
                     </Link>
                   </SidebarMenuButton>
@@ -252,9 +302,16 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   >
                     <Link
                       href="/dashboard/contributor/analytics"
-                      className="flex items-center justify-center"
+                      className="flex  w-full group-data-[collapsible=icon]:justify-center"
                     >
-                      <BarChart size={22} />
+                      <BarChart
+                        size={22}
+                        className={cn(
+                          "text-primary",
+                          pathname === "/dashboard/contributor/analytics" &&
+                            "text-[#FF6B98]",
+                        )}
+                      />
                       <span className="group-data-[collapsible=icon]:hidden">
                         Analytics
                       </span>
@@ -289,7 +346,13 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                       href="/dashboard/admin"
                       className="flex items-center justify-center"
                     >
-                      <Shield size={22} />
+                      <Shield
+                        size={22}
+                        className={cn(
+                          "text-primary",
+                          pathname === "/dashboard/admin" && "text-[#FF6B98]",
+                        )}
+                      />
                       <span className="group-data-[collapsible=icon]:hidden">
                         Dashboard
                       </span>
@@ -311,7 +374,14 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                       href="/dashboard/admin/users"
                       className="flex items-center justify-center"
                     >
-                      <Users size={22} />
+                      <Users
+                        size={22}
+                        className={cn(
+                          "text-primary",
+                          pathname === "/dashboard/admin/users" &&
+                            "text-[#FF6B98]",
+                        )}
+                      />
                       <span className="group-data-[collapsible=icon]:hidden">
                         Users
                       </span>
@@ -333,7 +403,14 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                       href="/dashboard/admin/content"
                       className="flex items-center justify-center"
                     >
-                      <FileText size={22} />
+                      <FileText
+                        size={22}
+                        className={cn(
+                          "text-primary",
+                          pathname === "/dashboard/admin/content" &&
+                            "text-[#FF6B98]",
+                        )}
+                      />
                       <span className="group-data-[collapsible=icon]:hidden">
                         Content
                       </span>
@@ -375,25 +452,48 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <SidebarSeparator className=" group-data-[collapsible=icon]:hidden" />
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton
-              asChild
-              isActive={pathname === "/settings"}
-              className={cn(
-                "text-gray-600 hover:text-gray-900 font-medium group-data-[collapsible=icon]:!p-0 group-data-[collapsible=icon]:justify-center",
-                pathname === "/settings" &&
-                  "bg-[#FFF0F3] text-[#FF6B98] hover:bg-[#ffe0e9] hover:text-[#FF6B98] font-semibold",
-              )}
-            >
-              <Link
-                href="/settings"
-                className="flex items-center justify-center"
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <SidebarMenuButton
+                  isActive={pathname === "/settings"}
+                  className={cn(
+                    "text-gray-600 hover:text-gray-900 font-medium group-data-[collapsible=icon]:!p-0 group-data-[collapsible=icon]:justify-center",
+                    pathname === "/settings" &&
+                      "bg-[#FFF0F3] text-[#FF6B98] hover:bg-[#ffe0e9] hover:text-[#FF6B98] font-semibold",
+                  )}
+                >
+                  <div className="flex items-center justify-center gap-2">
+                    <Settings size={22} />
+                    <span className="group-data-[collapsible=icon]:hidden">
+                      Account Settings
+                    </span>
+                  </div>
+                </SidebarMenuButton>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent
+                side="right"
+                align="end"
+                className="w-56 mb-2"
               >
-                <Settings size={22} />
-                <span className="group-data-[collapsible=icon]:hidden">
-                  Account Settings
-                </span>
-              </Link>
-            </SidebarMenuButton>
+                <DropdownMenuLabel>Account</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  className="cursor-pointer flex items-center gap-2 py-2"
+                  onClick={() => router.push("/settings/change-password")}
+                >
+                  <KeyRound size={16} />
+                  <span>Change Password</span>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  className="cursor-pointer flex items-center gap-2 py-2 text-red-600 focus:text-red-600 focus:bg-red-50"
+                  onClick={handleLogout}
+                >
+                  <LogOut size={16} />
+                  <span>Logout</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </SidebarMenuItem>
           <SidebarMenuItem>
             <SidebarMenuButton
