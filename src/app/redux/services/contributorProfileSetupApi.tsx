@@ -1,7 +1,5 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
-
-
 export const contributorProfileApi = createApi({
   reducerPath: "contributorProfileApi",
 
@@ -31,9 +29,18 @@ export const contributorProfileApi = createApi({
   keepUnusedDataFor: 600,
 
   // Tag types for cache invalidation
-  tagTypes: ["Articles", "Categories"],
+  tagTypes: ["Articles", "Categories", "ContributorProfile"],
 
   endpoints: (build) => ({
+    // get contributor profile
+    getContributorProfile: build.query<any, void>({
+      query: () => ({
+        url: "/contributor/profile",
+        method: "GET",
+      }),
+      providesTags: ["ContributorProfile"],
+    }),
+
     basicProfileSetup: build.mutation<
       any,
       {
@@ -56,15 +63,13 @@ export const contributorProfileApi = createApi({
     educationProfileSetup: build.mutation<
       any,
       {
-        education: [
-          {
-            education_id: string;
-            institution_name: string;
-            degree: string;
-            year_of_graduation: string;
-            field_of_study: string;
-          },
-        ];
+        education: {
+          education_id: string;
+          institution_name: string;
+          degree: string;
+          year_of_graduation: string;
+          field_of_study: string;
+        }[];
       }
     >({
       query: (body) => ({
@@ -80,19 +85,17 @@ export const contributorProfileApi = createApi({
     experienceProfileSetup: build.mutation<
       any,
       {
-        experience: [
-          {
-            experience_id: string;
-            job_title: string;
-            company_name: string;
-            start_month: number;
-            start_year: number;
-            end_month: number;
-            end_year: number;
-            is_currently_working: boolean;
-            key_responsibilities: string;
-          },
-        ];
+        experience: {
+          experience_id: string;
+          job_title: string;
+          company_name: string;
+          start_month: number;
+          start_year: string;
+          end_month: number | null;
+          end_year: string | null;
+          is_currently_working: boolean;
+          key_responsibilities: string;
+        }[];
       }
     >({
       query: (body) => ({
@@ -108,16 +111,14 @@ export const contributorProfileApi = createApi({
     certificateProfileSetup: build.mutation<
       any,
       {
-        certifications: [
-          {
-            certification_id: string;
-            certification_name: string;
-            issuing_organization: string;
-            date_issued: string;
-            expiration_date: string;
-            credential_id: string;
-          },
-        ];
+        certifications: {
+          certification_id: string;
+          certification_name: string;
+          issuing_organization: string;
+          date_issued: string;
+          expiration_date: string | null;
+          credential_id: string | null;
+        }[];
       }
     >({
       query: (body) => ({
@@ -129,22 +130,23 @@ export const contributorProfileApi = createApi({
       //   invalidatesTags: ["ContributorProfile"],
     }),
 
+
+
+
     // skill ,experties and publication
     expertiesProfileSetup: build.mutation<
       any,
       {
-        expertise_topics: [string];
-        publications: [
-          {
-            publication_id: string;
-            title: string;
-            url: string;
-          },
-        ];
+        expertise_topics: string[];
+        publications: {
+          publication_id: string | null;
+          title: string | null;
+          url: string | null;
+        }[];
       }
     >({
       query: (body) => ({
-        url: "/contributor/profile/step5-experties-and-publications",
+        url: "/contributor/profile/step5-expertise-and-publications",
         method: "POST",
         body,
       }),
@@ -155,6 +157,7 @@ export const contributorProfileApi = createApi({
 });
 
 export const {
+  useGetContributorProfileQuery,
   useBasicProfileSetupMutation,
   useEducationProfileSetupMutation,
   useExperienceProfileSetupMutation,

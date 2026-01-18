@@ -292,6 +292,35 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 <SidebarMenuItem>
                   <SidebarMenuButton
                     asChild
+                    isActive={pathname === "/dashboard/contributor/my-profile"}
+                    tooltip="My Profile"
+                    className={cn(
+                      "text-gray-600 hover:text-gray-900 group-data-[collapsible=icon]:!p-0 group-data-[collapsible=icon]:justify-center",
+                      pathname === "/dashboard/contributor/my-profile" &&
+                        "bg-[#FFF0F3] text-[#FF6B98] hover:bg-[#ffe0e9] hover:text-[#FF6B98] font-semibold",
+                    )}
+                  >
+                    <Link
+                      href="/dashboard/contributor/my-profile"
+                      className="flex  w-full group-data-[collapsible=icon]:justify-center"
+                    >
+                      <Users
+                        size={22}
+                        className={cn(
+                          "text-primary",
+                          pathname === "/dashboard/contributor/my-profile" &&
+                            "text-[#FF6B98]",
+                        )}
+                      />
+                      <span className="group-data-[collapsible=icon]:hidden">
+                        My profile
+                      </span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <SidebarMenuButton
+                    asChild
                     isActive={pathname === "/dashboard/contributor/analytics"}
                     tooltip="Analytics"
                     className={cn(

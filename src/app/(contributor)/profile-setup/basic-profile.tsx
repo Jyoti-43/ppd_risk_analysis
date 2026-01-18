@@ -1,6 +1,6 @@
 "use client";
-import React from "react";
-import { Pencil, ArrowRight } from "lucide-react";
+import React, { useState } from "react";
+import { Pencil, ArrowRight, Loader2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@radix-ui/react-label";
 import {
@@ -9,6 +9,8 @@ import {
   InputGroupTextarea,
 } from "@/components/ui/input-group";
 import { Button } from "@/components/ui/button";
+import { useBasicProfileSetupMutation } from "@/src/app/redux/services/contributorProfileSetupApi";
+import { toast } from "react-toastify";
 
 export interface UserProfile {
   name: string;
@@ -36,6 +38,35 @@ export const ProfileSetup: React.FC<ProfileSetupProps> = ({
   onNext,
   onPrevious,
 }) => {
+  const [firstName, setFirstName] = useState(user.name.split(" ")[0] || "");
+  const [lastName, setLastName] = useState(user.name.split(" ")[1] || "");
+  const [professionalTitle, setProfessionalTitle] = useState("");
+  const [shortBio, setShortBio] = useState("");
+
+  const [basicProfileSetup, { isLoading }] = useBasicProfileSetupMutation();
+
+  const handleNext = async () => {
+    try {
+      await basicProfileSetup({
+        first_name: firstName,
+        last_name: lastName,
+        professional_title: professionalTitle,
+        short_bio: shortBio,
+      }).unwrap();
+      toast.success("Basic profile saved successfully!");
+      onNext();
+    } catch (error: any) {
+      if (error?.status === 409) {
+        // Handle "Profile already exists" as a success for navigation
+        toast.info("Profile already exists, proceeding to next step.");
+        onNext();
+      } else {
+        toast.error(error?.data?.message || "Failed to save basic profile");
+        console.error("Basic Profile Save Error:", error);
+      }
+    }
+  };
+
   return (
     <>
       <div className="bg-card/70 rounded-lg shadow-sm border border-[#f0e0e9] overflow-hidden">
@@ -89,9 +120,9 @@ export const ProfileSetup: React.FC<ProfileSetupProps> = ({
                   <InputGroup>
                     <InputGroupInput
                       name="firstName"
-                      onChange={() => {}}
+                      onChange={(e) => setFirstName(e.target.value)}
                       type="text"
-                      value={user.name.split(" ")[0]}
+                      value={firstName}
                       className="w-full px-4 py-3  border-transparent rounded-2xl text-sm focus:ring-2 focus:ring-primary focus:bg-white transition-all outline-none font-medium"
                     />
                   </InputGroup>
@@ -103,9 +134,9 @@ export const ProfileSetup: React.FC<ProfileSetupProps> = ({
                   <InputGroup>
                     <InputGroupInput
                       name="lastName"
-                      onChange={() => {}}
+                      onChange={(e) => setLastName(e.target.value)}
                       type="text"
-                      value={user.name.split(" ")[1] || ""}
+                      value={lastName}
                       className="w-full px-4 py-3  border-transparent rounded-2xl text-sm focus:ring-2 focus:ring-[#d41173] focus:bg-white transition-all outline-none font-medium"
                     />
                   </InputGroup>
@@ -119,8 +150,9 @@ export const ProfileSetup: React.FC<ProfileSetupProps> = ({
                 <InputGroup>
                   <InputGroupInput
                     name="title"
-                    onChange={() => {}}
+                    onChange={(e) => setProfessionalTitle(e.target.value)}
                     type="text"
+                    value={professionalTitle}
                     placeholder="e.g. Clinical Psychologist, Doula, Lactation Consultant"
                     className="w-full px-4 py-3  border-transparent rounded-2xl text-sm focus:ring-2 focus:ring-[#d41173] focus:bg-white transition-all outline-none font-medium"
                   />
@@ -139,6 +171,8 @@ export const ProfileSetup: React.FC<ProfileSetupProps> = ({
                     <InputGroupTextarea
                       name="bio"
                       rows={4}
+                      value={shortBio}
+                      onChange={(e) => setShortBio(e.target.value)}
                       placeholder="Briefly describe your background and passion for maternal health.."
                       className="w-full  border py-0  border-transparent rounded-lg  text-sm focus:ring-2 focus:ring-[#d41173] focus:bg-white transition-all outline-none font-medium resize-none"
                     ></InputGroupTextarea>
@@ -147,7 +181,7 @@ export const ProfileSetup: React.FC<ProfileSetupProps> = ({
                     <p className="text-[10px] text-gray-400 font-medium px-1 ">
                       Visible on your public profile.
                     </p>
-                    <p>0/300</p>
+                    <p>{shortBio.length}/300</p>
                   </div>
                 </div>
               </div>
@@ -157,14 +191,21 @@ export const ProfileSetup: React.FC<ProfileSetupProps> = ({
 
         <div className=" mt-4 py-8 px-8 bg-gray-50 flex justify-end">
           <Button
-            onClick={onNext}
+            onClick={handleNext}
+            disabled={isLoading}
             className="flex items-center gap-2 px-10 py-3.5 bg-primary text-white font-bold rounded-full shadow-xl shadow-primary/20 hover:bg-[#b50d62] transition-all group"
           >
-            Next Step
-            <ArrowRight
-              size={18}
-              className="group-hover:translate-x-1 transition-transform"
-            />
+            {isLoading ? (
+              <Loader2 className="animate-spin" size={18} />
+            ) : (
+              <>
+                Next Step
+                <ArrowRight
+                  size={18}
+                  className="group-hover:translate-x-1 transition-transform"
+                />
+              </>
+            )}
           </Button>
         </div>
       </div>

@@ -1,5 +1,7 @@
 "use client";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { cn } from "@/lib/utils";
 
 import { useAppDispatch, useAppSelector } from "../../Hooks/hook";
 
@@ -24,8 +26,8 @@ export function SiteHeader() {
   const role = mounted ? realRole : "";
 
   return (
-    <header className="sticky top-0 z-50 flex items-center justify-between border-b border-border bg-white px-6 lg:px-10 py-3">
-      <div className="flex items-center gap-10">
+    <header className="sticky top-0 z-50  flex items-center border-b border-border bg-white px-6 lg:px-10 py-3">
+      <div className="flex flex-1 items-center justify-between px-10">
         <Link
           href="/"
           className="flex items-center gap-2.5 text-foreground transition-opacity hover:opacity-80"
@@ -92,6 +94,8 @@ function SiteNavAuth() {
     router.push("/");
   };
 
+  const pathname = usePathname();
+
   if (!mounted) {
     return (
       <nav className="hidden lg:flex items-center gap-9">
@@ -101,36 +105,54 @@ function SiteNavAuth() {
   }
 
   return (
-    <nav className="hidden lg:flex gap-9 flex-wrap items-center">
+    <nav className="hidden lg:flex gap-9 items-center pr-5">
       <Link
         href="/"
-        className="text-[15px] font-medium text-foreground hover:text-primary transition-colors"
+        className={cn(
+          "text-md font-semibold transition-colors hover:text-primary",
+          pathname === "/" ? "text-primary" : "text-foreground",
+        )}
       >
         Home
       </Link>
       <Link
         href="/screening"
-        className="text-[15px] font-medium text-foreground hover:text-primary transition-colors"
+        className={cn(
+          "text-md font-semibold transition-colors hover:text-primary",
+          pathname === "/screening" ? "text-primary" : "text-foreground",
+        )}
       >
         Screening
       </Link>
       <Link
         href="/resources"
-        className="text-[15px] font-medium text-foreground hover:text-primary transition-colors"
+        className={cn(
+          "text-md font-semibold transition-colors hover:text-primary",
+          pathname === "/resources" ? "text-primary" : "text-foreground",
+        )}
       >
         Resources
       </Link>
-      <Link href="/community" className="text-[15px] font-bold text-primary">
+      <Link
+        href="/community"
+        className={cn(
+          "text-md font-semibold transition-colors hover:text-primary",
+          pathname === "/community" ? "text-primary" : "text-foreground",
+        )}
+      >
         Community
       </Link>
       <Link
-        href={`/dashboard/mother`}
-        className="text-[15px] font-medium text-foreground hover:text-primary transition-colors"
+        href="/dashboard/mother"
+        className={cn(
+          "text-md font-semibold transition-colors hover:text-primary",
+          pathname === "/dashboard/mother" ? "text-primary" : "text-foreground",
+        )}
       >
         Profile
       </Link>
       <button
-        className="text-[15px] font-medium text-foreground hover:text-primary transition-colors p-0 cursor-pointer"
+        className="text-md font-semibold text-foreground hover:text-primary transition-colors p-0 cursor-pointer"
         onClick={handleLogout}
       >
         Logout
@@ -157,38 +179,51 @@ function SiteNavContributor() {
     router.push("/");
   };
 
+  const pathname = usePathname();
+
   if (!mounted) {
     return (
-      <nav className="hidden lg:flex items-center gap-9">
+      <nav className="hidden lg:flex items-center gap-9 ">
         {/* Render a placeholder or skeleton that matches server output */}
       </nav>
     );
   }
 
   return (
-    <nav className="hidden lg:flex gap-9 flex-wrap items-center">
+    <nav className="hidden lg:flex gap-9 items-center px-6">
       <Link
         href="/"
-        className="text-[15px] font-medium text-foreground hover:text-primary transition-colors"
+        className={cn(
+          "text-md font-semibold transition-colors hover:text-primary",
+          pathname === "/" ? "text-primary" : "text-foreground",
+        )}
       >
         Home
       </Link>
 
       <Link
         href="/resources"
-        className="text-[15px] font-medium text-foreground hover:text-primary transition-colors"
+        className={cn(
+          "text-md font-semibold transition-colors hover:text-primary",
+          pathname === "/resources" ? "text-primary" : "text-foreground",
+        )}
       >
         Resources
       </Link>
 
       <Link
         href="/dashboard/contributor"
-        className="text-[15px] font-medium text-foreground hover:text-primary transition-colors"
+        className={cn(
+          "text-md font-semibold transition-colors hover:text-primary",
+          pathname.startsWith("/dashboard/contributor")
+            ? "text-primary"
+            : "text-foreground",
+        )}
       >
         Dashboard
       </Link>
       <button
-        className="text-[15px] font-medium text-foreground hover:text-primary transition-colors p-0 cursor-pointer"
+        className="text-md font-semibold text-foreground hover:text-primary transition-colors p-0 cursor-pointer"
         onClick={handleLogout}
       >
         Logout
@@ -198,32 +233,51 @@ function SiteNavContributor() {
 }
 
 function SiteNav() {
+  const pathname = usePathname();
   return (
     <nav className="hidden lg:flex items-center gap-9">
       <Link
         href="/"
-        className="text-[15px] font-medium text-foreground hover:text-primary transition-colors"
+        className={cn(
+          "text-md font-semibold transition-colors hover:text-primary",
+          pathname === "/" ? "text-primary" : "text-foreground",
+        )}
       >
         Home
       </Link>
       <Link
         href="/login"
-        className="text-[15px] font-medium text-foreground hover:text-primary transition-colors"
+        className={cn(
+          "text-md font-semibold transition-colors hover:text-primary",
+          pathname === "/login" ? "text-primary" : "text-foreground",
+        )}
       >
         Screening
       </Link>
       <Link
         href="/login"
-        className="text-[15px] font-medium text-foreground hover:text-primary transition-colors"
+        className={cn(
+          "text-md font-semibold transition-colors hover:text-primary",
+          pathname === "/login" ? "text-primary" : "text-foreground",
+        )}
       >
         Resources
       </Link>
-      <Link href="/login" className="text-[15px] font-bold text-primary">
+      <Link
+        href="/login"
+        className={cn(
+          "text-md font-semibold transition-colors hover:text-primary",
+          pathname === "/login" ? "text-primary" : "text-foreground",
+        )}
+      >
         Community
       </Link>
       <Link
         href="/login"
-        className="text-[15px] font-medium text-foreground hover:text-primary transition-colors"
+        className={cn(
+          "text-md font-semibold transition-colors hover:text-primary",
+          pathname === "/login" ? "text-primary" : "text-foreground",
+        )}
       >
         Login
       </Link>
