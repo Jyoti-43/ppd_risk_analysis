@@ -30,6 +30,7 @@ export function ArticleEditor({
   }, [content]);
 
   const executeCommand = (command: string, value: string = "") => {
+    console.log("Executing command:", command, value);
     document.execCommand(command, false, value);
     if (contentRef.current) {
       setContent(contentRef.current.innerHTML);
@@ -51,14 +52,6 @@ export function ArticleEditor({
             e.target.style.height = e.target.scrollHeight + "px";
           }}
         />
-
-        {/* <div className="flex items-center gap-2 px-3 py-1.5 bg-secondary/40 border border-border/50 rounded-full w-fit group hover:border-primary/20 transition-colors">
-          <span className="material-symbols-outlined text-[16px] text-muted-foreground">link</span>
-          <span className="text-[12px] text-muted-foreground">ppdsupport.com/blog/</span>
-          <span className="text-[12px] font-medium text-foreground">
-            {title ? title.toLowerCase().replace(/[^a-z0-9]+/g, "-") : "understanding-postpartum-..."}
-          </span>
-        </div> */}
       </div>
 
       <div className="sticky top-[61px] z-40 bg-white border-y border-border px-4 py-2 flex items-center justify-between">
@@ -89,73 +82,15 @@ export function ArticleEditor({
           <div className="w-px h-5 bg-border mx-2" />
           <ToolbarButton
             icon="format_quote"
-            className="p-2 hover:bg-muted rounded text-foreground"
-            onClick={() => {
-              const textarea = document.querySelector(
-                "textarea",
-              ) as HTMLTextAreaElement;
-              if (textarea) {
-                const start = textarea.selectionStart;
-                const end = textarea.selectionEnd;
-                const text = textarea.value;
-                const beforeText = text.substring(0, start);
-                const selectedText = text.substring(start, end);
-                const afterText = text.substring(end);
-                // Add markdown blockquote style
-                const quoteText = selectedText
-                  ? selectedText
-                      .split("\n")
-                      .map((line) => `> ${line}`)
-                      .join("\n")
-                  : ">";
-                // onChange?.(`${beforeText}${quoteText}${afterText}`);
-              }
-            }}
+            onClick={() => executeCommand("formatBlock", "blockquote")}
           />
           <ToolbarButton
             icon="format_list_bulleted"
-            onClick={() => {
-              const textarea = document.querySelector(
-                "textarea",
-              ) as HTMLTextAreaElement;
-              if (textarea) {
-                const start = textarea.selectionStart;
-                const end = textarea.selectionEnd;
-                const text = textarea.value;
-                const beforeText = text.substring(0, start);
-                const selectedText = text.substring(start, end);
-                const afterText = text.substring(end);
-                // Add markdown unordered list style
-                const listText = selectedText
-                  ? selectedText
-                      .split("\n")
-                      .map((line) => `- ${line || "list item"}`)
-                      .join("\n")
-                  : "- list item";
-                // onChange?.(`${beforeText}${listText}${afterText}`);
-              }
-            }}
-            className="p-2 hover:bg-muted rounded text-foreground"
+            onClick={() => executeCommand("insertUnorderedList")}
           />
           <ToolbarButton
             icon="format_list_numbered"
             onClick={() => executeCommand("insertOrderedList")}
-          />
-        </div>
-        <div className="flex items-center gap-1">
-          <ToolbarButton
-            icon="link"
-            onClick={() => {
-              const url = prompt("Enter the URL");
-              if (url) executeCommand("createLink", url);
-            }}
-          />
-          <ToolbarButton
-            icon="image"
-            onClick={() => {
-              const url = prompt("Enter the image URL");
-              if (url) executeCommand("insertImage", url);
-            }}
           />
         </div>
       </div>
@@ -164,7 +99,12 @@ export function ArticleEditor({
         <div
           ref={contentRef}
           onInput={(e) => setContent(e.currentTarget.innerHTML)}
-          className="min-h-full outline-none text-[15px] leading-relaxed text-foreground/80 empty:before:content-[attr(data-placeholder)] empty:before:text-muted-foreground/40"
+          className="min-h-full outline-none text-[16px] leading-relaxed text-foreground/80 empty:before:content-[attr(data-placeholder)] empty:before:text-muted-foreground/40 
+          [&_h1]:text-3xl [&_h1]:font-bold [&_h1]:mb-4 [&_h1]:mt-6
+          [&_h2]:text-2xl [&_h2]:font-bold [&_h2]:mb-3 [&_h2]:mt-5
+          [&_ul]:list-disc [&_ul]:pl-6 [&_ul]:mb-4
+          [&_ol]:list-decimal [&_ol]:pl-6 [&_ol]:mb-4
+          [&_blockquote]:border-l-4 [&_blockquote]:border-primary/30 [&_blockquote]:pl-4 [&_blockquote]:italic [&_blockquote]:my-4 [&_blockquote]:text-muted-foreground"
           contentEditable
           data-placeholder="Start writing your story here... Share your insights and experiences regarding PPD recovery."
         />

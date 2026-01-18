@@ -9,6 +9,7 @@ export interface Article {
   tags: string[];
   category: string;
   imageUrl?: string;
+  image?: string;
   userId?: string;
   userEmail?: string;
   userName?: string;
@@ -84,6 +85,14 @@ export const articleApi = createApi({
       providesTags: ["Articles"],
     }),
 
+    getSingleArticle: build.query<Article, string>({
+      query: (articleId) => ({
+        url: `/contributor/article/${articleId}`,
+        method: "GET",
+      }),
+      providesTags: (result, error, id) => [{ type: "Articles", id }],
+    }),
+
     deleteArticle: build.mutation<any, string>({
       query: (articleId) => ({
         url: `/contributor/article/${articleId}`,
@@ -122,6 +131,7 @@ export const {
   useArticleUploadImageMutation,
   useCreateArticleMutation,
   useGetArticleQuery,
+  useGetSingleArticleQuery,
   useDeleteArticleMutation,
   useUpdateArticleMutation,
 } = articleApi;
