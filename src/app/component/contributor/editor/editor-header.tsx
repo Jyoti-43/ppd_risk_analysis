@@ -1,8 +1,14 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Loader2 } from "lucide-react";
 
-export function EditorHeader() {
+interface EditorHeaderProps {
+  onPublish: () => void;
+  isLoading: boolean;
+}
+
+export function EditorHeader({ onPublish, isLoading }: EditorHeaderProps) {
   return (
     <header className="sticky top-0 z-50 flex items-center justify-between border-b border-border bg-white px-4 md:px-6 py-2">
       <div className="flex items-center gap-4">
@@ -31,12 +37,6 @@ export function EditorHeader() {
       </div>
 
       <div className="flex items-center gap-4">
-        {/* <div className="flex items-center gap-2 text-muted-foreground">
-          <span className="material-symbols-outlined text-[18px]">
-            cloud_done
-          </span>
-          <span className="text-[12px]">Saved 2m ago</span>
-        </div> */}
         <Button
           variant="outline"
           size="sm"
@@ -46,9 +46,15 @@ export function EditorHeader() {
         </Button>
         <Button
           size="sm"
+          onClick={onPublish}
+          disabled={isLoading}
           className="h-9 px-5 bg-primary hover:bg-primary-hover text-white text-[13px] font-medium shadow-sm"
         >
-          Submit for Review
+          {isLoading ? (
+            <Loader2 className="animate-spin" size={16} />
+          ) : (
+            "Submit for Review"
+          )}
         </Button>
         <Avatar className="size-8 border border-border ml-2">
           <AvatarImage src="/placeholder-user.jpg" alt="User" />

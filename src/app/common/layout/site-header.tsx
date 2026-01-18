@@ -1,4 +1,4 @@
-'use client';
+"use client";
 import Link from "next/link";
 
 import { useAppDispatch, useAppSelector } from "../../Hooks/hook";
@@ -9,7 +9,6 @@ import {
   selectCurrentUser,
 } from "../../redux/feature/user/userSlice";
 import { useEffect, useState } from "react";
-
 
 export function SiteHeader() {
   const [mounted, setMounted] = useState(false);
@@ -87,7 +86,7 @@ function SiteNavAuth() {
 
   const currentUser = useAppSelector(selectCurrentUser)?.userName ?? "";
 
-  useEffect(() => { }, []);
+  useEffect(() => {}, []);
   const handleLogout = () => {
     dispatch(logout());
     router.push("/");
@@ -102,7 +101,7 @@ function SiteNavAuth() {
   }
 
   return (
-    <nav className="hidden lg:flex  gap-9 wrap lg:items-end-safe">
+    <nav className="hidden lg:flex gap-9 flex-wrap items-center">
       <Link
         href="/"
         className="text-[15px] font-medium text-foreground hover:text-primary transition-colors"
@@ -131,7 +130,7 @@ function SiteNavAuth() {
         Profile
       </Link>
       <button
-        className="text-[15px] font-medium text-foreground hover:text-primary transition-colors p-0"
+        className="text-[15px] font-medium text-foreground hover:text-primary transition-colors p-0 cursor-pointer"
         onClick={handleLogout}
       >
         Logout
@@ -152,7 +151,7 @@ function SiteNavContributor() {
     setMounted(true);
   }, []);
 
-  useEffect(() => { }, []);
+  useEffect(() => {}, []);
   const handleLogout = () => {
     dispatch(logout());
     router.push("/");
@@ -167,7 +166,7 @@ function SiteNavContributor() {
   }
 
   return (
-    <nav className="hidden lg:flex  gap-9 wrap lg:items-end-safe">
+    <nav className="hidden lg:flex gap-9 flex-wrap items-center">
       <Link
         href="/"
         className="text-[15px] font-medium text-foreground hover:text-primary transition-colors"
@@ -189,7 +188,7 @@ function SiteNavContributor() {
         Dashboard
       </Link>
       <button
-        className="text-[15px] font-medium text-foreground hover:text-primary transition-colors p-0"
+        className="text-[15px] font-medium text-foreground hover:text-primary transition-colors p-0 cursor-pointer"
         onClick={handleLogout}
       >
         Logout

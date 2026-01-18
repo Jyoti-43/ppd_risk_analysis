@@ -1,17 +1,45 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef } from "react";
 
-export function ArticleEditor() {
-  const [title, setTitle] = useState("");
+interface ArticleEditorProps {
+  title: string;
+  setTitle: (title: string) => void;
+  content: string;
+  setContent: (content: string) => void;
+}
+
+export function ArticleEditor({
+  title,
+  setTitle,
+  content,
+  setContent,
+}: ArticleEditorProps) {
+  const contentRef = useRef<HTMLDivElement>(null);
+
+  // Synchronize content with local state only once on mount if needed,
+  // but better to manage via input events to avoid cursor jumping
+  useEffect(() => {
+    if (contentRef.current && contentRef.current.innerHTML !== content) {
+      // Only update if external content changed significantly (like a reset)
+      // Otherwise we let the user type naturally
+      if (content === "") {
+        contentRef.current.innerHTML = "";
+      }
+    }
+  }, [content]);
 
   const executeCommand = (command: string, value: string = "") => {
     document.execCommand(command, false, value);
+    if (contentRef.current) {
+      setContent(contentRef.current.innerHTML);
+    }
   };
 
   return (
     <div className="bg-white rounded-xl border border-border shadow-sm min-h-[800px] flex flex-col">
       <div className="p-8 pb-4 space-y-4">
+        {/* title Section */}
         <textarea
           placeholder="Enter article title..."
           className="w-full bg-transparent border-0 outline-none text-4xl font-black placeholder:text-muted-foreground/20 resize-none overflow-hidden h-auto"
@@ -62,43 +90,52 @@ export function ArticleEditor() {
           <ToolbarButton
             icon="format_quote"
             className="p-2 hover:bg-muted rounded text-foreground"
-           onClick={() => {
-            const textarea = document.querySelector("textarea") as HTMLTextAreaElement;
-            if (textarea) {
-              const start = textarea.selectionStart;
-              const end = textarea.selectionEnd;
-              const text = textarea.value;
-              const beforeText = text.substring(0, start);
-              const selectedText = text.substring(start, end);
-              const afterText = text.substring(end);
-              // Add markdown blockquote style
-              const quoteText = selectedText
-                ? selectedText.split('\n').map(line => `> ${line}`).join('\n')
-                : '>';
-              // onChange?.(`${beforeText}${quoteText}${afterText}`);
-            }
-          }}
-          
+            onClick={() => {
+              const textarea = document.querySelector(
+                "textarea",
+              ) as HTMLTextAreaElement;
+              if (textarea) {
+                const start = textarea.selectionStart;
+                const end = textarea.selectionEnd;
+                const text = textarea.value;
+                const beforeText = text.substring(0, start);
+                const selectedText = text.substring(start, end);
+                const afterText = text.substring(end);
+                // Add markdown blockquote style
+                const quoteText = selectedText
+                  ? selectedText
+                      .split("\n")
+                      .map((line) => `> ${line}`)
+                      .join("\n")
+                  : ">";
+                // onChange?.(`${beforeText}${quoteText}${afterText}`);
+              }
+            }}
           />
           <ToolbarButton
             icon="format_list_bulleted"
-           onClick={() => {
-            const textarea = document.querySelector("textarea") as HTMLTextAreaElement;
-            if (textarea) {
-              const start = textarea.selectionStart;
-              const end = textarea.selectionEnd;
-              const text = textarea.value;
-              const beforeText = text.substring(0, start);
-              const selectedText = text.substring(start, end);
-              const afterText = text.substring(end);
-              // Add markdown unordered list style
-              const listText = selectedText
-                ? selectedText.split('\n').map(line => `- ${line || 'list item'}`).join('\n')
-                : '- list item';
-              // onChange?.(`${beforeText}${listText}${afterText}`);
-            }
-          }}
-          className="p-2 hover:bg-muted rounded text-foreground"
+            onClick={() => {
+              const textarea = document.querySelector(
+                "textarea",
+              ) as HTMLTextAreaElement;
+              if (textarea) {
+                const start = textarea.selectionStart;
+                const end = textarea.selectionEnd;
+                const text = textarea.value;
+                const beforeText = text.substring(0, start);
+                const selectedText = text.substring(start, end);
+                const afterText = text.substring(end);
+                // Add markdown unordered list style
+                const listText = selectedText
+                  ? selectedText
+                      .split("\n")
+                      .map((line) => `- ${line || "list item"}`)
+                      .join("\n")
+                  : "- list item";
+                // onChange?.(`${beforeText}${listText}${afterText}`);
+              }
+            }}
+            className="p-2 hover:bg-muted rounded text-foreground"
           />
           <ToolbarButton
             icon="format_list_numbered"
@@ -125,6 +162,8 @@ export function ArticleEditor() {
 
       <div className="flex-1 p-8 pt-6">
         <div
+          ref={contentRef}
+          onInput={(e) => setContent(e.currentTarget.innerHTML)}
           className="min-h-full outline-none text-[15px] leading-relaxed text-foreground/80 empty:before:content-[attr(data-placeholder)] empty:before:text-muted-foreground/40"
           contentEditable
           data-placeholder="Start writing your story here... Share your insights and experiences regarding PPD recovery."
@@ -156,7 +195,6 @@ function ToolbarButton({
         onClick?.();
       }}
       className={`h-8 w-8 lg:w-auto lg:px-2 rounded flex items-center justify-center gap-1 hover:bg-secondary text-muted-foreground hover:text-foreground transition-colors ${className}`}
-    
     >
       {label && <span className="text-[11px] font-bold">{label}</span>}
       {!label && (

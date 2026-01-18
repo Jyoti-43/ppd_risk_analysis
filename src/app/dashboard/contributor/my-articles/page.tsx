@@ -127,10 +127,12 @@ export default function MyArticlesPage() {
             Organize, edit, and track the status of your professional content.
           </p>
         </div>
-        <Button className="bg-primary hover:bg-[#ff7a9f] text-white px-8 py-6 rounded-2xl text-lg font-semibold shadow-lg shadow-pink-100 transition-all active:scale-95 flex gap-2">
-          <Plus size={24} />
-          <span>Create New Article</span>
-        </Button>
+        <Link href="/new-article">
+          <Button className="bg-primary hover:bg-[#e21e80] text-white px-4 py-2 rounded-2xl text-lg font-semibold shadow-lg shadow-pink-100 transition-all active:scale-95 flex gap-2">
+            <Plus size={24} />
+            <span>Create New Article</span>
+          </Button>
+        </Link>
       </div>
 
       {/* Filters & Search Section */}
