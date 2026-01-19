@@ -1,9 +1,53 @@
+"use client";
 import { Heart, CheckCircle } from "lucide-react";
+import { useParams } from "next/navigation";
+import {
+  useGetGroupQuery,
+  useGetMyJoinedgroupQuery,
+} from "@/src/app/redux/services/communityGroupApi";
+import { useAppSelector } from "@/src/app/Hooks/hook";
+import { selectCurrentUser } from "@/src/app/redux/feature/user/userSlice";
+
+const normalizeId = (id: string | number | null | undefined): string => {
+  if (!id) return "";
+  return String(id).replace("user_", "");
+};
 
 export function GroupHeader() {
+  const params = useParams();
+  const id = String(params?.id || "");
+  const currentUser = useAppSelector(selectCurrentUser);
+
+  const { data: groups, isLoading: isAllLoading } = useGetGroupQuery(
+    currentUser?.userId,
+  );
+  const { data: joinedGroups, isLoading: isJoinedLoading } =
+    useGetMyJoinedgroupQuery(currentUser?.userId, {
+      skip: !currentUser?.userId,
+    });
+
+  const group = groups?.find(
+    (g) =>
+      String(g.groupId || g.id) === id || `group_${g.groupId || g.id}` === id,
+  );
+  const isJoined = joinedGroups?.some(
+    (g) =>
+      String(g.groupId || g.id) === id || `group_${g.groupId || g.id}` === id,
+  );
+
+  if (isAllLoading || isJoinedLoading) {
+    return <div className="h-64 bg-muted animate-pulse rounded-b-2xl" />;
+  }
+
+  if (!group) return null;
+
+  const isOwner =
+    group.isOwner ||
+    normalizeId(group.createdBy?.id) === normalizeId(currentUser?.userId);
+
   return (
     <div className="bg-gradient-to-br from-secondary via-accent to-secondary">
-      <div className="max-w-7xl mx-auto px-6 py-16 pb-4 relative">
+      <div className="max-w-6xl mx-auto px-6 py-16 pb-4 relative">
         {/* Decorative element */}
 
         <div className="flex gap-5 items-start">
@@ -13,21 +57,22 @@ export function GroupHeader() {
           </div>
 
           {/* Group info */}
-          <div className="flex-1">
+          <div className="flex-1 max-w-5xl">
             <h1 className="text-3xl font-bold mb-2">
-              Postpartum Anxiety Support Group
+              {group.groupName || "Group Details"}
             </h1>
             <p className="text-foreground mb-6">
-              A safe, non-judgmental space to discuss anxiety symptoms and
-              coping strategies.
+              {group.groupDescription ||
+                group.description ||
+                "A safe, non-judgmental community space."}
             </p>
 
             {/* Stats and buttons */}
             <div className="flex flex-wrap items-center gap-6">
               <div className="flex items-center gap-6">
                 <div>
-                  <div className="text-xl font-bold">1,245</div>
-                  <div className="text-sm text-muted-foreground">Members</div>
+                  {/* <div className="text-xl font-bold">{group.members || 0}</div>
+                  <div className="text-sm text-muted-foreground">Members</div> */}
                 </div>
                 {/* <div className="flex items-center gap-2">
                   <div className="w-3 h-3 bg-green-500 rounded-full"></div>
@@ -45,13 +90,12 @@ export function GroupHeader() {
                 </div>
               </div> */}
 
-              {/* Action buttons */}
-              {/* <div className="flex gap-3 ml-auto"> */}
-                {/* <button className="flex items-center gap-2 px-4 py-2 border border-border rounded-lg hover:bg-muted transition">
+              <div className="flex gap-3 ml-auto">
+                <button className="flex items-center gap-2 px-4 py-2 border border-green-200 bg-green-50 text-green-700 rounded-lg font-semibold transition cursor-default">
                   <CheckCircle className="w-4 h-4" />
-                  Joined
-                </button> */}
-              {/* </div> */}
+                  {isOwner ? "Admin" : isJoined ? "Member" : "Joined"}
+                </button>
+              </div>
             </div>
           </div>
         </div>

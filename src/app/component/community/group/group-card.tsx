@@ -3,6 +3,11 @@ import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { useAppDispatch, useAppSelector } from "@/src/app/Hooks/hook";
 import { setCurrentGroupId } from "@/src/app/redux/feature/community/groupSlice";
+import {
+  useGetGroupQuery,
+  useJoinedGroupMutation,
+} from "@/src/app/redux/services/communityGroupApi";
+import { useState, useEffect } from "react";
 
 interface GroupCardProps {
   id: string;
@@ -31,14 +36,37 @@ export function GroupCard({
   imageUrl,
   avatars = [],
   extraAvatarCount,
-  isJoined,
   isOwner = false,
-
+  isJoined = false,
   onDelete,
 }: GroupCardProps) {
+  const dispatch = useAppDispatch();
+  const [joinedGroup] = useJoinedGroupMutation();
+  // const [isJoinedState, setIsJoinedState] = useState(isJoined);
 
-   const dispatch = useAppDispatch();
-  
+  // useEffect(() => {
+  //   setIsJoinedState(isJoined);
+  // }, [isJoined]);
+
+  const handleGroupJoin = async () => {
+    //  dispatch(setCurrentGroupId(id));
+    const groupId = id.startsWith("group_") ? id.replace("group_", "") : id;
+
+    try {
+      const response = await joinedGroup({
+        groupId: groupId,
+        isJoined: true,
+      }).unwrap();
+      // setIsJoinedState(true);
+      console.log("Api response success join group", response);
+      alert("joined group  successfully!");
+    } catch (error: any) {
+      console.error("Failed to join group:", error);
+
+      alert(error?.data?.detail ?? "Failed to join group");
+    }
+  };
+
   return (
     <div className="flex flex-col rounded-2xl border border-border bg-card overflow-hidden shadow-sm hover:shadow-md transition-shadow">
       {/* Image Header */}
@@ -129,21 +157,26 @@ export function GroupCard({
               )}
             </div>
 
-            <Link href={`/community/group/${id}/view-group`}>
+            {isOwner || isJoined ? (
+              <Link href={`/community/group/${id}/view-group`}>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="h-8 px-4 rounded-full font-semibold text-[13px] bg-white border-border text-foreground hover:bg-muted"
+                >
+                  view group
+                </Button>
+              </Link>
+            ) : (
               <Button
-               onClick={() => dispatch(setCurrentGroupId(id))}
+                onClick={handleGroupJoin}
                 size="sm"
-                variant={isJoined ? "outline" : "default"}
-                className={cn(
-                  "h-8 px-4 rounded-full font-semibold text-[13px]",
-                  isJoined
-                    ? "bg-white border-border text-foreground hover:bg-muted"
-                    : "bg-primary hover:bg-[#b50d62] text-white"
-                )}
+                variant="default"
+                className="h-8 px-4 rounded-full font-semibold text-[13px] bg-primary hover:bg-[#b50d62] text-white"
               >
-                {isJoined ? "Joined" : "Join Group"}
+                Join Group
               </Button>
-            </Link>
+            )}
           </div>
         </div>
       </div>

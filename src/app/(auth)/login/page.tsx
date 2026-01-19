@@ -17,6 +17,9 @@ import { useLoginUserMutation } from "../../redux/services/authApi";
 import { useAppDispatch } from "../../Hooks/hook";
 import { setCredientials } from "../../redux/feature/user/userSlice";
 import { useSearchParams } from "next/navigation";
+import { communityPost } from "../../redux/services/communityPostApi";
+import { communityGroup } from "../../redux/services/communityGroupApi";
+import { screeningAPI } from "../../redux/services/screeningApi";
 
 const FcGoogle = dynamic(
   () => import("react-icons/fc").then((m) => m.FcGoogle),
@@ -62,6 +65,11 @@ const LoginForm = () => {
           role: data.role,
         }),
       );
+
+      // Reset all API states to clear guest/old data and force fresh fetches with new token
+      dispatch(communityPost.util.resetApiState());
+      dispatch(communityGroup.util.resetApiState());
+      dispatch(screeningAPI.util.resetApiState());
 
       setEmail("");
       setPassword("");

@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
 import { CommunityHero } from "@/src/app/component/community/homaPage/community-hero";
@@ -9,12 +10,45 @@ import { CommunityTabs } from "@/src/app/component/community/homaPage/community-
 import { CommunityFilters } from "@/src/app/component/community/homaPage/community-filters";
 import { PostsList } from "@/src/app/component/community/homaPage/post/postList";
 import { GroupList } from "@/src/app/component/community/group/groupList";
+import { useAppSelector } from "@/src/app/Hooks/hook";
+import { selectCurrentUser } from "@/src/app/redux/feature/user/userSlice";
 
+function CommunityContent() {
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const tabParam = searchParams.get("tab") || "feed";
+  const filterParam =
+    searchParams.get("filter") ||
+    (tabParam === "groups" ? "All Groups" : "All");
 
+  const [activeTab, setActiveTab] = useState(tabParam);
+  const [activeFilter, setActiveFilter] = useState(filterParam);
+  const [searchQuery, setSearchQuery] = useState("");
 
-export default function CommunityPage() {
-  const [activeTab, setActiveTab] = useState("feed");
-  const { data: posts } = useGetPostQuery();
+  // Update local state when URL changes
+  useEffect(() => {
+    setActiveTab(tabParam);
+    setActiveFilter(filterParam);
+  }, [tabParam, filterParam]);
+
+  const handleTabChange = (tab: string) => {
+    setActiveTab(tab);
+    const defaultFilter = tab === "groups" ? "All Groups" : "All";
+    setActiveFilter(defaultFilter);
+    router.push(`/community?tab=${tab}&filter=${defaultFilter}`, {
+      scroll: false,
+    });
+  };
+
+  const handleFilterChange = (filter: string) => {
+    setActiveFilter(filter);
+    router.push(`/community?tab=${activeTab}&filter=${filter}`, {
+      scroll: false,
+    });
+  };
+
+  const currentUser = useAppSelector(selectCurrentUser);
+  const { data: posts } = useGetPostQuery(currentUser?.userId);
 
   return (
     <div className="relative flex min-h-screen flex-col overflow-x-hidden bg-background">
@@ -24,15 +58,23 @@ export default function CommunityPage() {
         <div className="container max-w-[1040px] mx-auto px-6 py-4">
           <CommunityHero activeTab={activeTab} />
 
-          <CommunityTabs activeTab={activeTab} onTabChange={setActiveTab} />
+          <CommunityTabs activeTab={activeTab} onTabChange={handleTabChange} />
 
-          <CommunityFilters activeTab={activeTab} />
+          <CommunityFilters
+            activeTab={activeTab}
+            activeCategory={activeFilter}
+            onCategoryChange={handleFilterChange}
+            onSearchChange={setSearchQuery}
+          />
 
           {activeTab === "feed" && (
             <>
               {/* Posts Feed */}
               <div className="flex flex-col gap-6 mb-12">
-                <PostsList />
+                <PostsList
+                  searchQuery={searchQuery}
+                  activeFilter={activeFilter}
+                />
               </div>
 
               {/* Pagination / Load More */}
@@ -55,7 +97,10 @@ export default function CommunityPage() {
               {/* Groups Grid */}
               {/* <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12"> */}
 
-              <GroupList />
+              <GroupList
+                activeFilter={activeFilter}
+                searchQuery={searchQuery}
+              />
 
               {/* <GroupCard
                   id="1"
@@ -136,5 +181,13 @@ export default function CommunityPage() {
 
       {/* <SiteFooter /> */}
     </div>
+  );
+}
+
+export default function CommunityPage() {
+  return (
+    <Suspense fallback={<div>Loading community...</div>}>
+      <CommunityContent />
+    </Suspense>
   );
 }

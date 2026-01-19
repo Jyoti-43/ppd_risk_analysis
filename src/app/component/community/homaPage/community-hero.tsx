@@ -1,11 +1,11 @@
-"use client"
+"use client";
 
-import { Button } from "@/components/ui/button"
-import Image from "next/image"
-import Link from "next/link"
+import { Button } from "@/components/ui/button";
+import Image from "next/image";
+import Link from "next/link";
 
 interface CommunityHeroProps {
-  activeTab: string
+  activeTab: string;
 }
 
 export function CommunityHero({ activeTab }: CommunityHeroProps) {
@@ -14,14 +14,22 @@ export function CommunityHero({ activeTab }: CommunityHeroProps) {
       title: "Community",
       description:
         "Welcome to your safe haven. Connect with other mothers, join support groups, and share your journey through our stories feed.",
-      primaryButton: { icon: "edit", label: "Create Post", href: "/community/create-post" },
+      primaryButton: {
+        icon: "edit",
+        label: "Create Post",
+        href: "/community/create-post",
+      },
       secondaryButton: { icon: "edit", label: "Guidelines" },
     },
     groups: {
       title: "Community Groups",
       description:
         "Find your tribe. Join moderated groups focused on shared experiences, or create your own safe space to connect with other mothers.",
-      primaryButton: { icon: "add_circle", label: "Create Group", href: "/community/create-post" },
+      primaryButton: {
+        icon: "add_circle",
+        label: "Create Group",
+        href: "/community/group/create-group",
+      },
       secondaryButton: { icon: "explore", label: "Discover" },
     },
     // stories: {
@@ -31,18 +39,21 @@ export function CommunityHero({ activeTab }: CommunityHeroProps) {
     //   primaryButton: { icon: "edit", label: "Share Your Story", href: "/community/create-post" },
     //   secondaryButton: { icon: "edit", label: "Guidelines" },
     // },
-  }
+  };
 
-  const currentContent = content[activeTab as keyof typeof content] || content.feed
+  const currentContent =
+    content[activeTab as keyof typeof content] || content.feed;
 
   const primaryContent = (
     <>
       {currentContent.primaryButton.icon && (
-        <span className="material-symbols-outlined text-[18px] mr-1.5">{currentContent.primaryButton.icon}</span>
+        <span className="material-symbols-outlined text-[18px] mr-1.5">
+          {currentContent.primaryButton.icon}
+        </span>
       )}
       {currentContent.primaryButton.label}
     </>
-  )
+  );
 
   return (
     <div className="flex flex-col lg:flex-row items-center gap-8 lg:gap-12 py-8 lg:py-12">
@@ -74,7 +85,9 @@ export function CommunityHero({ activeTab }: CommunityHeroProps) {
             asChild={Boolean(currentContent.primaryButton.href)}
           >
             {currentContent.primaryButton.href ? (
-              <Link href={currentContent.primaryButton.href}>{primaryContent}</Link>
+              <Link href={currentContent.primaryButton.href}>
+                {primaryContent}
+              </Link>
             ) : (
               primaryContent
             )}
@@ -93,5 +106,5 @@ export function CommunityHero({ activeTab }: CommunityHeroProps) {
         </div>
       </div>
     </div>
-  )
+  );
 }

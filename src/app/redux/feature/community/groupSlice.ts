@@ -22,6 +22,7 @@ interface CreateGroupState {
   currentGroupId?: string | null;
   groups: Group[];
   userName?: string | null;
+  joinedGroupIds: string[];
   status: "idle" | "loading" | "succeeded" | "failed";
   error: string | null;
 }
@@ -34,6 +35,10 @@ const initialState: CreateGroupState = {
     imageUrl: undefined,
   },
   groups: [],
+  joinedGroupIds:
+    typeof window !== "undefined"
+      ? JSON.parse(localStorage.getItem("joinedGroupIds") || "[]")
+      : [],
   userName: null,
   status: "idle",
   error: null,
@@ -60,7 +65,7 @@ export const createGroupSlice = createSlice({
     },
     setFormData: (
       state,
-      action: PayloadAction<Partial<CreateGroupState["formData"]>>
+      action: PayloadAction<Partial<CreateGroupState["formData"]>>,
     ) => {
       state.formData = { ...state.formData, ...action.payload };
     },
@@ -84,7 +89,7 @@ export const createGroupSlice = createSlice({
     },
     deleteGroupSuccess: (state, action: PayloadAction<string>) => {
       state.groups = state.groups.filter(
-        (group) => group.id !== action.payload
+        (group) => group.id !== action.payload,
       );
       state.status = "succeeded";
     },

@@ -6,6 +6,7 @@ import { CreatePostModal } from "./create-group-modal";
 import { Avatar, AvatarFallback, AvatarImage } from "@radix-ui/react-avatar";
 import { Input } from "@/components/ui/input";
 import { useAppSelector } from "@/src/app/Hooks/hook";
+import { useParams } from "next/navigation";
 
 export function PostCreator() {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -13,10 +14,10 @@ export function PostCreator() {
   const userName = useAppSelector((state) => state.user.currentUser.userName); // adjust path as needed
   // adjust path as needed
 
-  // Get groupId from create group API store
-  const groupID = useAppSelector((state) => state.createGroup.currentGroupId); // adjust path as needed
-const cleanGroupId = groupID ? groupID.replace(/^group_/, "") : "";
-console.log("Clean Group ID form post-creator:", cleanGroupId);
+  const params = useParams();
+  const groupID = params?.id as string;
+  const cleanGroupId = groupID ? groupID.replace(/^group_/, "") : "";
+  console.log("Clean Group ID form post-creator:", cleanGroupId);
   return (
     <>
       <div className="bg-card rounded-lg p-6 mb-6 ">

@@ -4,34 +4,46 @@ import { DiscussionPost } from "./discussion-post";
 import { timeAgo } from "@/utills/timeAgo";
 import { useAppDispatch, useAppSelector } from "@/src/app/Hooks/hook";
 import { setCurrentGroupId } from "@/src/app/redux/feature/community/groupSlice";
+import { useParams } from "next/navigation";
 import { useEffect } from "react";
 
 export function DiscussionsSection() {
   const dispatch = useAppDispatch();
   const selectedGroupId = useAppSelector(
-    (state) => state.createGroup.currentGroupId
+    (state) => state.createGroup.currentGroupId,
   );
   const { data: posts = [], isLoading, error } = useGetGroupPostQuery();
   const likeByPostId = useAppSelector(
-    (state) => state.createGroupPost.likeByPostId
+    (state) => state.createGroupPost.likeByPostId,
   );
 
-  // Set currentGroupId in Redux if not set and posts exist
+  const params = useParams();
+  const groupIdFromUrl = params?.id as string;
+
+  // Set currentGroupId in Redux based on URL parameter
   useEffect(() => {
-    if (!selectedGroupId && posts.length > 0 && posts[0].groupId) {
-      dispatch(setCurrentGroupId(posts[0].groupId.toString()));
+    if (groupIdFromUrl) {
+      dispatch(setCurrentGroupId(groupIdFromUrl));
     }
-  }, [selectedGroupId, posts, dispatch]);
+  }, [groupIdFromUrl, dispatch]);
 
   if (isLoading) return <div>Loading...</div>;
   if (error) return <div>Error loading posts.</div>;
 
-  const filteredPosts = posts.filter(
-    (post) => post.groupId?.toString() === selectedGroupId?.toString()
-  );
+  const filteredPosts = posts.filter((post) => {
+    // Standardize IDs by removing any prefix like 'group_'
+    const postGroupId = post.groupId?.toString().replace(/^group_/, "");
+    const urlGroupId = groupIdFromUrl?.toString().replace(/^group_/, "");
+    return postGroupId === urlGroupId;
+  });
 
   if (filteredPosts.length === 0) {
-    console.log("All Posts:", posts);
+    console.log("No matching posts found.");
+    console.log("URL Group ID:", groupIdFromUrl);
+    console.log(
+      "All Posts Group IDs:",
+      posts.map((p) => p.groupId),
+    );
     return <div>No discussions available for this group.</div>;
   }
 

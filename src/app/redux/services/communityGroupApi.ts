@@ -13,6 +13,16 @@ interface Group {
   };
   image?: string;
   imageUrl: string;
+  isOwner?: boolean;
+  members?: number;
+  isJoined?: boolean;
+  is_joined?: boolean;
+  groupId?: string | number;
+  description?: string;
+  createdBy?: {
+    id: string | number;
+    name?: string;
+  };
 }
 
 export const communityGroup = createApi({
@@ -62,6 +72,7 @@ export const communityGroup = createApi({
         groupDescription: string;
         categoryId: string;
         image: string;
+        isOwner: boolean;
       }
     >({
       query: (body) => ({
@@ -73,7 +84,32 @@ export const communityGroup = createApi({
       invalidatesTags: ["Group"],
     }),
 
-    getGroup: build.query<Group[], void>({
+    joinedGroup: build.mutation<
+      any,
+      {
+        isJoined: boolean;
+        groupId: string;
+      }
+    >({
+      query: (body) => ({
+        url: `/join-group/${body.groupId}`,
+        method: "POST",
+        body,
+      }),
+      // Invalidate posts cache when a new post is created
+      invalidatesTags: ["Group"],
+    }),
+
+    getMyJoinedgroup: build.query<Group[], any>({
+      query: () => ({
+        url: `/user/my-groups/joined`,
+        method: "GET",
+      }),
+      // Invalidate posts cache when a new post is created
+      providesTags: ["Group"],
+    }),
+
+    getGroup: build.query<Group[], any>({
       query: () => ({
         url: "/view-group",
         method: "GET",
@@ -120,4 +156,6 @@ export const {
   useGetGroupQuery,
   useDeleteGroupMutation,
   useUpdateGroupMutation,
+  useJoinedGroupMutation,
+  useGetMyJoinedgroupQuery,
 } = communityGroup;

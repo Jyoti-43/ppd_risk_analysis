@@ -1,5 +1,11 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { logout } from "../feature/user/userSlice";
+import { communityPost } from "./communityPostApi";
+import { communityGroup } from "./communityGroupApi";
+import { screeningAPI } from "./screeningApi";
+import { groupPost } from "./groupPostApi";
+import { articleApi } from "./articleApi";
+import { contributorProfileApi } from "./contributorProfileSetupApi";
 import ForgotPassword from "../../(auth)/forgotPassword/page";
 
 export const authUserAPI = createApi({
@@ -48,6 +54,13 @@ export const authUserAPI = createApi({
           await queryFulfilled;
           // 1. Wipe all API cache (PPD scores, user info, etc.)
           dispatch(authUserAPI.util.resetApiState());
+          dispatch(communityPost.util.resetApiState());
+          dispatch(communityGroup.util.resetApiState());
+          dispatch(screeningAPI.util.resetApiState());
+          dispatch(groupPost.util.resetApiState());
+          dispatch(articleApi.util.resetApiState());
+          dispatch(contributorProfileApi.util.resetApiState());
+
           // 2. Clear your Auth Slice (the 'user' object)
           dispatch(logout());
         } catch {

@@ -78,8 +78,8 @@ export const forgotPassword = createAsyncThunk<
   } catch (err: any) {
     return rejectWithValue(
       err.response?.data?.detail ||
-      err.message ||
-      "Failed to send reset Password"
+        err.message ||
+        "Failed to send reset Password",
     );
   }
 });
@@ -99,8 +99,8 @@ export const resetPassword = createAsyncThunk<
   } catch (err: any) {
     return rejectWithValue(
       err.response?.data?.detail ||
-      err.message ||
-      "Failed to send reset Password"
+        err.message ||
+        "Failed to send reset Password",
     );
   }
 });
@@ -118,7 +118,7 @@ export const UserSlice = createSlice({
         access_token: string;
         refreshToken: string;
         role: string;
-      }>
+      }>,
     ) => {
       localStorage.setItem(
         "user",
@@ -129,7 +129,7 @@ export const UserSlice = createSlice({
           userId: action.payload.userId,
           role: action.payload.role,
           ...(action.payload.userName && { userName: action.payload.userName }),
-        })
+        }),
       );
       state.currentUser = {
         ...action.payload,

@@ -1,6 +1,5 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-import {  Post } from "@/src/app/type";
-
+import { Post } from "@/src/app/type";
 
 export const communityPost = createApi({
   reducerPath: "communityPost",
@@ -79,7 +78,7 @@ export const communityPost = createApi({
       invalidatesTags: ["Posts"],
     }),
 
-    getPost: build.query<Post[], void>({
+    getPost: build.query<Post[], any>({
       query: () => ({
         url: "/community/view-post",
         method: "GET",
