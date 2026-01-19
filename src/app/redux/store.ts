@@ -13,6 +13,7 @@ import { createGroupPostSlice } from "./feature/community/groupPostSlice";
 import { SymptomsResultSlice } from "./feature/screening/symptoms/symptomsSlice";
 import { articleApi } from "./services/articleApi";
 import { contributorProfileApi } from "./services/contributorProfileSetupApi";
+import { adminApi } from "./services/adminApi";
 
 export const store = configureStore({
   reducer: {
@@ -43,6 +44,8 @@ export const store = configureStore({
 
     contributorProfile: contributorProfileApi.reducer,
     [contributorProfileApi.reducerPath]: contributorProfileApi.reducer,
+    admin: adminApi.reducer,
+    [adminApi.reducerPath]: adminApi.reducer,
   },
 
   // Adding the middleware for the APIs that helps in caching, invalidation, polling, etc.
@@ -54,7 +57,8 @@ export const store = configureStore({
       .concat(communityGroup.middleware)
       .concat(groupPost.middleware)
       .concat(articleApi.middleware)
-      .concat(contributorProfileApi.middleware),
+      .concat(contributorProfileApi.middleware)
+      .concat(adminApi.middleware),
 });
 
 export type RootState = ReturnType<typeof store.getState>;

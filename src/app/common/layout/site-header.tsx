@@ -49,6 +49,8 @@ export function SiteHeader() {
           <SiteNavAuth />
         ) : isLoggedIn && role === "contributor" ? (
           <SiteNavContributor />
+        ) : isLoggedIn && role === "admin" ? (
+          <SiteNavAdmin />
         ) : (
           <SiteNav />
         )}
@@ -211,6 +213,57 @@ function SiteNavContributor() {
         Resources
       </Link>
 
+      <Link
+        href="/dashboard/contributor"
+        className={cn(
+          "text-md font-semibold transition-colors hover:text-primary",
+          pathname.startsWith("/dashboard/contributor")
+            ? "text-primary"
+            : "text-foreground",
+        )}
+      >
+        Dashboard
+      </Link>
+      <button
+        className="text-md font-semibold text-foreground hover:text-primary transition-colors p-0 cursor-pointer"
+        onClick={handleLogout}
+      >
+        Logout
+      </button>
+    </nav>
+  );
+}
+
+function SiteNavAdmin() {
+  const dispatch = useAppDispatch();
+
+  const router = require("next/navigation").useRouter();
+  const role = useAppSelector(selectCurrentUser)?.role ?? "";
+
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {}, []);
+  const handleLogout = () => {
+    dispatch(logout());
+    router.push("/");
+  };
+
+  const pathname = usePathname();
+
+  if (!mounted) {
+    return (
+      <nav className="hidden lg:flex items-center gap-9 ">
+        {/* Render a placeholder or skeleton that matches server output */}
+      </nav>
+    );
+  }
+
+  return (
+    <nav className="hidden lg:flex gap-9 items-center px-6">
       <Link
         href="/dashboard/contributor"
         className={cn(

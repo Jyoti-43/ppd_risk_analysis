@@ -17,6 +17,7 @@ import {
   Eye,
   Loader2,
   AlertCircle,
+  
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -30,6 +31,7 @@ import { toast } from "react-toastify";
 import { format } from "date-fns";
 import { useAppSelector } from "../../Hooks/hook";
 import { selectCurrentUser } from "../../redux/feature/user/userSlice";
+import { Badge } from "@/components/ui/badge";
 
 const ContributorDashboard = () => {
   const {
@@ -46,14 +48,14 @@ const ContributorDashboard = () => {
 
   const stats = [
     {
-      label: "Total Published",
+      label: "Total Articles",
       value: articles.length,
       icon: <CheckCircle className="text-emerald-500" size={24} />,
       bgColor: "bg-emerald-50",
     },
     {
       label: "Pending Review",
-      value: 0, // Mocked for now
+      value: articles.filter((article) => article.status === "pending").length,
       icon: <Clock className="text-amber-500" size={24} />,
       bgColor: "bg-amber-50",
     },
@@ -261,10 +263,10 @@ const ContributorDashboard = () => {
                   Category
                 </th>
                 <th className="px-4 py-3 border-r border-muted-foreground/20 text-left text-md font-semibold text-gray-400 uppercase tracking-widest">
-                  Published Date
+                  Created Date
                 </th>
                 <th className="px-4 py-3 border-r border-muted-foreground/20 text-left text-md font-semibold text-gray-400 uppercase tracking-widest">
-                  Views
+                  Status
                 </th>
                 <th className="px-4 py-3 text-right text-md font-semibold text-gray-400 uppercase tracking-widest">
                   Actions
@@ -327,8 +329,15 @@ const ContributorDashboard = () => {
                     </td>
                     <td className="px-4 border border-muted-foreground/20">
                       <div className="flex items-center gap-2">
-                        <span className="text-gray-900 font-bold">1.2k</span>
-                        <TrendingUp size={14} className="text-emerald-500" />
+                        {article.status === "pending" ? (
+                          <Badge className="text-gray-900 bg-orange-100 font-bold">Pending</Badge>
+                        ) : article.status === "published" ? (
+                          <Badge className="text-gray-900 bg-green-100 font-bold">Published</Badge>
+                        ) : (
+                          <Badge className="text-gray-900 bg-red-100 font-bold">Rejected</Badge>
+                        )}
+                      {/* <Badge className="text-gray-900 font-bold">{article.status}</Badge> */}
+                        {/* <TrendingUp size={14} className="text-emerald-500" /> */}
                       </div>
                     </td>
                     <td className="px-4 text-right border border-muted-foreground/20">

@@ -1,6 +1,7 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
 //  community post types
+
 export interface Article {
   id: string;
   title: string;
@@ -17,8 +18,8 @@ export interface Article {
   status?: string;
 }
 
-export const articleApi = createApi({
-  reducerPath: "articleApi",
+export const adminApi = createApi({
+  reducerPath: "adminApi",
 
   baseQuery: fetchBaseQuery({
     baseUrl: `${process.env.NEXT_PUBLIC_API_URL}`,
@@ -35,9 +36,6 @@ export const articleApi = createApi({
           console.error("Failed to parse user from localStorage", e);
         }
       }
-      if (endpoint !== "articleUploadImage") {
-        headers.set("Content-Type", "application/json");
-      }
       return headers;
     },
   }),
@@ -49,35 +47,25 @@ export const articleApi = createApi({
   tagTypes: ["Articles", "Categories"],
 
   endpoints: (build) => ({
-    articleUploadImage: build.mutation<{ url: string } | any, FormData>({
-      query: (formData) => ({
-        url: "/contributor/article/upload-image",
-        method: "POST",
-        body: formData,
+    getPendingArticles: build.query<Article[], any>({
+      query: () => ({
+        url: "/admin/article/pending",
+        method: "GET",
       }),
+      // Tag this query so it can be invalidated
+      providesTags: ["Articles"],
     }),
 
-    createArticle: build.mutation<
-      any,
-      {
-        title: string;
-        preview: string;
-        content: string;
-        tags: string[];
-        categoryId: string;
-        image?: string;
-      }
-    >({
-      query: (body) => ({
-        url: "/contributor/article/create",
-        method: "POST",
-        body,
+    publishArticle: build.mutation<any, string>({
+      query: (articleId) => ({
+        url: `/admin/article/${articleId}/publish`,
+        method: "PATCH",
       }),
-      // Invalidate posts cache when a new post is created
+      // Invalidate posts cache when a post is deleted
       invalidatesTags: ["Articles"],
     }),
 
-    // both pending and published articles
+    // get pending and published article list
     getArticle: build.query<Article[], void>({
       query: () => ({
         url: "/contributor/article/list",
@@ -85,24 +73,6 @@ export const articleApi = createApi({
       }),
       // Tag this query so it can be invalidated
       providesTags: ["Articles"],
-    }),
-
-    // published articles
-    getPublishedArticle: build.query<Article[], void>({
-      query: () => ({
-        url: "/article/published",
-        method: "GET",
-      }),
-      // Tag this query so it can be invalidated
-      providesTags: ["Articles"],
-    }),
-
-    getSingleArticle: build.query<Article, string>({
-      query: (articleId) => ({
-        url: `/contributor/article/${articleId}`,
-        method: "GET",
-      }),
-      providesTags: (result, error, id) => [{ type: "Articles", id }],
     }),
 
     deleteArticle: build.mutation<any, string>({
@@ -140,11 +110,8 @@ export const articleApi = createApi({
 });
 
 export const {
-  useArticleUploadImageMutation,
-  useCreateArticleMutation,
-  useGetPublishedArticleQuery,
-  useGetSingleArticleQuery,
+  useGetPendingArticlesQuery,
+  usePublishArticleMutation,
   useDeleteArticleMutation,
   useUpdateArticleMutation,
-  useGetArticleQuery,
-} = articleApi;
+} = adminApi;

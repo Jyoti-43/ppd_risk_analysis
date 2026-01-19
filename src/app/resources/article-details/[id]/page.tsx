@@ -5,6 +5,7 @@ import {
   useGetSingleArticleQuery,
   useGetArticleQuery,
   Article,
+  useGetPublishedArticleQuery,
 } from "@/src/app/redux/services/articleApi";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -28,8 +29,12 @@ export default function ArticleDetailPage() {
   const router = useRouter();
 
   // Fetch article list to find the specific article
-  const { data: allArticles, isLoading, isError } = useGetArticleQuery();
-  const currentUser= useAppSelector(selectCurrentUser)?.userName
+  const {
+    data: allArticles,
+    isLoading,
+    isError,
+  } = useGetPublishedArticleQuery();
+  const currentUser = useAppSelector(selectCurrentUser)?.userName;
 
   const article = (allArticles as any[])?.find(
     (a: any) => String(a.id || a._id) === String(id),
@@ -85,9 +90,22 @@ export default function ArticleDetailPage() {
         <div className="bg-white rounded-[32px] p-8 md:p-12 shadow-sm border border-border/40">
           {/* Header Metadata */}
           <div className="flex flex-wrap items-center gap-4 mb-2 text-[13px] font-bold uppercase tracking-wider">
-            
             {/* <span className="text-primary/60">|</span> */}
-            <span className="text-primary bg-secondary/50 rounded-md p-1">{categoryName || "General"}</span>
+            <span className="text-primary bg-secondary/50 rounded-md p-1">
+              {categoryName || "General"}
+            </span>
+            |
+            <div className="flex flex-wrap gap-2">
+              {article.tags?.map((tag: string) => (
+                <Badge
+                  key={tag}
+                  variant="secondary"
+                  className="bg-primary/20 text-[12px] text-primary px-3 font-semibold rounded-xl"
+                >
+                  #{tag}
+                </Badge>
+              ))}
+            </div>
             <div className="flex-1" />
             <div className="flex items-center gap-2 text-muted-foreground">
               <Calendar size={16} />
@@ -105,7 +123,7 @@ export default function ArticleDetailPage() {
           </div>
 
           {/* Title */}
-          <h1 className="text-4xl md:text-5xl lg:text-5xl font-extrabold text-[#2d3a3a] leading-[1.15] mb-10">
+          <h1 className="text-4xl md:text-5xl lg:text-5xl font-extrabold text-[#2d3a3a]  mb-10">
             {article.title}
           </h1>
 
@@ -124,7 +142,7 @@ export default function ArticleDetailPage() {
           <div
             className="max-w-none text-[#4a5555] leading-relaxed
             [&_p]:mb-6 [&_p]:text-[18px]
-            [&_p:first-of-type]:first-letter:text-6xl [&_p:first-of-type]:first-letter:font-bold [&_p:first-of-type]:first-letter:text-[#ff8172] [&_p:first-of-type]:first-letter:float-left [&_p:first-of-type]:first-letter:mr-3 [&_p:first-of-type]:first-letter:mt-2 [&_p:first-of-type]:first-letter:leading-none
+            [&>div>p:first-of-type]:first-letter:text-6xl [&>div>p:first-of-type]:first-letter:font-bold [&>div>p:first-of-type]:first-letter:text-primary [&>div>p:first-of-type]:first-letter:float-left [&>div>p:first-of-type]:first-letter:mr-3 [&>div>p:first-of-type]:first-letter:mt-1 [&>div>p:first-of-type]:first-letter:leading-none
             [&_h1]:text-3xl [&_h1]:font-extrabold [&_h1]:text-[#2d3a3a] [&_h1]:mt-10 [&_h1]:mb-6
             [&_h2]:text-2xl [&_h2]:font-extrabold [&_h2]:text-[#2d3a3a] [&_h2]:mt-10 [&_h2]:mb-4
             [&_ul]:list-disc [&_ul]:pl-6 [&_ul]:mb-6 [&_li]:mb-2
@@ -176,7 +194,11 @@ export default function ArticleDetailPage() {
               <Avatar className="size-24 border-4 border-[#fff1f0] shadow-sm">
                 <AvatarImage src="https://images.unsplash.com/photo-1559839734-2b71f1536783?q=80&w=200&auto=format&fit=crop" />
                 <AvatarFallback>
-                  {article.userName?.charAt(0) || "U"}
+                  {(
+                    article.contributor?.name ||
+                    article.userName ||
+                    "U"
+                  ).charAt(0)}
                 </AvatarFallback>
               </Avatar>
               <div className="absolute bottom-1 right-1 bg-white rounded-full p-1 border border-border/40">
@@ -184,7 +206,9 @@ export default function ArticleDetailPage() {
               </div>
             </div>
             <h3 className="text-xl font-bold text-[#2d3a3a] mb-1">
-              {article.userName || "Dr. Sarah Jenkins"}
+              {article.contributor?.name ||
+                article.userName ||
+                "Dr. Sarah Jenkins"}
             </h3>
             <p className="text-[13px] font-bold text-destructive/80 mb-4 uppercase tracking-tighter">
               Clinical Psychologist
@@ -221,56 +245,8 @@ export default function ArticleDetailPage() {
             </Button> */}
           </div>
 
-          {/* More from Author */}
-          <div className="bg-white rounded-[32px] p-8 shadow-sm border border-border/40">
-            <div className="flex justify-between items-center mb-6">
-              <h4 className="text-[11px] font-bold uppercase tracking-widest text-[#2d3a3a]">
-                More from {article.userName?.split(" ")[0] || "Sarah"}
-              </h4>
-              <button className="text-[10px] font-bold text-destructive uppercase">
-                View All
-              </button>
-            </div>
-            <div className="space-y-4">
-              {[
-                {
-                  title: "5-Minute Breathing Reset for Moms",
-                  date: "Sep 12",
-                  img: "https://images.unsplash.com/photo-1515377905703-c4788e51af15?q=80&w=100&auto=format&fit=crop",
-                },
-                {
-                  title: "Talking to Your Partner: A Guide",
-                  date: "Aug 24",
-                  img: "https://images.unsplash.com/photo-1516589174184-e6646f6588f2?q=80&w=100&auto=format&fit=crop",
-                },
-              ].map((item, idx) => (
-                <div key={idx} className="flex gap-4 group cursor-pointer">
-                  <div className="size-16 rounded-2xl overflow-hidden shrink-0">
-                    <img
-                      src={item.img}
-                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                    />
-                  </div>
-                  <div className="flex flex-col justify-center min-w-0">
-                    <h5 className="text-[14px] font-bold text-[#2d3a3a] leading-tight line-clamp-2 mb-1 group-hover:text-primary/80">
-                      {item.title}
-                    </h5>
-                    <div className="flex items-center gap-2 text-[11px] text-muted-foreground font-bold">
-                      <Badge className="bg-[#8aa771] hover:bg-[#8aa771]/90 text-white border-none py-0 px-1 text-[8px] rounded-sm">
-                        P
-                      </Badge>
-                      <span className="tracking-tighter uppercase">
-                        • {item.date}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
           {/* Editorial Guidelines Card */}
-          <div className="bg-[#fff1f0] rounded-[32px] p-10 relative overflow-hidden group cursor-pointer hover:shadow-md transition-shadow">
+          <div className="bg-primary/10 rounded-[32px] shadow-sm p-10 relative overflow-hidden group cursor-pointer hover:shadow-md transition-shadow">
             <div className="absolute -right-4 -top-4 size-32 bg-[#ff8172]/5 rounded-full blur-2xl group-hover:bg-[#ff8172]/10 transition-colors" />
             <h4 className="text-xl font-extrabold text-[#2d3a3a] mb-3 leading-tight">
               Editorial Guidelines

@@ -2,12 +2,17 @@
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
 import { useState } from "react";
-import { useGetArticleQuery } from "../../redux/services/articleApi";
+import { useGetPublishedArticleQuery } from "../../redux/services/articleApi";
 
 export default function ArticleResources() {
   const [activeFilter, setActiveFilter] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
-  const { data: articles, isLoading } = useGetArticleQuery();
+  const {
+    data: articles,
+    isLoading,
+    isError,
+    error,
+  } = useGetPublishedArticleQuery();
 
   const topicFilters = [
     { id: "all", label: "All Topics", icon: null },
@@ -18,26 +23,50 @@ export default function ArticleResources() {
     { id: "Wellness", label: "Wellness", icon: "✨" },
   ];
 
-  const filteredArticles = articles?.filter((article) => {
-    // Category filtering
-    const articleCategoryName =
-      typeof article.category === "object" && article.category !== null
-        ? (article.category as any).name
-        : article.category || "";
+  // Determine the actual array of articles
+  const articlesArray = Array.isArray(articles)
+    ? articles
+    : (articles as any)?.articles ||
+      (articles as any)?.allArticles ||
+      (articles as any)?.all_articles ||
+      (articles as any)?.data ||
+      [];
 
-    const matchesCategory =
-      activeFilter === "all" ||
-      articleCategoryName.toLowerCase().includes(activeFilter.toLowerCase());
+  const filteredArticles = articlesArray.filter((article: any) => {
+    // 1. Get properties safely with multiple fallbacks
+    const title = (
+      article.title ||
+      article.article_title ||
+      article.postTitle ||
+      ""
+    ).toLowerCase();
+    const catName = (
+      typeof article.category === "object"
+        ? article.category?.name
+        : article.category || article.categoryName || ""
+    ).toLowerCase();
 
-    // Search filtering (title, tags, category)
-    const lowerSearch = searchQuery.toLowerCase();
-    const matchesSearch =
-      article.title.toLowerCase().includes(lowerSearch) ||
-      articleCategoryName.toLowerCase().includes(lowerSearch) ||
-      article.tags?.some((tag) => tag.toLowerCase().includes(lowerSearch));
+    // 2. Normalize filter values
+    const filter = activeFilter.toLowerCase();
+    const search = searchQuery.toLowerCase();
 
-    return matchesCategory && matchesSearch;
+    // 3. Match logic
+    const categoryMatch = filter === "all" || catName.includes(filter);
+    const searchMatch =
+      !search || title.includes(search) || catName.includes(search);
+
+    return categoryMatch && searchMatch;
   });
+
+  console.log("Raw Articles Data:", articles);
+  console.log("Articles Array:", articlesArray);
+  if (articlesArray.length > 0) {
+    console.log("First article keys:", Object.keys(articlesArray[0]));
+    console.log("First article content:", articlesArray[0]);
+  }
+  console.log("Active Filter:", activeFilter);
+  console.log("Search Query:", searchQuery);
+  console.log("Filtered Results:", filteredArticles);
 
   return (
     <div className="min-h-screen bg-background py-6">
@@ -127,98 +156,112 @@ export default function ArticleResources() {
           <h2 className="text-2xl font-bold text-foreground mb-6">
             Latest Articles
           </h2>
-          <Link href="/new-article">
+          {/* <Link href="/new-article">
             <button className="mb-6 inline-flex items-center gap-2 bg-primary hover:bg-primary/90 text-white px-4 py-2 rounded-full font-semibold transition-colors">
               <span className="material-symbols-outlined text-md">add</span>
               Write New Article
             </button>
-          </Link>
+          </Link> */}
         </div>
 
         {isLoading ? (
           <div className="flex justify-center items-center h-64">
             <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
           </div>
+        ) : isError ? (
+          <div className="text-center py-20 text-red-500">
+            <p className="text-lg font-medium">Failed to load articles.</p>
+            <p className="text-sm opacity-70">
+              Please check your connection or try again later.
+            </p>
+          </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10 mb-10">
             {filteredArticles && filteredArticles.length > 0 ? (
-              filteredArticles.map((article) => (
-                <Link
-                  key={article.id}
-                  href={`/resources/article-details/${article.id}`}
-                >
-                  <article className="flex flex-col gap-6 p-5 bg-white rounded-[20px] border border-border shadow-sm hover:shadow-md transition-shadow h-full cursor-pointer">
-                    {/* Image Container */}
-                    <div className="relative md:w-full shrink-0 aspect-[4/3] rounded-xl overflow-hidden bg-muted">
-                      <img
-                        src={(() => {
-                          const imgPath = article.image || article.imageUrl;
-                          if (!imgPath) return "/placeholder.svg";
-                          if (imgPath.startsWith("http")) return imgPath;
-                          return `${process.env.NEXT_PUBLIC_API_URL}${
-                            imgPath.startsWith("/") ? "" : "/"
-                          }${imgPath}`;
-                        })()}
-                        alt={article.title}
-                        className="w-full h-full object-cover"
-                      />
+              filteredArticles.map((article:any) => {
+                const articleId = article.id || (article as any).articleId;
+                return (
+                  <Link
+                    key={articleId}
+                    href={`/resources/article-details/${articleId}`}
+                  >
+                    <article className="flex flex-col gap-6 p-5 bg-white rounded-[20px] border border-border shadow-sm hover:shadow-md transition-shadow h-full cursor-pointer">
+                      {/* Image Container */}
+                      <div className="relative md:w-full shrink-0 aspect-[4/3] rounded-xl overflow-hidden bg-muted">
+                        <img
+                          src={(() => {
+                            const imgPath = article.image || article.imageUrl;
+                            if (!imgPath) return "/placeholder.svg";
+                            if (imgPath.startsWith("http")) return imgPath;
+                            return `${process.env.NEXT_PUBLIC_API_URL}${
+                              imgPath.startsWith("/") ? "" : "/"
+                            }${imgPath}`;
+                          })()}
+                          alt={article.title}
+                          className="w-full h-full object-cover"
+                        />
 
-                      {/* Category Badge */}
-                      <div className="absolute top-3 left-3">
-                        <Badge className="bg-white/90 hover:bg-white text-foreground/80 text-[11px] font-bold px-2 py-0.5 border-none shadow-sm backdrop-blur-sm rounded-md">
-                          {typeof article.category === "object" &&
-                          article.category !== null
-                            ? (article.category as any).name
-                            : article.category || "General"}
-                        </Badge>
+                        {/* Category Badge */}
+                        <div className="absolute top-3 left-3">
+                          <Badge className="bg-white/90 hover:bg-white text-foreground/80 text-[11px] font-bold px-2 py-0.5 border-none shadow-sm backdrop-blur-sm rounded-md">
+                            {typeof article.category === "object" &&
+                            article.category !== null
+                              ? (article.category as any).name
+                              : article.category || "General"}
+                          </Badge>
+                        </div>
                       </div>
-                    </div>
 
-                    {/* card Content Section */}
-                    <div className="flex flex-col flex-1 py-1">
-                      <div className="flex items-center gap-2.5 mb-2.5">
-                        <div className="size-6 rounded-full bg-primary/10 flex items-center justify-center text-primary overflow-hidden">
-                          <span className="material-symbols-outlined text-[16px] fill">
-                            account_circle
+                      {/* card Content Section */}
+                      <div className="flex flex-col flex-1 py-1">
+                        <div className="flex items-center gap-2.5 mb-2.5">
+                          <div className="size-6 rounded-full bg-primary/10 flex items-center justify-center text-primary overflow-hidden">
+                            <span className="material-symbols-outlined text-[16px] fill">
+                              account_circle
+                            </span>
+                          </div>
+                          <span className="text-[13px] font-semibold text-foreground/90">
+                            {article.contributor.name || "Contributor"}
+                          </span>
+                          <span className="text-[13px] text-muted-foreground">
+                            •
+                          </span>
+                          <span className="text-[13px] text-muted-foreground">
+                            {article.createdAt
+                              ? new Date(article.createdAt).toLocaleDateString()
+                              : "Recent"}
                           </span>
                         </div>
-                        <span className="text-[13px] font-semibold text-foreground/90">
-                          {article.userName || "Contributor"}
-                        </span>
-                        <span className="text-[13px] text-muted-foreground">
-                          •
-                        </span>
-                        <span className="text-[13px] text-muted-foreground">
-                          {article.createdAt
-                            ? new Date(article.createdAt).toLocaleDateString()
-                            : "Recent"}
-                        </span>
-                      </div>
 
-                      <h3 className="text-[20px] font-extrabold text-foreground leading-snug mb-3 line-clamp-2">
-                        {article.title}
-                      </h3>
-                      <p className="text-sm text-muted-foreground leading-relaxed line-clamp-3">
-                        {article.preview}
-                      </p>
-                    </div>
-                  </article>
-                </Link>
-              ))
+                        <h3 className="text-[20px] font-extrabold text-foreground leading-snug mb-3 line-clamp-2">
+                          {article.title}
+                        </h3>
+                        <p className="text-sm text-muted-foreground leading-relaxed line-clamp-3">
+                          {article.preview}
+                        </p>
+                      </div>
+                    </article>
+                  </Link>
+                );
+              })
             ) : (
               <div className="col-span-full py-20 text-center">
                 <p className="text-muted-foreground text-lg">
-                  No articles found matching your criteria.
+                  {articles && articles.length > 0
+                    ? "No articles found matching your criteria."
+                    : "No articles have been shared yet."}
                 </p>
-                <button
-                  onClick={() => {
-                    setSearchQuery("");
-                    setActiveFilter("all");
-                  }}
-                  className="mt-4 text-primary font-bold hover:underline"
-                >
-                  Clear all filters
-                </button>
+                {(searchQuery || activeFilter !== "all") && (
+                  <button
+                    onClick={() => {
+                      setSearchQuery("");
+                      setActiveFilter("all");
+                    }}
+                    className="mt-4 text-primary font-bold hover:underline"
+                  >
+                    Clear all filters
+                  </button>
+                )}
               </div>
             )}
           </div>

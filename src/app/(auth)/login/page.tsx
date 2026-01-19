@@ -81,6 +81,8 @@ const LoginForm = () => {
       );
       if (data.role === "contributor" && !setupCompleted) {
         router.push("/dashboard/contributor/profile-setup");
+      } else if (data.role === "admin") {
+        router.push("/dashboard/admin");
       } else {
         router.push(callbackUrl);
       }
