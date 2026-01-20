@@ -94,9 +94,7 @@ Assess your mental health through scientifically-backed screening methods:
 - `src/lib`: Shared utility functions and configurations.
 - `public`: Static assets like images and fonts.
 
-## 🤝 Contributing
 
-Contributions are welcome! Please feel free to submit a Pull Request.
 
 ## 📄 Credits & License
 
