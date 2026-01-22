@@ -20,6 +20,8 @@ import { useSearchParams } from "next/navigation";
 import { communityPost } from "../../redux/services/communityPostApi";
 import { communityGroup } from "../../redux/services/communityGroupApi";
 import { screeningAPI } from "../../redux/services/screeningApi";
+import { groupPost } from "../../redux/services/groupPostApi";
+import { userDashboardApi } from "../../redux/services/userDashboardApi";
 
 const FcGoogle = dynamic(
   () => import("react-icons/fc").then((m) => m.FcGoogle),
@@ -55,21 +57,37 @@ const LoginForm = () => {
   useEffect(() => {
     if (isSuccess && data) {
       toast.success("Login Successful");
+      // Normalize response fields (support snake_case or camelCase from backend)
+      const accessToken = data.access_token || data.accessToken || null;
+      const refreshToken = data.refreshToken || data.refresh_token || null;
+      const userId = data.user?.id ?? data.userId ?? null;
+      const userName = data.user?.name ?? data.userName ?? null;
+      const emailResp = data.user?.email ?? data.email ?? null;
+
+      console.debug("Login response normalized:", {
+        userId,
+        userName,
+        email: emailResp,
+        hasAccessToken: !!accessToken,
+        hasRefreshToken: !!refreshToken,
+      });
+
       dispatch(
         setCredientials({
-          userId: data.user.id,
-          userName: data.user.name,
-          email: data.user.email,
-          access_token: data.access_token,
-          refreshToken: data.refreshToken,
+          userId,
+          userName,
+          email: emailResp,
+          access_token: accessToken,
+          refreshToken: refreshToken,
           role: data.role,
         }),
       );
 
-      // Reset all API states to clear guest/old data and force fresh fetches with new token
       dispatch(communityPost.util.resetApiState());
       dispatch(communityGroup.util.resetApiState());
       dispatch(screeningAPI.util.resetApiState());
+      dispatch(groupPost.util.resetApiState());
+      dispatch(userDashboardApi.util.resetApiState());
 
       setEmail("");
       setPassword("");

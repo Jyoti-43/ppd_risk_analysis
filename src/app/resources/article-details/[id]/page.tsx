@@ -155,7 +155,7 @@ export default function ArticleDetailPage() {
 
           {/* Tags & Stats Footer */}
           <div className="mt-16 pt-8 border-t border-border/60 flex flex-wrap items-center justify-between gap-6">
-            <div className="flex flex-wrap gap-2">
+            {/* <div className="flex flex-wrap gap-2">
               <span className="text-[13px] font-bold text-muted-foreground mr-2">
                 Tags:
               </span>
@@ -168,21 +168,21 @@ export default function ArticleDetailPage() {
                   #{tag}
                 </Badge>
               ))}
-            </div>
+            </div> */}
 
-            {/* <div className="flex items-center gap-6 text-muted-foreground font-semibold text-[14px]">
-              <div className="flex items-center gap-2">
+            <div className="flex items-center gap-6 text-muted-foreground font-semibold text-[14px]">
+              {/* <div className="flex items-center gap-2">
                 <Eye size={18} className="text-muted-foreground/60" />
                 <span>1,240 Views</span>
-              </div>
+              </div> */}
               <div className="flex items-center gap-2">
                 <Heart size={18} className="text-[#ff8172]" />
                 <span>42 Likes</span>
               </div>
-              <div className="flex items-center gap-2 cursor-pointer hover:text-primary transition-colors">
+              {/* <div className="flex items-center gap-2 cursor-pointer hover:text-primary transition-colors">
                 <Share2 size={18} />
-              </div>
-            </div> */}
+              </div> */}
+            </div>
           </div>
         </div>
 

@@ -32,8 +32,8 @@ export const groupPost = createApi({
     },
   }),
 
-  // Cache data for 5 minutes (300 seconds) - won't refetch if data exists
-  keepUnusedDataFor: 300,
+  // Cache data for 1 hour (3600 seconds) - won't refetch if data exists
+  keepUnusedDataFor: 3600,
 
   // Tag types for cache invalidation
   tagTypes: ["GroupPost", "Categories"],

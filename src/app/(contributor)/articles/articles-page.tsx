@@ -125,12 +125,12 @@ export default function ArticleResources() {
             <h2 className="text-2xl font-bold text-foreground">
               Browse by Topic
             </h2>
-            <a
+            {/* <a
               href="#"
               className="text-primary font-semibold hover:text-primary/80 transition-colors"
             >
               View All
-            </a>
+            </a> */}
           </div>
 
           <div className="flex flex-wrap gap-3">

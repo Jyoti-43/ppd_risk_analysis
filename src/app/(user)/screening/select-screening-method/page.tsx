@@ -45,7 +45,7 @@ const SelectScreeningMethod = () => {
           />
           <MethodCard
             id="hybrid"
-            title="Full Assessment"
+            title="Hybrid Assessment"
             description="A comprehensive combined (epds + symptoms) screening for the most accurate understanding of your wellbeing."
             icon={Brain}
             colorClass="bg-primary"

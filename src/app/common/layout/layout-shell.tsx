@@ -3,6 +3,7 @@
 import { usePathname } from "next/navigation";
 import { SiteHeader } from "./site-header";
 import { SiteFooter } from "./site-footer";
+import { CommunityPrefetcher } from "./community-prefetcher";
 import ProtectedRoute from "../../component/auth/ProtectedRoute/ProtectedRoute";
 
 const AUTH_PREFIXES = [
@@ -38,6 +39,7 @@ export function LayoutShell({ children }: { children: React.ReactNode }) {
 
     return (
       <ProtectedRoute roles={allowedRoles}>
+        <CommunityPrefetcher />
         <SiteHeader />
         {children}
       </ProtectedRoute>
@@ -58,6 +60,7 @@ export function LayoutShell({ children }: { children: React.ReactNode }) {
   // Protected routes: header/footer + authentication required
   return (
     <ProtectedRoute roles={["mother", "contributor", "admin"]}>
+      <CommunityPrefetcher />
       <SiteHeader />
       {children}
       <SiteFooter />

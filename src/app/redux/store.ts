@@ -15,6 +15,7 @@ import { HybridResultSlice } from "./feature/screening/hybrid/hybridSlice";
 import { articleApi } from "./services/articleApi";
 import { contributorProfileApi } from "./services/contributorProfileSetupApi";
 import { adminApi } from "./services/adminApi";
+import { userDashboardApi } from "./services/userDashboardApi";
 
 export const store = configureStore({
   reducer: {
@@ -48,6 +49,8 @@ export const store = configureStore({
     [contributorProfileApi.reducerPath]: contributorProfileApi.reducer,
     admin: adminApi.reducer,
     [adminApi.reducerPath]: adminApi.reducer,
+    userDashboard: userDashboardApi.reducer,
+    [userDashboardApi.reducerPath]: userDashboardApi.reducer,
   },
 
   // Adding the middleware for the APIs that helps in caching, invalidation, polling, etc.
@@ -60,7 +63,9 @@ export const store = configureStore({
       .concat(groupPost.middleware)
       .concat(articleApi.middleware)
       .concat(contributorProfileApi.middleware)
-      .concat(adminApi.middleware),
+      .concat(adminApi.middleware)
+      .concat(userDashboardApi.middleware),
+
 });
 
 export type RootState = ReturnType<typeof store.getState>;

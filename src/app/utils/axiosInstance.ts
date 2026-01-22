@@ -10,6 +10,8 @@ export const axiosInstance = axios.create({
   headers: {
     "Content-Type": "application/json",
   },
+  // Send cookies (httpOnly refresh token) with requests when needed
+  withCredentials: true,
 });
 
 // Flag to prevent multiple refresh attempts
@@ -79,34 +81,53 @@ axiosInstance.interceptors.response.use(
       originalRequest._retry = true;
       isRefreshing = true;
 
-      const state = store.getState();
-      const refreshToken = state.user.currentUser.refreshToken;
-
-      if (!refreshToken) {
-        // No refresh token available, logout
-        store.dispatch(logout());
-        processQueue(error, null);
-        isRefreshing = false;
-        return Promise.reject(error);
-      }
-
       try {
-        // Call refresh token endpoint
-        const response = await axios.post(`${baseURL}/refresh-token`, {
-          refresh_token: refreshToken,
-        });
+        // Debug: log refresh attempt
+        try {
+          const state = store.getState();
+          const refreshToken = state.user.currentUser.refreshToken;
+          console.debug("[axiosInstance] attempting refresh-token", {
+            refreshToken: refreshToken ? "(present)" : "(missing)",
+            baseURL,
+            trigger:
+              originalRequest?.url || originalRequest?.baseURL || "unknown",
+          });
+        } catch (e) {
+          /* ignore logging errors */
+        }
 
-        const { access_token, refresh_token: newRefreshToken } = response.data;
+        // Call refresh token endpoint using httpOnly cookie (backend reads cookie)
+        const response = await axios.post(
+          `${baseURL}/refresh-token`,
+          {},
+          { withCredentials: true },
+        );
 
-        // Update tokens in Redux store
-        const currentUser = state.user.currentUser;
+        // Debug: log refresh response
+        try {
+          console.debug(
+            "[axiosInstance] refresh-token response",
+            response?.data,
+          );
+        } catch (e) {
+          /* ignore logging errors */
+        }
+
+        const { access_token, refresh_token: newRefreshToken } =
+          response.data || {};
+
+        // Update tokens in Redux store (keep any existing refreshToken value; when using httpOnly cookie
+        // the client won't receive the refresh token in JS. Backend should set the cookie.)
+        const currentUser = store.getState().user.currentUser;
         store.dispatch(
           setCredientials({
             userId: currentUser.userId!,
             userName: currentUser.userName || undefined,
             email: currentUser.email!,
             access_token,
-            refreshToken: newRefreshToken || refreshToken,
+            // If backend returns a refresh token in response (not recommended with httpOnly cookie), use it;
+            // otherwise preserve the existing stored value (may be null).
+            refreshToken: newRefreshToken || currentUser.refreshToken || null,
             role: currentUser.role!,
           }),
         );

@@ -26,8 +26,8 @@ export const communityPost = createApi({
     },
   }),
 
-  // Cache data for 5 minutes (300 seconds) - won't refetch if data exists
-  keepUnusedDataFor: 600,
+  // Cache data for 1 hour (3600 seconds) - won't refetch if data exists
+  keepUnusedDataFor: 3600,
 
   // Tag types for cache invalidation
   tagTypes: ["Posts", "Categories"],
