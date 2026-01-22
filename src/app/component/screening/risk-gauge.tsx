@@ -1,29 +1,36 @@
 interface RiskGaugeProps {
-  score: number | string
-  maxScore: number
+  score: number | string;
+  maxScore: number;
   // optional: snap indicator to one of three zones regardless of numeric score
-  snapTo?: "low" | "moderate" | "high"
-  screening?: "epds" | "symptoms"
+  snapTo?: "low" | "moderate" | "high";
+  screening?: "epds" | "symptoms" | "hybrid";
 }
 
-export function RiskGauge({ score, maxScore, snapTo, screening }: RiskGaugeProps) {
-  const numericScore = typeof score === "string" ? Number(score) : score
-  const safeScore = Number.isFinite(numericScore) ? numericScore : 0
-  let percentage = (safeScore / maxScore) * 100
+export function RiskGauge({
+  score,
+  maxScore,
+  snapTo,
+  screening,
+}: RiskGaugeProps) {
+  const numericScore = typeof score === "string" ? Number(score) : score;
+  const safeScore = Number.isFinite(numericScore) ? numericScore : 0;
+  let percentage = (safeScore / maxScore) * 100;
   // clamp to [0,100]
-  percentage = Math.max(0, Math.min(100, percentage))
+  percentage = Math.max(0, Math.min(100, percentage));
 
   if (snapTo) {
-    if (snapTo === "low") percentage = 10
-    if (snapTo === "moderate") percentage = 40
-    if (snapTo === "high") percentage = 70
+    if (snapTo === "low") percentage = 10;
+    if (snapTo === "moderate") percentage = 40;
+    if (snapTo === "high") percentage = 70;
   }
 
   return (
     <div className="space-y-4">
-      <div className=" relative flex items-center justify-end">
-        <div className=" absolute bottom-0 right-0 text-lg font-bold text-primary">
-          {safeScore} / {maxScore}
+      <div className="relative flex items-center justify-end">
+        <div className="absolute bottom-0 right-0 text-lg font-bold text-primary">
+          {screening === "epds"
+            ? `${safeScore} / ${maxScore}`
+            : `${Math.round(safeScore)}%`}
         </div>
       </div>
 
@@ -39,19 +46,29 @@ export function RiskGauge({ score, maxScore, snapTo, screening }: RiskGaugeProps
       </div>
 
       {/* Labels */}
-          {/** Show three labels for EPDS screening, and two labels for Symptoms screening. */}
-          {screening === "symptoms" ? (
-            <div className="flex items-center justify-between text-xs font-semibold">
-              <span className="text-green-700 uppercase tracking-wide">Low Risk</span>
-              <span className="text-red-600 uppercase tracking-wide">High Risk</span>
-            </div>
-          ) : (
-            <div className="flex items-center justify-between text-xs font-semibold">
-              <span className="text-green-700 uppercase tracking-wide">Low Risk</span>
-              <span className="text-orange-600 uppercase tracking-wide">Moderate</span>
-              <span className="text-red-600 uppercase tracking-wide">High Risk</span>
-            </div>
-          )}
+      {/** Show three labels for EPDS screening, and two labels for Symptoms screening. */}
+      {screening === "symptoms" ? (
+        <div className="flex items-center justify-between text-xs font-semibold">
+          <span className="text-green-700 uppercase tracking-wide">
+            Low Risk
+          </span>
+          <span className="text-red-600 uppercase tracking-wide">
+            High Risk
+          </span>
+        </div>
+      ) : (
+        <div className="flex items-center justify-between text-xs font-semibold">
+          <span className="text-green-700 uppercase tracking-wide">
+            Low Risk
+          </span>
+          <span className="text-orange-600 uppercase tracking-wide">
+            Moderate
+          </span>
+          <span className="text-red-600 uppercase tracking-wide">
+            High Risk
+          </span>
+        </div>
+      )}
     </div>
-  )
+  );
 }

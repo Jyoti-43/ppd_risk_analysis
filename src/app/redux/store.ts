@@ -11,6 +11,7 @@ import { communityGroup } from "./services/communityGroupApi";
 import { groupPost } from "./services/groupPostApi";
 import { createGroupPostSlice } from "./feature/community/groupPostSlice";
 import { SymptomsResultSlice } from "./feature/screening/symptoms/symptomsSlice";
+import { HybridResultSlice } from "./feature/screening/hybrid/hybridSlice";
 import { articleApi } from "./services/articleApi";
 import { contributorProfileApi } from "./services/contributorProfileSetupApi";
 import { adminApi } from "./services/adminApi";
@@ -28,6 +29,7 @@ export const store = configureStore({
     // Slice ko detail lai epdsResult vanne naam diyekoo
     epdsResult: EpdsResultSlice.reducer,
     symptomsResult: SymptomsResultSlice.reducer,
+    hybridResult: HybridResultSlice.reducer,
     // yo chai api call ko lagi redux service add gareko
     [screeningAPI.reducerPath]: screeningAPI.reducer,
 

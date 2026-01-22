@@ -1,5 +1,5 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-import { EPDSQuestion, SymptomsQuestion, SymptomsAnswer, SymptomsAssessmentResponse } from "../../type";
+import { EPDSQuestion, SymptomsQuestion, SymptomsAnswer, SymptomsAssessmentResponse, HybridAssessmentResponse } from "../../type";
 export const screeningAPI = createApi({
   reducerPath: "ppdScreening",
   baseQuery: fetchBaseQuery({
@@ -47,9 +47,19 @@ export const screeningAPI = createApi({
       }),
     }),
 
-
+    hybridAssessment: build.mutation<HybridAssessmentResponse, any>({
+      query: (body) => ({
+        url: "/screening/hybrid",
+        method: "POST",
+        body,
+      }),
+    }),
   }),
 });
 
-export const { useEpdsScreeningMutation, useSymptomsQuestionQuery, useSymptomsAssessmentMutation } =
-  screeningAPI;
+export const {
+  useEpdsScreeningMutation,
+  useSymptomsQuestionQuery,
+  useSymptomsAssessmentMutation,
+  useHybridAssessmentMutation,
+} = screeningAPI;

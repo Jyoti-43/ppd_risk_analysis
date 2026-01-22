@@ -150,7 +150,7 @@ export interface SymptomsQuestionsResponse {
 }
 
 export interface SymptomsResultState {
-  answers: SymptomsQuestion | null;
+  answers: Record<string, any> | null;
   score: number | null;
   status: "idle" | "loading" | "succeeded" | "failed";
   error: string | null;
@@ -166,4 +166,34 @@ export interface SymptomsAssessmentResponse {
     clinical_note?: string;
     threshold_used?: number;
   };
+}
+
+export interface HybridAssessmentResponse {
+  audit: {
+    decision_path: string;
+    is_discordant: boolean;
+    timestamp: string;
+    uncertainty_flag: boolean;
+  };
+  clinical_recommendation: string;
+  explanation: string;
+  final_probability: number;
+  fusion_method: string;
+  is_critical: boolean;
+  metrics: {
+    epds_total: number;
+    epds_risk: string;
+    ml_raw: number;
+    ml_std: number;
+  };
+  risk_label: string;
+  system_disclaimer: string;
+}
+
+export interface HybridResultState {
+  epdsAnswers: EPDSQuestion | null;
+  symptomsAnswers: Record<string, any> | null;
+  status: "idle" | "loading" | "succeeded" | "failed";
+  error: string | null;
+  result: HybridAssessmentResponse | null;
 }
