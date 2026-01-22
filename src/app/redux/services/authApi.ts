@@ -1,4 +1,8 @@
-import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+import {
+  createApi,
+  fetchBaseQuery,
+  BaseQueryFn,
+} from "@reduxjs/toolkit/query/react";
 import { logout } from "../feature/user/userSlice";
 import { communityPost } from "./communityPostApi";
 import { communityGroup } from "./communityGroupApi";
@@ -6,11 +10,46 @@ import { screeningAPI } from "./screeningApi";
 import { groupPost } from "./groupPostApi";
 import { articleApi } from "./articleApi";
 import { contributorProfileApi } from "./contributorProfileSetupApi";
-import ForgotPassword from "../../(auth)/forgotPassword/page";
+import axiosInstance from "../../utils/axiosInstance";
+import { AxiosError, AxiosRequestConfig } from "axios";
+
+// Custom base query using axios instance with refresh token support
+const axiosBaseQuery =
+  (
+    { baseUrl }: { baseUrl: string } = { baseUrl: "" },
+  ): BaseQueryFn<
+    {
+      url: string;
+      method?: AxiosRequestConfig["method"];
+      body?: AxiosRequestConfig["data"];
+      params?: AxiosRequestConfig["params"];
+    },
+    unknown,
+    unknown
+  > =>
+  async ({ url, method = "GET", body, params }) => {
+    try {
+      const result = await axiosInstance({
+        url: baseUrl + url,
+        method,
+        data: body,
+        params,
+      });
+      return { data: result.data };
+    } catch (axiosError) {
+      const err = axiosError as AxiosError;
+      return {
+        error: {
+          status: err.response?.status,
+          data: err.response?.data || err.message,
+        },
+      };
+    }
+  };
 
 export const authUserAPI = createApi({
   reducerPath: "authUser",
-  baseQuery: fetchBaseQuery({ baseUrl: `${process.env.NEXT_PUBLIC_API_URL}` }),
+  baseQuery: axiosBaseQuery({ baseUrl: `${process.env.NEXT_PUBLIC_API_URL}` }),
 
   endpoints: (build) => ({
     registerUser: build.mutation({
@@ -34,14 +73,6 @@ export const authUserAPI = createApi({
         body,
       }),
     }),
-
-    // ForgotPassword: build.mutation({
-    //   query: (email: string) => ({
-    //     url: "/forgot-password",
-    //     method: "POST",
-    //     body: { email },
-    //   }),
-    // }),
 
     logoutUser: build.mutation({
       query: () => ({
@@ -73,7 +104,6 @@ export const authUserAPI = createApi({
 });
 
 export const {
-  // useForgotPasswordMutation,
   useRegisterUserMutation,
   useLoginUserMutation,
   useLogoutUserMutation,
