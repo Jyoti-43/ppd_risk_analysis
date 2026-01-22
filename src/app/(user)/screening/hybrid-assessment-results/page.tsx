@@ -21,7 +21,6 @@ import {
 } from "lucide-react";
 
 export default function HybridResultsPage() {
-    
   const router = useRouter();
   const result = useAppSelector(selectHybridResult);
   const status = useAppSelector(selectHybridStatus);
@@ -179,7 +178,7 @@ export default function HybridResultsPage() {
                 </p>
               </div>
 
-              <div className="w-full max-w-2xl mx-auto">
+              <div className="w-full max-w-2xl mx-auto print:mt-6">
                 <RiskGauge
                   score={Math.round(final_probability * 100)}
                   maxScore={100}
@@ -189,7 +188,7 @@ export default function HybridResultsPage() {
               </div>
 
               <div
-                className={`inline-flex items-center gap-2 px-4 py-1 rounded-full border-2 ${styles.bg} ${styles.border} ${styles.text} font-bold text-md uppercase tracking-wider`}
+                className={`inline-flex items-center gap-2 px-4 py-1 rounded-full border-2 ${styles.bg} ${styles.border} ${styles.text} font-bold text-md uppercase tracking-wider print:mt-4`}
               >
                 {styles.icon}
                 {risk_label} RISK
@@ -198,7 +197,7 @@ export default function HybridResultsPage() {
 
             {/* Recommendation Box */}
             <div
-              className={`p-5 rounded-2xl border-l-4 ${styles.bg} ${styles.border} space-y-3 shadow-sm`}
+              className={`p-5 rounded-2xl border-l-4 ${styles.bg} ${styles.border} space-y-3 shadow-sm print:mt-10`}
             >
               <h3
                 className={`text-lg font-bold ${styles.text} flex items-center gap-2`}
@@ -206,13 +205,13 @@ export default function HybridResultsPage() {
                 <Info size={20} />
                 Suggested Next Step
               </h3>
-              <p className="text-foreground leading-relaxed font-medium text-lg text-center">
+              <p className="text-foreground leading-relaxed font-medium text-lg text-left">
                 {clinical_recommendation}
               </p>
             </div>
 
             {/* Disclaimer */}
-            <div className="pt-6 border-t border-gray-100">
+            <div className="pt-6 border-t border-gray-100 print:mt-20">
               <p className="text-sm text-muted-foreground text-center italic">
                 This tool is here to help you check in on yourself, but it is{" "}
                 <strong>not a doctor's diagnosis</strong>. Please share these
@@ -221,7 +220,7 @@ export default function HybridResultsPage() {
             </div>
 
             {/* Flash Cards Section */}
-            <div className="space-y-4 pt-4">
+            <div className="space-y-4 pt-4 print:break-before-page">
               <h4 className="text-lg font-bold text-foreground flex items-center gap-2">
                 <Info size={18} className="text-primary" />
                 Understanding Your Result
@@ -253,7 +252,7 @@ export default function HybridResultsPage() {
                       }
                       return (
                         explanation.replace(/^[A-Z0-9>=_\s:]+/, "").trim() ||
-                        explanation
+                        "We looked at both your mood and physical health to give you a full picture of how you're doing."
                       );
                     })()}
                   </p>
@@ -368,6 +367,12 @@ export default function HybridResultsPage() {
         @media print {
           @page {
             margin: 1.5cm;
+          }
+
+          /* Force page break before Understanding section */
+          .print\\:break-before-page {
+            break-before: page !important;
+            page-break-before: always !important;
           }
 
           /* Hide non-report elements */
