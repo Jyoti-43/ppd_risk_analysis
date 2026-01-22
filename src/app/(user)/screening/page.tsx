@@ -113,7 +113,7 @@ export default function ScreeningPage() {
               <div className="flex-1">
                 <p className="text-sm text-foreground">
                   If you are in immediate danger or need urgent help, please do not use this tool.{" "}
-                  <Link href="/crisis-resources" className="font-semibold text-red-600 underline hover:text-red-700">
+                  <Link href="/#" className="font-semibold text-red-600 underline hover:text-red-700">
                     Click here for emergency resources
                   </Link>
                   .

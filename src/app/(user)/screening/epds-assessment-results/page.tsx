@@ -97,7 +97,7 @@ export default function ResultsPage() {
                 </p>
               ) : riskInfo.level === "moderate" ? (
                 <p className="text-orange-700 text-center pb-2 font-semibold">
-                  You may be experiencing SOME emotional difficulties
+                  You may be experiencing SOME emotional difficulties. 
                 </p>
               ) : (
                 <p className="text-red-700 text-center pb-2 font-semibold">
