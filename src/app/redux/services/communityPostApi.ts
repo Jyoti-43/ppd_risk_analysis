@@ -30,7 +30,7 @@ export const communityPost = createApi({
   keepUnusedDataFor: 3600,
 
   // Tag types for cache invalidation
-  tagTypes: ["Posts", "Categories"],
+  tagTypes: ["Posts", "Categories", "Comments"],
 
   endpoints: (build) => ({
     uploadImage: build.mutation<{ url: string } | any, FormData>({
@@ -49,6 +49,62 @@ export const communityPost = createApi({
       }),
       invalidatesTags: ["Categories"],
     }),
+
+    postComment: build.mutation<
+      any,
+      { postId: string; body: string; parentCommentId?: string }
+    >({
+      query: ({ postId, body, parentCommentId }) => ({
+        url: "/community/comments",
+        method: "POST",
+        body: {
+          postId,
+          text: body,
+          parentCommentId: parentCommentId || null,
+        },
+      }),
+      invalidatesTags: ["Comments"],
+    }),
+
+    getPostsComments: build.query<any, { postId: string }>({
+      query: ({ postId }) => ({
+        url: `/community/comments/${postId}`,
+        method: "GET",
+      }),
+      providesTags: ["Comments"],
+    }),
+
+    commentLike: build.mutation<any, { commentId: string; hasLiked: boolean }>({
+      query: ({ commentId, hasLiked }) => ({
+        url: `/community/comments/${commentId}/toggle-like`,
+        method: "POST",
+        body: { commentId, hasLiked },
+      }),
+      async onQueryStarted(
+        { commentId, hasLiked },
+        { dispatch, queryFulfilled },
+      ) {
+       
+      },
+      invalidatesTags: ["Comments"],
+    }),
+
+    postLike: build.mutation<any, { id: string; likeCount: number; hasLiked: boolean }>({
+      query: ({ id, likeCount, hasLiked }) => ({
+        url: `/community/toggle-like/${id}`,
+        method: "POST",
+        body: { id, likeCount, hasLiked },
+      }),
+      async onQueryStarted(
+        { id, likeCount, hasLiked },
+        { dispatch, queryFulfilled },
+      ) {
+       
+      },
+      invalidatesTags: ["Posts"],
+    }),
+
+
 
     getCategory: build.query<any, void>({
       query: () => ({
@@ -129,4 +185,8 @@ export const {
   useGetCategoryQuery,
   useDeletePostMutation,
   useUpdatePostMutation,
+  usePostCommentMutation,
+  useGetPostsCommentsQuery,
+  useCommentLikeMutation,
+  usePostLikeMutation,
 } = communityPost;

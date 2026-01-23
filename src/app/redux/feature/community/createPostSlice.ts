@@ -1,8 +1,6 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { RootState } from "../../store";
-import { CreatePostState, Post } from "@/src/app/type";
-
-
+import { CreatePostState, Post, Like } from "@/src/app/type";
 
 const initialState: CreatePostState = {
   formData: {
@@ -17,11 +15,8 @@ const initialState: CreatePostState = {
   userName: null,
   status: "idle",
   error: null,
+  likeByPostId: {},
 };
-
-
-
-
 
 export const createPostSlice = createSlice({
   name: "createPost",
@@ -48,7 +43,7 @@ export const createPostSlice = createSlice({
     },
     setFormData: (
       state,
-      action: PayloadAction<Partial<CreatePostState["formData"]>>
+      action: PayloadAction<Partial<CreatePostState["formData"]>>,
     ) => {
       state.formData = { ...state.formData, ...action.payload };
     },
@@ -92,6 +87,11 @@ export const createPostSlice = createSlice({
     clearError: (state) => {
       state.error = null;
     },
+    setPostLikes: (state, action: PayloadAction<Like>) => {
+      const { id, likeCount, hasLiked } = action.payload;
+      if (!state.likeByPostId) state.likeByPostId = {};
+      state.likeByPostId[id] = { id, likeCount, hasLiked };
+    },
   },
 });
 
@@ -118,6 +118,7 @@ export const {
   // setErrorromStorage,
   // deletePost,
   resetForm,
+  setPostLikes,
   clearError,
 } = createPostSlice.actions;
 

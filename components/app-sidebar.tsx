@@ -39,6 +39,7 @@ import {
   logout,
 } from "@/src/app/redux/feature/user/userSlice";
 import { EditProfileModal } from "./dashboard/mother/EditProfileModal";
+import { ChangePasswordModal } from "./dashboard/mother/ChangePasswordModal";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -54,6 +55,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const router = useRouter();
   const dispatch = useAppDispatch();
   const role = user?.role || "mother"; // Default to mother if no role
+  const [isPasswordModalOpen, setIsPasswordModalOpen] = React.useState(false);
 
   const handleLogout = () => {
     dispatch(logout());
@@ -94,29 +96,25 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             {user?.userName || "Guest User"}
           </h3>
           <p className="text-xs text-muted-foreground uppercase tracking-wide mt-1 group-data-[collapsible=icon]:hidden">
-            {role.charAt(0).toUpperCase() + role.slice(1)} • Joined Oct '23
+            {role.charAt(0).toUpperCase() + role.slice(1)}
           </p>
-          {role === "mother" && (
-            <EditProfileModal>
-              <Button
-                variant="default"
-                className="mt-4 w-full bg-primary hover:bg-[#ff5286] text-white rounded-full h-8 text-sm font-medium shadow-sm group-data-[collapsible=icon]:hidden"
-              >
-                Edit Profile
-              </Button>
-            </EditProfileModal>
-          )}
-          {role === "contributor" && (
+
+          <EditProfileModal>
             <Button
-              asChild
               variant="default"
               className="mt-4 w-full bg-primary hover:bg-[#ff5286] text-white rounded-full h-8 text-sm font-medium shadow-sm group-data-[collapsible=icon]:hidden"
             >
-              <Link href="/dashboard/contributor/edit-profile">
-                Edit Profile
-              </Link>
+              Edit Profile
             </Button>
-          )}
+          </EditProfileModal>
+
+          {/* <Button
+            asChild
+            variant="default"
+            className="mt-4 w-full bg-primary hover:bg-[#ff5286] text-white rounded-full h-8 text-sm font-medium shadow-sm group-data-[collapsible=icon]:hidden"
+          >
+            <Link href="/dashboard/contributor/edit-profile">Edit Profile</Link>
+          </Button> */}
         </div>
 
         <SidebarSeparator className=" group-data-[collapsible=icon]:hidden" />
@@ -139,7 +137,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                     className={cn(
                       "text-gray-600 hover:text-gray-900 group-data-[collapsible=icon]:!p-0 group-data-[collapsible=icon]:justify-center",
                       pathname === "/dashboard/mother" &&
-                        "bg-[#FFF0F3] text-[#FF6B98] hover:bg-[#ffe0e9] hover:text-[#FF6B98] font-semibold",
+                        "bg-[#FFF0F3] !text-primary hover:bg-[#ffe0e9] font-semibold",
                     )}
                   >
                     <Link href="/dashboard/mother" className="flex ">
@@ -148,11 +146,15 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                           size={22}
                           className={cn(
                             "text-primary",
-                            pathname === "/dashboard/mother" &&
-                              "text-[#FF6B98]",
+                            pathname === "/dashboard/mother" && "!text-primary",
                           )}
                         />
-                        <span className="group-data-[collapsible=icon]:hidden">
+                        <span
+                          className={cn(
+                            "group-data-[collapsible=icon]:hidden",
+                            pathname === "/dashboard/mother" && "!text-primary",
+                          )}
+                        >
                           Dashboard
                         </span>
                       </div>
@@ -167,7 +169,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                     className={cn(
                       "text-gray-600 hover:text-gray-900 group-data-[collapsible=icon]:!p-0 group-data-[collapsible=icon]:justify-center",
                       pathname === "/dashboard/mother/screening-center" &&
-                        "bg-[#FFF0F3] text-[#FF6B98] hover:bg-[#ffe0e9] hover:text-[#FF6B98] font-semibold",
+                        "bg-[#FFF0F3] !text-primary hover:bg-[#ffe0e9] font-semibold",
                     )}
                   >
                     <Link
@@ -180,10 +182,16 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                           className={cn(
                             "text-primary",
                             pathname === "/dashboard/mother/screening-center" &&
-                              "text-[#FF6B98]",
+                              "!text-primary",
                           )}
                         />
-                        <span className="group-data-[collapsible=icon]:hidden">
+                        <span
+                          className={cn(
+                            "group-data-[collapsible=icon]:hidden",
+                            pathname === "/dashboard/mother/screening-center" &&
+                              "!text-primary",
+                          )}
+                        >
                           Screening Center
                         </span>
                       </div>
@@ -193,12 +201,12 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 <SidebarMenuItem>
                   <SidebarMenuButton
                     asChild
-                    isActive={pathname === "/dashboard/mother/community"}
+                    isActive={pathname === "/dashboard/mother/my-community"}
                     tooltip="Community"
                     className={cn(
                       "text-gray-600 hover:text-gray-900 group-data-[collapsible=icon]:!p-0 group-data-[collapsible=icon]:justify-center",
                       pathname === "/dashboard/mother/my-community" &&
-                        "bg-[#FFF0F3] text-[#FF6B98] hover:bg-[#ffe0e9] hover:text-[#FF6B98] font-semibold",
+                        "bg-[#FFF0F3] !text-primary hover:bg-[#ffe0e9] font-semibold",
                     )}
                   >
                     <Link
@@ -211,10 +219,16 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                           className={cn(
                             "text-primary",
                             pathname === "/dashboard/mother/my-community" &&
-                              "text-[#FF6B98]",
+                              "!text-primary",
                           )}
                         />
-                        <span className="group-data-[collapsible=icon]:hidden">
+                        <span
+                          className={cn(
+                            "group-data-[collapsible=icon]:hidden",
+                            pathname === "/dashboard/mother/my-community" &&
+                              "!text-primary",
+                          )}
+                        >
                           My community
                         </span>
                       </div>
@@ -477,7 +491,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         )} */}
       </SidebarContent>
 
-      <SidebarFooter className="px-4 pb-6">
+      <SidebarFooter className="px-4 pb-14">
         <SidebarSeparator className=" group-data-[collapsible=icon]:hidden" />
         <SidebarMenu>
           <SidebarMenuItem>
@@ -486,7 +500,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 <SidebarMenuButton
                   isActive={pathname === "/settings"}
                   className={cn(
-                    "text-gray-600 hover:text-gray-900 font-medium group-data-[collapsible=icon]:!p-0 group-data-[collapsible=icon]:justify-center",
+                    "text-gray-600 hover:text-gray-900 font-medium group-data-[collapsible=icon]:!p-0 group-data-[collapsible=icon]:justify-left ",
                     pathname === "/settings" &&
                       "bg-[#FFF0F3] text-[#FF6B98] hover:bg-[#ffe0e9] hover:text-[#FF6B98] font-semibold",
                   )}
@@ -508,7 +522,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
                   className="cursor-pointer flex items-center gap-2 py-2"
-                  onClick={() => router.push("/settings/change-password")}
+                  onClick={() => setIsPasswordModalOpen(true)}
                 >
                   <KeyRound size={16} />
                   <span>Change Password</span>
@@ -523,8 +537,14 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
+            <ChangePasswordModal
+              openState={isPasswordModalOpen}
+              setOpenState={setIsPasswordModalOpen}
+            >
+              <div className="hidden" />
+            </ChangePasswordModal>
           </SidebarMenuItem>
-          <SidebarMenuItem>
+          {/* <SidebarMenuItem>
             <SidebarMenuButton
               asChild
               isActive={pathname === "/saved"}
@@ -541,7 +561,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 </span>
               </Link>
             </SidebarMenuButton>
-          </SidebarMenuItem>
+          </SidebarMenuItem> */}
         </SidebarMenu>
       </SidebarFooter>
     </Sidebar>

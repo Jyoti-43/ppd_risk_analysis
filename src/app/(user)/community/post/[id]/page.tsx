@@ -10,6 +10,7 @@ interface PageProps {
 const page = async ({ params }: PageProps) => {
   const resolvedParams = await params;
   const id = resolvedParams.id;
+  console.log(id);
   if (!id) return <div>Invalid post ID</div>;
   return (
   <>

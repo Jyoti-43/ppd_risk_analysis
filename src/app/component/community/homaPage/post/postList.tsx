@@ -38,12 +38,11 @@ export const PostsList = ({
     isError,
     error,
     isFetching,
-  } = useGetPostQuery(currentUser?.userId, {
-    // Only fetch on first load or browser refresh, not on component remount
-    refetchOnMountOrArgChange: true,
+  } = useGetPostQuery(undefined, {
     refetchOnFocus: false,
     // refetchOnReconnect: false,
   });
+  console.log("posts", posts);
 
   // Filter logic
   const filteredPosts = (posts || []).filter((post: any) => {
@@ -140,6 +139,7 @@ export const PostsList = ({
       {currentPosts.map((post: any) => {
         const pUserId = post.user?.id || post.userId || post.user_id;
         const cUserId = currentUser?.userId;
+
         console.log("post user id", pUserId);
         console.log("current user id", cUserId);
         const isOwner = normalizeId(pUserId) === normalizeId(cUserId);
@@ -158,6 +158,7 @@ export const PostsList = ({
             title={post.title}
             excerpt={post.body.replace(/<[^>]*>/g, "")} // Strip HTML tags
             imageUrl={post.image || post.imageUrl}
+            likeCount={post.likeCount}
             // isSensitive={post.post_type}
             isOwner={isOwner}
             onDelete={() => handleDeletePost(String(post.id))}

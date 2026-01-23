@@ -43,6 +43,10 @@ export interface Post {
   userEmail?: string;
   userName?: string;
   createdAt?: string;
+  postedTime?: string;
+  user?: User;
+  likeCount?: number;
+  hasLiked: boolean;
 }
 
 export interface Category {
@@ -69,6 +73,13 @@ export interface CreatePostState {
   status: "idle" | "loading" | "succeeded" | "failed";
   error: string | null;
   currentPostId?: string | null;
+  likeByPostId?: { [postId: string]: Like };
+}
+
+export interface Like {
+  id: string;
+  likeCount: string;
+  hasLiked: boolean;
 }
 
 // community group post types
@@ -93,8 +104,6 @@ export interface GroupPost {
   user: User; // Backend adds this
   postedTime: string; // Backend adds this
   groupId: string;
-  // hasLiked: boolean;
-  // likeCount?: string;
   commentsCount: number;
   like: LikeResponse;
 }

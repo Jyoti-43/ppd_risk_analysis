@@ -91,10 +91,7 @@ function SiteNavAuth() {
   const currentUser = useAppSelector(selectCurrentUser)?.userName ?? "";
 
   useEffect(() => {}, []);
-  const handleLogout = () => {
-    dispatch(logout());
-    router.push("/");
-  };
+  
 
   const pathname = usePathname();
 
@@ -153,12 +150,7 @@ function SiteNavAuth() {
       >
         Profile
       </Link>
-      <button
-        className="text-md font-semibold text-foreground hover:text-primary transition-colors p-0 cursor-pointer"
-        onClick={handleLogout}
-      >
-        Logout
-      </button>
+      
     </nav>
   );
 }
@@ -175,11 +167,7 @@ function SiteNavContributor() {
     setMounted(true);
   }, []);
 
-  useEffect(() => {}, []);
-  const handleLogout = () => {
-    dispatch(logout());
-    router.push("/");
-  };
+  
 
   const pathname = usePathname();
 
@@ -224,12 +212,7 @@ function SiteNavContributor() {
       >
         Dashboard
       </Link>
-      <button
-        className="text-md font-semibold text-foreground hover:text-primary transition-colors p-0 cursor-pointer"
-        onClick={handleLogout}
-      >
-        Logout
-      </button>
+      
     </nav>
   );
 }
@@ -246,11 +229,7 @@ function SiteNavAdmin() {
     setMounted(true);
   }, []);
 
-  useEffect(() => {}, []);
-  const handleLogout = () => {
-    dispatch(logout());
-    router.push("/");
-  };
+  
 
   const pathname = usePathname();
 
@@ -275,12 +254,7 @@ function SiteNavAdmin() {
       >
         Dashboard
       </Link>
-      <button
-        className="text-md font-semibold text-foreground hover:text-primary transition-colors p-0 cursor-pointer"
-        onClick={handleLogout}
-      >
-        Logout
-      </button>
+      
     </nav>
   );
 }

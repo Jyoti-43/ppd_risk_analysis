@@ -1,19 +1,20 @@
-import Image from "next/image"
-import Link from "next/link"
-import { Badge } from "@/components/ui/badge"
-import { cn } from "@/lib/utils"
+import Image from "next/image";
+import Link from "next/link";
+import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
 
 interface PostCardProps {
-  id: string
-  topic: string
-  author: string
-  timeAgo: string
-  title: string
-  excerpt: string
-  imageUrl?: string
-  isSensitive?: boolean
-  isOwner?: boolean
-  onDelete?: () => void
+  id: string;
+  topic: string;
+  author: string;
+  timeAgo: string;
+  title: string;
+  excerpt: string;
+  imageUrl?: string;
+  isSensitive?: boolean;
+  likeCount?: number;
+  isOwner?: boolean;
+  onDelete?: () => void;
 }
 
 export function PostCard({
@@ -25,6 +26,7 @@ export function PostCard({
   excerpt,
   imageUrl,
   isSensitive,
+  likeCount,
   isOwner = false,
   onDelete,
 }: PostCardProps) {
@@ -52,14 +54,20 @@ export function PostCard({
       <div className="flex flex-col flex-1 py-1">
         <div className="flex items-center gap-2.5 mb-2.5">
           <div className="size-6 rounded-full bg-primary/10 flex items-center justify-center text-primary overflow-hidden">
-            <span className="material-symbols-outlined text-[16px] fill">account_circle</span>
+            <span className="material-symbols-outlined text-[16px] fill">
+              account_circle
+            </span>
           </div>
-          <span className="text-[13px] font-semibold text-foreground/90">{author}</span>
+          <span className="text-[13px] font-semibold text-foreground/90">
+            {author}
+          </span>
           <span className="text-[13px] text-muted-foreground">•</span>
           <span className="text-[13px] text-muted-foreground">{timeAgo}</span>
         </div>
 
-        <h3 className="text-[20px] font-extrabold text-foreground leading-snug mb-3">{title}</h3>
+        <h3 className="text-[20px] font-extrabold text-foreground leading-snug mb-3">
+          {title}
+        </h3>
 
         <div className="relative">
           <p
@@ -82,6 +90,15 @@ export function PostCard({
         {/* Footer Actions */}
         <div className="flex items-center justify-between mt-auto">
           <div className="flex items-center gap-4">
+            <div
+              className="flex items-center gap-1.5 text-muted-foreground"
+              title="Likes"
+            >
+              <span className="material-symbols-outlined text-[18px]">
+                favorite
+              </span>
+              <span className="text-[13px] font-medium">{likeCount || 0}</span>
+            </div>
             {/* Edit/Delete buttons - only show if user owns this post */}
             {isOwner && (
               <>
@@ -89,7 +106,9 @@ export function PostCard({
                   href={`/community/edit-post/${id}`}
                   className="flex items-center gap-1 text-[13px] font-medium text-muted-foreground hover:text-primary transition-colors"
                 >
-                  <span className="material-symbols-outlined text-[18px]">edit</span>
+                  <span className="material-symbols-outlined text-[18px]">
+                    edit
+                  </span>
                   Edit
                 </Link>
                 <button
@@ -99,7 +118,9 @@ export function PostCard({
                   }}
                   className="flex items-center gap-1 text-[13px] font-medium text-muted-foreground hover:text-red-500 transition-colors"
                 >
-                  <span className="material-symbols-outlined text-[18px]">delete</span>
+                  <span className="material-symbols-outlined text-[18px]">
+                    delete
+                  </span>
                   Delete
                 </button>
               </>
@@ -110,10 +131,12 @@ export function PostCard({
             className="text-primary hover:text-brand-primary-hover text-[13px] font-bold flex items-center gap-1.5 transition-colors"
           >
             Read Full Story
-            <span className="material-symbols-outlined text-[18px]">arrow_forward</span>
+            <span className="material-symbols-outlined text-[18px]">
+              arrow_forward
+            </span>
           </Link>
         </div>
       </div>
     </article>
-  )
+  );
 }

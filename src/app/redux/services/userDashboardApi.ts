@@ -39,6 +39,32 @@ export const userDashboardApi = createApi({
       // Invalidate posts cache when a post is deleted
       //   invalidatesTags: [""],
     }),
+    getUserPosts: build.query<any, void>({
+      query: () => ({
+        url: `/user/posts`,
+        method: "GET",
+      }),
+      // Invalidate posts cache when a post is deleted
+      //   invalidatesTags: [""],
+    }),
+    getUserGroupCreated: build.query<any, void>({
+      query: () => ({
+        url: `/user/my-groups/created`,
+        method: "GET",
+      }),
+      // Invalidate posts cache when a post is deleted
+      //   invalidatesTags: [""],
+    }),
+
+    getUserGroupJoined: build.query<any, void>({
+      query: () => ({
+        url: `/user/my-groups/joined`,
+        method: "GET",
+      }),
+      // Invalidate posts cache when a post is deleted
+      //   invalidatesTags: [""],
+    }),
+
     screeningCount: build.query<any, void>({
       query: () => ({
         url: `/screening/count`,
@@ -66,35 +92,39 @@ export const userDashboardApi = createApi({
       }),
     }),
 
-    updateArticle: build.mutation<
-      any,
-      {
-        articleId: string;
-        articleBody: {
-          title?: string;
-          preview?: string;
-          content?: string;
-          tags?: string[];
-          categoryId?: string;
-          image?: string;
-        };
-      }
-    >({
-      query: ({ articleId, articleBody }) => ({
-        url: `/contributor/article/update/${articleId}`,
-        method: "PATCH",
-        body: articleBody,
+    getEpdsScreeningHistoryById: build.query<any, any>({
+      query: (result_id: string) => ({
+        url: `/epds-screen/${result_id}`,
+        method: "GET",
       }),
-      // Invalidate posts cache when a post is updated
-      invalidatesTags: ["Articles"],
+    }),
+
+    getSymptomsScreeningHistoryById: build.query<any, any>({
+      query: (result_id: string) => ({
+        url: `/symptom/ppd-risk/${result_id}`,
+        method: "GET",
+      }),
+    }),
+
+    getHybridScreeningHistoryById: build.query<any, any>({
+      query: (result_id: string) => ({
+        url: `/hybrid-screen/${result_id}`,
+        method: "GET",
+      }),
     }),
   }),
 });
 
 export const {
   usePostCountQuery,
+  useGetUserPostsQuery,
+  useGetUserGroupCreatedQuery,
+  useGetUserGroupJoinedQuery,
   useScreeningCountQuery,
   useGetSymptomsScreeningHistoryQuery,
   useGetHybridScreeningHistoryQuery,
   useGetEpdsScreeningHistoryQuery,
+  useGetEpdsScreeningHistoryByIdQuery,
+  useGetSymptomsScreeningHistoryByIdQuery,
+  useGetHybridScreeningHistoryByIdQuery,
 } = userDashboardApi;

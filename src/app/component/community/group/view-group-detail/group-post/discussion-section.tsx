@@ -52,14 +52,14 @@ export function DiscussionsSection() {
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-2xl font-bold">Recent Discussions</h2>
-        <div className="flex gap-4">
+        {/* <div className="flex gap-4">
           <button className="text-primary font-semibold hover:underline">
             Newest
           </button>
           <button className="text-muted-foreground hover:text-primary transition">
             Popular
           </button>
-        </div>
+        </div> */}
       </div>
 
       {/* Posts */}

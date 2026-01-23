@@ -1,185 +1,257 @@
-import React from "react";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-
-// import { SectionCards } from "@/components/businessDashboard/sectionCard";
-// import DashboardChart from "@/components/businessDashboard/chartSection";
-import { SidebarTrigger } from "@/components/ui/sidebar";
-import { IoSearch } from "react-icons/io5";
+"use client";
+import React, { useMemo } from "react";
+import { Card, CardContent } from "@/components/ui/card";
+import { FileText, Heart, Users, Search } from "lucide-react";
 import MyPostsTable from "@/src/app/component/dashboard/mother/my-community";
-import { Badge, TrendingUpIcon } from "lucide-react";
-import { SelectSeparator } from "@/components/ui/select";
+import {
+  usePostCountQuery,
+  useGetUserGroupCreatedQuery,
+  useGetUserGroupJoinedQuery,
+  useGetUserPostsQuery,
+} from "@/src/app/redux/services/userDashboardApi";
+import { GroupCard } from "@/src/app/component/community/group/group-card";
+import { cn } from "@/lib/utils";
+import { selectCurrentUser } from "@/src/app/redux/feature/user/userSlice";
+import { useAppSelector } from "@/src/app/Hooks/hook";
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
 
 const ClientDashboard = () => {
+  const { data: postCount, isLoading: isPostLoading } = usePostCountQuery();
+  const { data: userGroupsJoined, isLoading: isGroupsLoading } =
+    useGetUserGroupJoinedQuery();
+  const { data: postsData, isLoading: isUserPostsLoading } =
+    useGetUserPostsQuery();
+  const userPosts = postsData?.posts;
+  const { data: groupCreated, isLoading: isGroupCreatedLoading } =
+    useGetUserGroupCreatedQuery();
+  const [activeGroupTab, setActiveGroupTab] = React.useState("all");
+  const currentUser = useAppSelector(selectCurrentUser);
+
+  console.log("userPosts", userPosts);
+  console.log("userGroupsJoined", userGroupsJoined);
+  console.log("postCount", postCount);
+  console.log("groupCreated", groupCreated);
+
+  const mergedGroups = useMemo(() => {
+    const joined = Array.isArray(userGroupsJoined) ? userGroupsJoined : [];
+    const created = Array.isArray(groupCreated) ? groupCreated : [];
+
+    // Create a map by ID to avoid duplicates
+    const groupMap = new Map();
+
+    joined.forEach((g) => {
+      const id = g.groupId || g.id;
+      if (id) groupMap.set(id, { ...g, isJoined: true });
+    });
+
+    created.forEach((g) => {
+      const id = g.groupId || g.id;
+      if (id) {
+        groupMap.set(id, { ...g, isOwner: true, isJoined: true });
+      }
+    });
+
+    return Array.from(groupMap.values());
+  }, [userGroupsJoined, groupCreated]);
+
+  const displayedGroups = useMemo(() => {
+    if (activeGroupTab === "created") {
+      return Array.isArray(groupCreated) ? groupCreated : [];
+    }
+    if (activeGroupTab === "joined") {
+      return Array.isArray(userGroupsJoined) ? userGroupsJoined : [];
+    }
+    return mergedGroups;
+  }, [activeGroupTab, mergedGroups, groupCreated, userGroupsJoined]);
+  // Calculate total likes from user posts
+  const totalLikes = useMemo(() => {
+    if (!userPosts || !Array.isArray(userPosts)) return 0;
+    return userPosts.reduce((acc, post) => {
+      const likes = parseInt(post.like?.likeCount || post.likeCount || "0");
+      return acc + (isNaN(likes) ? 0 : likes);
+    }, 0);
+  }, [userPosts]);
+
   return (
-    <div className="w-full     flex   justify-center bg-amber-50/35 ">
-      <div className="flex flex-col w-full pt-8 px-10 max-w-7xl ">
-        <div className="flex flex-row justify-between items-center">
-          <div className="absolute top-2 right-20 flex flex-row justify-start items-center space-x-5">
-            <div className="relative w-full max-w-xs">
-              <input
-                type="text"
-                placeholder="Search here..."
-                className="w-full pl-10 pr-4 py-.5 rounded-md border-2 border-gray-300 "
-              />
-              <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">
-                <IoSearch />
-              </div>
+    <div className="w-full flex flex-col pt-8 px-10 max-w-7xl mx-auto space-y-8">
+      <div className="flex flex-col space-y-2">
+        <h2 className="text-2xl md:text-3xl font-bold text-amber-950/80 tracking-tight">
+          Community Dashboard
+        </h2>
+        <p className="text-slate-500 font-medium">
+          Track your engagement and activity in the MotherCare community.
+        </p>
+      </div>
+
+      {/* Stats Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <Card className="hover:shadow-md transition-shadow">
+          <CardContent className="flex items-center space-x-4 p-4 h-full">
+            <div className="flex-shrink-0 w-12 h-12 bg-green-100 rounded-2xl flex items-center justify-center">
+              <FileText className="h-6 w-6 text-green-600" />
             </div>
-          </div>
-        </div>
-
-        <div className="  w-full flex flex-1 flex-col">
-          <div className="flex flex-col  w-full py-4 md:gap-6 md:py-6">
-            <div className=" flex flex-row w-full *:data-[slot=card]:shadow-xs  gap-10  *:data-[slot=card]:bg-gradient-to-t *:data-[slot=card]:from-primary/5 *:data-[slot=card]:to-card dark:*:data-[slot=card]:bg-card lg:px-0">
-              {/* Total bookings */}
-              <Card className="@container/card flex flex-1 !w-100">
-                <CardHeader className="relative">
-                  <CardDescription>Total Bookings</CardDescription>
-                  <CardTitle className="@[250px]/card:text-3xl text-2xl font-semibold tabular-nums">
-                    1,245
-                  </CardTitle>
-                  <div className="absolute right-4 top-4">
-                    <Badge className="flex gap-1 rounded-lg text-xs">
-                      <TrendingUpIcon className="size-3" />
-                      +8.2%
-                    </Badge>
-                  </div>
-                </CardHeader>
-                <CardFooter className="flex-col items-start gap-1 text-sm">
-                  <div className="flex gap-2 font-medium">
-                    Growth from last week <TrendingUpIcon className="size-4" />
-                  </div>
-                  <div className="text-muted-foreground">
-                    Includes all recent bookings
-                  </div>
-                </CardFooter>
-              </Card>
-              {/* New Reviews */}
-              <Card className="@container/card flex flex-1 bg-card shadow">
-                <CardHeader className="relative">
-                  <CardDescription>New Reviews Today</CardDescription>
-                  <CardTitle className="@[250px]/card:text-3xl text-2xl font-semibold tabular-nums">
-                    56
-                  </CardTitle>
-                  <div className="absolute right-4 top-4">
-                    <Badge className="flex gap-1 rounded-lg text-xs">
-                      <TrendingUpIcon className="size-3" />
-                      +12.0%
-                    </Badge>
-                  </div>
-                </CardHeader>
-                <CardFooter className="flex-col items-start gap-1 text-sm">
-                  <div className="flex gap-2 font-medium">
-                    Higher engagement <TrendingUpIcon className="size-4" />
-                  </div>
-                  <div className="text-muted-foreground">
-                    More positive reviews today
-                  </div>
-                </CardFooter>
-              </Card>
-
-              {/* Active Acounts/users */}
-              <Card className="@container/card flex flex-1">
-                <CardHeader className="relative">
-                  <CardDescription>Active Accounts</CardDescription>
-                  <CardTitle className="@[250px]/card:text-3xl text-2xl font-semibold tabular-nums">
-                    3,742
-                  </CardTitle>
-                  <div className="absolute right-4 top-4">
-                    <Badge className="flex gap-1 rounded-lg text-xs">
-                      <TrendingUpIcon className="size-3" />
-                      +3.5%
-                    </Badge>
-                  </div>
-                </CardHeader>
-                <CardFooter className="flex-col items-start gap-1 text-sm">
-                  <div className="line-clamp-1 flex gap-2 font-medium">
-                    More daily visits <TrendingUpIcon className="size-4" />
-                  </div>
-                  <div className="text-muted-foreground">
-                    Daily login rate increasing
-                  </div>
-                </CardFooter>
-              </Card>
-              {/* growth rate */}
-              <Card className="@container/card flex flex-1">
-                <CardHeader className="relative">
-                  <CardDescription>Growth Rate</CardDescription>
-                  <CardTitle className="@[250px]/card:text-3xl text-2xl font-semibold tabular-nums">
-                    4.5%
-                  </CardTitle>
-                  <div className="absolute right-4 top-4">
-                    <Badge className="flex gap-1 rounded-lg text-xs">
-                      <TrendingUpIcon className="size-3" />
-                      +4.5%
-                    </Badge>
-                  </div>
-                </CardHeader>
-                <CardFooter className="flex-col items-start gap-1 text-sm">
-                  <div className="line-clamp-1 flex gap-2 font-medium">
-                    Steady performance <TrendingUpIcon className="size-4" />
-                  </div>
-                  <div className="text-muted-foreground">
-                    Meets growth projections
-                  </div>
-                </CardFooter>
-              </Card>
+            <div className="flex flex-col">
+              <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                Total Post Count
+              </span>
+              <p className="text-2xl font-bold text-slate-800">
+                {isPostLoading ? "..." : postCount?.total_post_count || 0}
+              </p>
             </div>
-          </div>
-        </div>
-        <div className=" w-full mt-3 flex flex-1 flex-col ">
-          <div className="flex flex-col gap-10 w-full py-4 md:gap-6 md:py-6">
-            {/* <DashboardChart /> */}
-          </div>
-        </div>
-        {/* <div className="w-full flex   mt-10  pb-5  gap-10  pr-2">
-          <div className=" flex flex-[1] flex-col     justify-stretch items-center  h-full   space-y-1 "> */}
-        <Card className=" relative w-full h-full py-2 rounded-md gap-2  ">
-          <CardHeader className="">
-            <CardTitle className="flex mb-1 ">
-              <h1 className="font-medium text-xl text-start  text-green-400 ">
-               My posts
-              </h1>
-
-            </CardTitle>
-          
-          </CardHeader>
-          <CardContent className="px-0">
-            {/* <RecentBookings/> */}
-            {/* <Calendar /> */}
-            <MyPostsTable />
           </CardContent>
         </Card>
-        {/* </div>
-        </div> */}
-        {/* <div className="w-full flex   mt-10  pb-5  gap-20  ">
-          <div className=" flex flex-[1] flex-col   justify-stretch items-center  h-full   space-y-1 ">
-            <Card className="w-full h-full py-2 rounded-sm gap-2  ">
-              <CardHeader className="">
-                <CardTitle>
-                  <h1 className="font-medium text-xl text-start  text-green-400 ">
-                    Recent Bookings
-                  </h1>
-                </CardTitle>
-              </CardHeader>
 
-              <CardContent className="px-0">
-                {/* <UpcomingBookings/> 
+        <Card className="hover:shadow-md transition-shadow">
+          <CardContent className="flex items-center space-x-4 p-4 h-full">
+            <div className="flex-shrink-0 w-12 h-12 bg-blue-100 rounded-2xl flex items-center justify-center">
+              <Users className="h-6 w-6 text-blue-600" />
+            </div>
+            <div className="flex flex-col">
+              <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                My Groups
+              </span>
+              <p className="text-2xl font-bold text-slate-800">
+                {isGroupsLoading ? "..." : userGroupsJoined?.length || 0}
+              </p>
+            </div>
+          </CardContent>
+        </Card>
 
-                <RecentBookingTable />
-              </CardContent>
-            </Card>
+        <Card className="hover:shadow-md transition-shadow">
+          <CardContent className="flex items-center space-x-4 p-4 h-full">
+            <div className="flex-shrink-0 w-12 h-12 bg-red-100 rounded-2xl flex items-center justify-center">
+              <Heart className="h-6 w-6 text-red-600" />
+            </div>
+            <div className="flex flex-col">
+              <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                Total Likes Count
+              </span>
+              <p className="text-2xl font-bold text-slate-800">
+                {isUserPostsLoading ? "..." : totalLikes}
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Posts Table */}
+      <Card className="relative border-none shadow-md shadow-primary/20 overflow-hidden pt-0">
+        <div className="  bg-primary/5 p-8 border-b border-slate-100">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="text-xl font-bold text-slate-800">My Posts</h3>
+              <p className="text-sm text-slate-500">
+                Manage and view your community contributions
+              </p>
+            </div>
+            <Link href="/community/create-post">
+              <Button className="bg-primary text-white px-3 py-4 rounded-full mr-75">
+                + Create New Post
+              </Button>
+            </Link>
+          </div>
+        </div>
+        <div className="p-0">
+          {userPosts?.length === 0 ? (
+            <div className="flex items-center justify-center h-64">
+              <p className="text-slate-500">No posts found</p>
+            </div>
+          ) : (
+            <MyPostsTable data={userPosts} isLoading={isUserPostsLoading} />
+          )}
+        </div>
+      </Card>
+      {/* Groups Section */}
+      <div className="space-y-6">
+        <div className="flex flex-col  space-y-4">
+          <div className="flex    justify-between">
+            <h3 className="text-xl font-bold text-slate-800">My Groups</h3>
           </div>
 
-         
-        </div> */}
+          <div className="flex items-center justify-between w-full">
+            <div className="flex items-center space-x-1 bg-slate-100/50 p-1 rounded-xl w-fit">
+              {[
+                { id: "all", label: "All My Groups" },
+                { id: "created", label: "My Created Groups" },
+                { id: "joined", label: "My Joined Groups" },
+              ].map((tab) => (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveGroupTab(tab.id)}
+                  className={cn(
+                    "px-4 py-2 text-sm font-bold rounded-lg transition-all",
+                    activeGroupTab === tab.id
+                      ? "bg-white text-primary shadow-sm"
+                      : "text-slate-500 hover:text-slate-700 hover:bg-white/50",
+                  )}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </div>
+
+            <Link href="/community/group/create-group">
+              <Button className="bg-primary hover:bg-[#b50d62] text-white px-6 rounded-full h-10 font-bold shadow-md shadow-primary/20 transition-all hover:scale-105 active:scale-95">
+                + Create New Group
+              </Button>
+            </Link>
+          </div>
+        </div>
+
+        {isGroupsLoading || isGroupCreatedLoading ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[...Array(3)].map((_, i) => (
+              <div
+                key={i}
+                className="h-64 bg-slate-100 animate-pulse rounded-2xl"
+              />
+            ))}
+          </div>
+        ) : displayedGroups.length === 0 ? (
+          <Card className="border-dashed border-2 border-slate-200 shadow-none">
+            <CardContent className="flex flex-col items-center justify-center py-12 text-center">
+              <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mb-4">
+                <Users className="h-8 w-8 text-slate-300" />
+              </div>
+              <p className="text-slate-500 font-medium">
+                No groups found in this category
+              </p>
+            </CardContent>
+          </Card>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {displayedGroups.map((group: any) => {
+              const gId = String(group.groupId || group.id || "");
+              return (
+                <GroupCard
+                  key={gId}
+                  id={gId}
+                  name={group.groupName || group.name}
+                  description={
+                    group.groupDescription ||
+                    group.description ||
+                    "No description provided."
+                  }
+                  imageUrl={group.image || group.imageUrl}
+                  category={
+                    group.category?.name ||
+                    group.categoryName ||
+                    group.category ||
+                    "General"
+                  }
+                  members={group.members || group.memberCount || 0}
+                  isOwner={
+                    activeGroupTab === "created" ||
+                    group.isOwner ||
+                    group.createdBy?.id === currentUser?.userId
+                  }
+                  isJoined={true} // Since these are from my-groups endpoints, user is already joined
+                />
+              );
+            })}
+          </div>
+        )}
       </div>
     </div>
   );

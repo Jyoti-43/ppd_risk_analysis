@@ -159,6 +159,22 @@ export const UserSlice = createSlice({
     reset_Password: (state) => {
       state.resetPassword = { loading: false, success: false, error: null };
     },
+    updateUserName: (state, action: PayloadAction<string>) => {
+      if (state.currentUser) {
+        state.currentUser.userName = action.payload;
+        // Update localStorage
+        const stored = localStorage.getItem("user");
+        if (stored) {
+          try {
+            const user = JSON.parse(stored);
+            user.userName = action.payload;
+            localStorage.setItem("user", JSON.stringify(user));
+          } catch (e) {
+            console.error("Failed to update localStorage user", e);
+          }
+        }
+      }
+    },
   },
 
   extraReducers: (builder) => {
@@ -202,7 +218,12 @@ export const selectAuth = (state: RootState) => state.user;
 export const selectIsLoggedIn = (state: RootState) => state.user.isLoggedIn;
 export const selectCurrentUser = (state: RootState) => state.user.currentUser;
 
-export const { setCredientials, logout, forgot_Password, reset_Password } =
-  UserSlice.actions;
+export const {
+  setCredientials,
+  logout,
+  forgot_Password,
+  reset_Password,
+  updateUserName,
+} = UserSlice.actions;
 
 export default UserSlice.reducer;

@@ -5,6 +5,21 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { ColumnDef } from "@tanstack/react-table";
 import { ArrowUpDown, HelpCircle } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useAppDispatch } from "@/src/app/Hooks/hook";
+import {
+  setStatus as setEpdsStatus,
+  setScore as setEpdsScore,
+  setAnswers as setEpdsAnswers,
+} from "@/src/app/redux/feature/screening/epds/epdsSlice";
+import {
+  setResult as setSymptomsResult,
+  setStatus as setSymptomsStatus,
+} from "@/src/app/redux/feature/screening/symptoms/symptomsSlice";
+import {
+  setHybridResult,
+  setHybridStatus,
+} from "@/src/app/redux/feature/screening/hybrid/hybridSlice";
 
 // This type is used to define the shape of our data.
 // You can use a Zod schema here if you want.
@@ -16,6 +31,8 @@ export type PPDRiskAnalysis = {
   prediction: string;
   action: string;
   created_at?: string;
+  method?: string;
+  raw?: any;
 };
 
 export const columns: ColumnDef<PPDRiskAnalysis>[] = [
@@ -73,6 +90,8 @@ export const columns: ColumnDef<PPDRiskAnalysis>[] = [
         <Badge
           className={cn(
             "px-3 py-1 rounded-full text-xs font-bold border-none shadow-sm",
+            lowerRisk === "CRITICAL" &&
+              "bg-red-200 text-red-800 hover:bg-red-300",
             lowerRisk === "HIGH" &&
               "bg-rose-100 text-rose-700 hover:bg-rose-200",
             lowerRisk === "LOW" &&
@@ -96,18 +115,42 @@ export const columns: ColumnDef<PPDRiskAnalysis>[] = [
   {
     accessorKey: "action",
     header: "Action",
-    cell: ({ row }) => {
-      const action = row.getValue("action") as string;
-      return (
-        <Button
-          variant="secondary"
-          size="sm"
-          className="h-8 bg-slate-100 text-slate-600 hover:bg-slate-200 font-medium"
-          onClick={() => console.log(action)}
-        >
-          {action}
-        </Button>
-      );
-    },
+    cell: ({ row }) => <ViewDetailsCell row={row} />,
   },
 ];
+
+function ViewDetailsCell({ row }: { row: any }) {
+  const router = useRouter();
+  const dispatch = useAppDispatch();
+  const { method, raw, action } = row.original;
+
+  const handleViewDetails = () => {
+    if (!raw) return;
+
+    if (method === "epds") {
+      dispatch(setEpdsScore(raw.score || raw.total_score || 0));
+      dispatch(setEpdsAnswers(raw.answers || []));
+      dispatch(setEpdsStatus("succeeded"));
+      router.push("/screening/epds-assessment-results");
+    } else if (method === "symptoms") {
+      dispatch(setSymptomsResult(raw));
+      dispatch(setSymptomsStatus("succeeded"));
+      router.push("/screening/symptoms-assessment-result");
+    } else if (method === "hybrid") {
+      dispatch(setHybridResult(raw));
+      dispatch(setHybridStatus("succeeded"));
+      router.push("/screening/hybrid-assessment-results");
+    }
+  };
+
+  return (
+    <Button
+      variant="secondary"
+      size="sm"
+      className="h-8 bg-slate-100 text-slate-600 hover:bg-slate-200 font-medium"
+      onClick={handleViewDetails}
+    >
+      {action}
+    </Button>
+  );
+}

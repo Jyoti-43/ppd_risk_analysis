@@ -70,7 +70,7 @@ export function ScreeningHistory<TData, TValue>({
     },
     initialState: {
       pagination: {
-        pageSize: 7,
+        pageSize: 5,
       },
     },
   });
@@ -143,19 +143,19 @@ export function ScreeningHistory<TData, TValue>({
           </div>
         </CardHeader>
         <CardContent className="p-0">
-          <div className="rounded-0 border-t border-slate-100 overflow-x-auto">
+          <div className="rounded-0 border-t border-slate-100 overflow-hidden h-[350px]">
             <Table>
-              <TableHeader className="bg-slate-50/50">
+              <TableHeader className="bg-slate-50/50 sticky top-0 z-10 shadow-sm">
                 {table.getHeaderGroups().map((headerGroup) => (
                   <TableRow
                     key={headerGroup.id}
-                    className="hover:bg-transparent border-slate-100"
+                    className="hover:bg-transparent border-slate-100 "
                   >
                     {headerGroup.headers.map((header) => {
                       return (
                         <TableHead
                           key={header.id}
-                          className="font-semibold text-slate-600 h-12"
+                          className="font-semibold text-slate-600 h-12 px-4"
                         >
                           {header.isPlaceholder
                             ? null
@@ -174,11 +174,11 @@ export function ScreeningHistory<TData, TValue>({
                   table.getRowModel().rows.map((row) => (
                     <TableRow
                       key={row.id}
-                      className="border-slate-100 hover:bg-background transition-colors"
+                      className="border-b border-slate-100 hover:bg-background transition-colors h-[60px] last:border-b"
                       data-state={row.getIsSelected() && "selected"}
                     >
                       {row.getVisibleCells().map((cell) => (
-                        <TableCell key={cell.id} className="py-2">
+                        <TableCell key={cell.id} className="py-0 px-4">
                           {flexRender(
                             cell.column.columnDef.cell,
                             cell.getContext(),
@@ -191,7 +191,7 @@ export function ScreeningHistory<TData, TValue>({
                   <TableRow>
                     <TableCell
                       colSpan={columns.length}
-                      className="h-32 text-center text-slate-400"
+                      className="h-[300px] text-center text-slate-400"
                     >
                       <div className="flex flex-col items-center justify-center space-y-2">
                         <Search className="h-8 w-8 text-slate-200" />
@@ -205,23 +205,31 @@ export function ScreeningHistory<TData, TValue>({
           </div>
         </CardContent>
         <CardFooter>
-          <div className="flex items-center justify-end space-x-2 py-4">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => table.previousPage()}
-              disabled={!table.getCanPreviousPage()}
-            >
-              Previous
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => table.nextPage()}
-              disabled={!table.getCanNextPage()}
-            >
-              Next
-            </Button>
+          <div className="flex items-center justify-between w-full py-4">
+            <div className="text-sm text-slate-500 font-medium">
+              Page {table.getState().pagination.pageIndex + 1} of{" "}
+              {table.getPageCount() || 1}
+            </div>
+            <div className="flex items-center space-x-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => table.previousPage()}
+                disabled={!table.getCanPreviousPage()}
+                className="h-8 w-20"
+              >
+                Previous
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => table.nextPage()}
+                disabled={!table.getCanNextPage()}
+                className="h-8 w-20"
+              >
+                Next
+              </Button>
+            </div>
           </div>
         </CardFooter>
       </Card>

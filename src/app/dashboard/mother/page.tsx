@@ -52,88 +52,125 @@ export default function MotherDashboard() {
     useGetHybridScreeningHistoryQuery(undefined, {
       refetchOnMountOrArgChange: false,
     });
+  console.log("hybridScreeningHistory", hybridScreeningHistory?.history);
 
   console.log("Dashboard State:", {
     symptoms: { data: symptomsScreeningHistory, loading: isSymptomsLoading },
     epds: { data: epdsScreeningHistory, loading: isEpdsLoading },
-    hybrid: { data: hybridScreeningHistory, loading: isHybridLoading },
+    hybrid: { data: hybridScreeningHistory?.history, loading: isHybridLoading },
     counts: screeningCount,
   });
   // Aggregated screening history from all sources, mapped to table format
   const screeningHistory = useMemo(() => {
     const allScreenings: any[] = [];
 
-    // Add symptoms screening history
-    if (
-      symptomsScreeningHistory?.data &&
-      Array.isArray(symptomsScreeningHistory.data)
-    ) {
-      symptomsScreeningHistory.data.forEach((screening: any) => {
-        allScreenings.push({
-          id: screening._id || `symptoms-${screening.createdAt}`,
-          screeningType: "Symptoms",
-          date: new Date(screening.createdAt).toLocaleDateString(),
-          created_at: screening.createdAt,
-          risk: (screening.result?.prediction === "High Risk"
-            ? "High"
-            : screening.result?.prediction === "Low Risk"
-            ? "Low"
-            : "Moderate") as any,
-          prediction: screening.result?.prediction || "Unknown",
-          action: "View Details",
-          method: "symptoms",
-        });
-      });
-    }
+    // 1. Symptoms Screening History
+    const symptomsData = Array.isArray(symptomsScreeningHistory?.data)
+      ? symptomsScreeningHistory.data
+      : Array.isArray(symptomsScreeningHistory)
+      ? symptomsScreeningHistory
+      : [];
 
-    // Add EPDS screening history
-    if (
-      epdsScreeningHistory?.history &&
-      Array.isArray(epdsScreeningHistory.history)
-    ) {
-      epdsScreeningHistory.history.forEach((screening: any, index: number) => {
-        allScreenings.push({
-          id: `epds-${index}-${screening.created_at}`,
-          screeningType: "EPDS",
-          date: new Date(screening.created_at).toLocaleDateString(),
-          created_at: screening.created_at,
-          risk: (screening.risk_level === "High Risk"
-            ? "High"
-            : screening.risk_level === "Low Risk"
-            ? "Low"
-            : "Moderate") as any,
-          prediction: screening.risk_level || "Unknown",
-          action: "View Details",
-          method: "epds",
-        });
+    symptomsData.forEach((screening: any) => {
+      const pred =
+        screening.risk_label ||
+        screening.result?.prediction ||
+        screening.prediction ||
+        "";
+      const lowerPred = pred.toLowerCase();
+      const riskLevel = lowerPred.includes("critical")
+        ? "Critical"
+        : lowerPred.includes("high")
+        ? "High"
+        : lowerPred.includes("low")
+        ? "Low"
+        : "Moderate";
+      allScreenings.push({
+        id:
+          screening._id ||
+          `symptoms-${screening.createdAt || screening.created_at}`,
+        screeningType: "Symptoms",
+        date: new Date(
+          screening.createdAt || screening.created_at,
+        ).toLocaleDateString(),
+        created_at: screening.createdAt || screening.created_at,
+        risk: riskLevel,
+        prediction: riskLevel,
+        action: "View Details",
+        method: "symptoms",
+        raw: screening,
       });
-    }
+    });
 
-    // Add hybrid screening history
-    if (
-      hybridScreeningHistory?.data &&
-      Array.isArray(hybridScreeningHistory.data)
-    ) {
-      hybridScreeningHistory.data.forEach((screening: any) => {
-        allScreenings.push({
-          id: screening._id || `hybrid-${screening.createdAt}`,
-          screeningType: "Hybrid",
-          date: new Date(
-            screening.createdAt || screening.created_at,
-          ).toLocaleDateString(),
-          created_at: screening.createdAt || screening.created_at,
-          risk: (screening.result?.prediction === "High Risk"
-            ? "High"
-            : screening.result?.prediction === "Low Risk"
-            ? "Low"
-            : "Moderate") as any,
-          prediction: screening.result?.prediction || "Unknown",
-          action: "View Details",
-          method: "hybrid",
-        });
+    // 2. EPDS Screening History
+    const epdsData = Array.isArray(epdsScreeningHistory?.history)
+      ? epdsScreeningHistory.history
+      : Array.isArray(epdsScreeningHistory)
+      ? epdsScreeningHistory
+      : [];
+
+    epdsData.forEach((screening: any, index: number) => {
+      const pred = screening.risk_label || screening.risk_level || "";
+      const lowerPred = pred.toLowerCase();
+      const riskLevel = lowerPred.includes("critical")
+        ? "Critical"
+        : lowerPred.includes("high")
+        ? "High"
+        : lowerPred.includes("low")
+        ? "Low"
+        : "Moderate";
+      allScreenings.push({
+        id: `epds-${index}-${screening.created_at}`,
+        screeningType: "EPDS",
+        date: new Date(screening.created_at).toLocaleDateString(),
+        created_at: screening.created_at,
+        risk: riskLevel,
+        prediction: riskLevel,
+        action: "View Details",
+        method: "epds",
+        raw: screening,
       });
-    }
+    });
 
+    // 3. Hybrid Screening History
+    const hybridData = Array.isArray(hybridScreeningHistory?.history)
+      ? hybridScreeningHistory.history
+      : Array.isArray(hybridScreeningHistory)
+      ? hybridScreeningHistory
+      : [];
+
+    hybridData.forEach((screening: any) => {
+      const pred =
+        screening.risk_label ||
+        screening.result?.prediction ||
+        screening.prediction ||
+        "";
+      const lowerPred = pred.toLowerCase();
+      const riskLevel = lowerPred.includes("critical")
+        ? "Critical"
+        : lowerPred.includes("high")
+        ? "High"
+        : lowerPred.includes("low")
+        ? "Low"
+        : "Moderate";
+      allScreenings.push({
+        id:
+          screening._id ||
+          `hybrid-${screening.createdAt || screening.created_at}`,
+        screeningType: "Hybrid",
+        date: new Date(
+          screening.createdAt || screening.created_at,
+        ).toLocaleDateString(),
+        created_at: screening.createdAt || screening.created_at,
+        risk: riskLevel,
+        prediction: riskLevel,
+        action: "View Details",
+        method: "hybrid",
+        raw: screening,
+      });
+    });
+
+    console.log("al screening", allScreenings);
     // Sort by created_at date (most recent first)
     return allScreenings.sort((a, b) => {
       const dateA = new Date(a.created_at).getTime();
@@ -265,14 +302,18 @@ export default function MotherDashboard() {
               {!isAnyScreeningLoading && currentRiskLevel !== "N/A" && (
                 <p
                   className={`text-xs font-semibold mt-0.5 ${
-                    currentRiskLevel?.toLowerCase().includes("high")
+                    currentRiskLevel?.toLowerCase().includes("critical")
+                      ? "text-red-600 animate-pulse"
+                      : currentRiskLevel?.toLowerCase().includes("high")
                       ? "text-red-500"
                       : currentRiskLevel?.toLowerCase().includes("moderate")
                       ? "text-amber-500"
                       : "text-emerald-500"
                   }`}
                 >
-                  {currentRiskLevel?.toLowerCase().includes("high")
+                  {currentRiskLevel?.toLowerCase().includes("critical")
+                    ? "EMERGENCY"
+                    : currentRiskLevel?.toLowerCase().includes("high")
                     ? "Seek Care"
                     : currentRiskLevel?.toLowerCase().includes("moderate")
                     ? "Monitor Closely"
@@ -315,7 +356,11 @@ export default function MotherDashboard() {
       {/* risk analysis overview */}
       <div className="grid grid-cols-1 sm:grid-cols-1  lg:grid-cols-5 gap-4 w-full">
         <div className="grid grid-col-span-1 md:col-span-1 lg:col-span-2 ">
-          <PPD_Risk_Analysis />
+          <PPD_Risk_Analysis
+            symptomsHistory={symptomsScreeningHistory}
+            epdsHistory={epdsScreeningHistory}
+            hybridHistory={hybridScreeningHistory}
+          />
         </div>
         <div className="grid grid-col-span-1 md:col-span-1 lg:col-span-3 ">
           <ScreeningHistory columns={columns} data={screeningHistory} />

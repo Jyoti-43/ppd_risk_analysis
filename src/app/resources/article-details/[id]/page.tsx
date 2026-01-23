@@ -2,7 +2,6 @@
 
 import { useParams, useRouter } from "next/navigation";
 import {
-  useGetSingleArticleQuery,
   useGetArticleQuery,
   Article,
   useGetPublishedArticleQuery,
@@ -27,20 +26,51 @@ import { useAppSelector } from "@/src/app/Hooks/hook";
 export default function ArticleDetailPage() {
   const { id } = useParams();
   const router = useRouter();
+  const currentUser = useAppSelector(selectCurrentUser);
 
-  // Fetch article list to find the specific article
+  // Fetch both published and contributor-specific articles
   const {
-    data: allArticles,
-    isLoading,
-    isError,
+    data: publishedArticles,
+    isLoading: loadingPublished,
+    isError: errorPublished,
   } = useGetPublishedArticleQuery();
-  const currentUser = useAppSelector(selectCurrentUser)?.userName;
 
-  const article = (allArticles as any[])?.find(
+  const {
+    data: contributorArticles,
+    isLoading: loadingContributor,
+    isError: errorContributor,
+  } = useGetArticleQuery(undefined, {
+    // Only run this query if there's a contributor logged in
+    skip: currentUser?.role !== "contributor",
+  });
+
+  // Combine and deduplicate articles
+  const allArticles = [
+    ...(publishedArticles || []),
+    ...(contributorArticles || []),
+  ];
+
+  // Create a unique list based on ID
+  const uniqueArticles = Array.from(
+    new Map(
+      allArticles.map((article: any) => [article.id || article._id, article]),
+    ).values(),
+  );
+
+  const article = (uniqueArticles as any[])?.find(
     (a: any) => String(a.id || a._id) === String(id),
   );
 
-  console.log("Article Detail Debug:", { id, article, allArticles });
+  console.log("Article Detail Debug:", {
+    id,
+    article,
+    publishedCount: publishedArticles?.length,
+    contributorCount: contributorArticles?.length,
+  });
+
+  const isLoading = loadingPublished || loadingContributor;
+  const isError =
+    errorPublished || (currentUser?.role === "contributor" && errorContributor);
 
   if (isLoading) {
     return (

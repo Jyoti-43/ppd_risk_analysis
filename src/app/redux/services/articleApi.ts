@@ -42,8 +42,8 @@ export const articleApi = createApi({
     },
   }),
 
-  // Cache data for 5 minutes (300 seconds) - won't refetch if data exists
-  keepUnusedDataFor: 600,
+  // Cache data for 1 hour (3600 seconds) - won't refetch if data exists
+  keepUnusedDataFor: 3600,
 
   // Tag types for cache invalidation
   tagTypes: ["Articles", "Categories"],
@@ -97,14 +97,6 @@ export const articleApi = createApi({
       providesTags: ["Articles"],
     }),
 
-    getSingleArticle: build.query<Article, string>({
-      query: (articleId) => ({
-        url: `/contributor/article/${articleId}`,
-        method: "GET",
-      }),
-      providesTags: (result, error, id) => [{ type: "Articles", id }],
-    }),
-
     deleteArticle: build.mutation<any, string>({
       query: (articleId) => ({
         url: `/contributor/article/${articleId}`,
@@ -143,7 +135,7 @@ export const {
   useArticleUploadImageMutation,
   useCreateArticleMutation,
   useGetPublishedArticleQuery,
-  useGetSingleArticleQuery,
+
   useDeleteArticleMutation,
   useUpdateArticleMutation,
   useGetArticleQuery,

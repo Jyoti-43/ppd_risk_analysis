@@ -74,6 +74,22 @@ export const authUserAPI = createApi({
       }),
     }),
 
+    updateName: build.mutation({
+      query: (body: { name: string }) => ({
+        url: "/update-name",
+        method: "PATCH",
+        body,
+      }),
+    }),
+
+    changePassword: build.mutation({
+      query: (body: { oldPassword: string; newPassword: string }) => ({
+        url: "/change-password",
+        method: "PATCH",
+        body,
+      }),
+    }),
+
     logoutUser: build.mutation({
       query: () => ({
         url: "/logout",
@@ -107,4 +123,6 @@ export const {
   useRegisterUserMutation,
   useLoginUserMutation,
   useLogoutUserMutation,
+  useUpdateNameMutation,
+  useChangePasswordMutation,
 } = authUserAPI;
