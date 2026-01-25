@@ -50,8 +50,8 @@ const ContributorDashboard = () => {
     data: articles = [],
     isLoading: articlesLoading,
     refetch,
-  } = useGetArticleQuery();
-  const { data: profile } = useGetContributorProfileQuery();
+  } = useGetArticleQuery({});
+  const { data: profile } = useGetContributorProfileQuery({});
   const [deleteArticle, { isLoading: isDeleting }] = useDeleteArticleMutation();
   const [updateArticle, { isLoading: isUpdating }] = useUpdateArticleMutation();
 
@@ -63,6 +63,7 @@ const ContributorDashboard = () => {
   });
   const currentUser = useAppSelector(selectCurrentUser)?.userName;
   const [searchQuery, setSearchQuery] = useState("");
+  
 
   const basicInfo = profile?.step1_basic_profile || {};
 
@@ -86,6 +87,7 @@ const ContributorDashboard = () => {
       bgColor: "bg-blue-50",
     },
   ];
+ 
 
   const pendingArticles = articles.filter(
     (article) => article.status === "pending",

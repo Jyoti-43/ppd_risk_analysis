@@ -39,6 +39,7 @@ export interface Post {
   category: string;
   postType: boolean;
   imageUrl?: string;
+  image?: string;
   userId?: string;
   userEmail?: string;
   userName?: string;
@@ -111,7 +112,7 @@ export interface GroupPost {
 // For like API response (if different from your main Like)
 export interface LikeResponse {
   id: string;
-  likeCount: string;
+  likeCount?: number;
   hasLiked: boolean;
 }
 

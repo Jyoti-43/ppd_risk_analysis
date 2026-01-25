@@ -17,6 +17,7 @@ import {
   setError,
   setResult,
 } from "@/src/app/redux/feature/screening/symptoms/symptomsSlice";
+import { toast } from "react-toastify";
 
 const SymptomsAssessmentPage = () => {
   // Only handle question fetching and display
@@ -145,7 +146,7 @@ const SymptomsAssessmentPage = () => {
           setError(e instanceof Error ? e.message : "Submission failed")
         );
         dispatch(setStatus("failed"));
-        alert("Failed to submit assessment. Please try again.");
+        toast.error("Failed to submit assessment. Please try again.");
       }
     };
     submit();

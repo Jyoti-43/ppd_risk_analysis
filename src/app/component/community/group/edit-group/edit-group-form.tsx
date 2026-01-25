@@ -14,6 +14,7 @@ import { useCustomSelectStyles } from "@/lib/selectStyle";
 import { useCategorySelect } from "@/src/app/Hooks/useCategorySelect";
 import ImageUpload from "../../common-component/imgae-uploader";
 import { useParams } from "next/navigation";
+import { toast } from "react-toastify";
 
 export default function EditGroupForm() {
   const [groupName, setGroupName] = useState("");
@@ -43,7 +44,7 @@ export default function EditGroupForm() {
 
   const router = require("next/navigation").useRouter();
 
-  const { data: groups, isLoading: isGroupsLoading } = useGetGroupQuery();
+  const { data: groups, isLoading: isGroupsLoading } = useGetGroupQuery({});
   const normalizedGroupId = String(groupId).replace(/^group_/, "");
   const group = groups?.find((g: any) => {
     const groupIdStr = String(g.groupId);
@@ -78,12 +79,12 @@ export default function EditGroupForm() {
 
   const handlePublish = async () => {
     if (!groupName.trim() || !groupDescription.trim()) {
-      alert("Please fill in both group name and groupDescription");
+      toast.info("Please fill in both group name and groupDescription");
       return;
     }
 
     if (!selectedCategory) {
-      alert("Please select a category");
+      toast.info("Please select a category");
       return;
     }
 
@@ -96,7 +97,7 @@ export default function EditGroupForm() {
 
     try {
       await updateGroup({ GroupId: numericGroupId, body: payload }).unwrap();
-      alert("groupDescription published successfully!");
+      toast.success("Group description published successfully!");
       router.push("/community");
       console.log("group:", updateGroup);
       // Reset form
@@ -106,7 +107,7 @@ export default function EditGroupForm() {
       setUploadedImage(null);
     } catch (error: any) {
       console.error("Failed to publish:", error);
-      alert(error?.data?.message ?? "Failed to publish groupDescription");
+      toast.error(error?.data?.message ?? "Failed to publish groupDescription");
     }
   };
 

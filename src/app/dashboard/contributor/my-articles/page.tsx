@@ -32,15 +32,33 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
-import { useGetArticleQuery } from "@/src/app/redux/services/articleApi";
+import {
+  useGetArticleQuery,
+  useDeleteArticleMutation,
+} from "@/src/app/redux/services/articleApi";
 
 export default function MyArticlesPage() {
   const [activeTab, setActiveTab] = React.useState("All Articles");
   const [searchQuery, setSearchQuery] = React.useState("");
   const [categoryFilter, setCategoryFilter] = React.useState("all");
-  const { data: articles = [], isLoading, error } = useGetArticleQuery();
+  const { data: articles = [], isLoading, error } = useGetArticleQuery({});
+  const [deleteArticle] = useDeleteArticleMutation();
 
-  const filteredArticles = articles.filter((article) => {
+  console.log("articles ", articles);
+  const handleDelete = async (id: string) => {
+    const numericId = id.replace(/\D/g, "");
+    if (confirm("Are you sure you want to delete this article?")) {
+      try {
+        const res = await deleteArticle(numericId).unwrap();
+        console.log("deleted article response", res);
+      } catch (err) {
+        console.error("Failed to delete the article: ", err);
+        alert("Failed to delete the article");
+      }
+    }
+  };
+
+  const filteredArticles = articles?.filter((article) => {
     const matchesSearch = article.title
       .toLowerCase()
       .includes(searchQuery.toLowerCase());
@@ -72,26 +90,27 @@ export default function MyArticlesPage() {
   const tabs = [
     {
       name: "All Articles",
-      count: articles.length,
+      count: articles?.length,
     },
     {
       name: "Published",
-      count: articles.filter((a) => {
+      count: articles?.filter((a) => {
         const s = (a.status || "").toLowerCase();
         return s === "published" || s === "approved";
       }).length,
     },
     {
       name: "Pending Review",
-      count: articles.filter((a) => {
+      count: articles?.filter((a) => {
         const s = (a.status || "").toLowerCase();
         return s === "pending" || s === "pending review";
       }).length,
     },
     {
       name: "Rejected",
-      count: articles.filter((a) => (a.status || "").toLowerCase() === "rejected")
-        .length,
+      count: articles?.filter(
+        (a) => (a.status || "").toLowerCase() === "rejected",
+      ).length,
     },
   ];
 
@@ -204,7 +223,7 @@ export default function MyArticlesPage() {
                 </TableCell>
               </TableRow>
             ) : filteredArticles.length > 0 ? (
-              filteredArticles.map((article) => {
+              filteredArticles?.map((article) => {
                 const articleId = article.id;
                 const articleImage = article.image || article.imageUrl;
                 const articleCategory =
@@ -264,14 +283,16 @@ export default function MyArticlesPage() {
                     </TableCell>
                     <TableCell className="px-8 py-1 text-right">
                       <div className="flex justify-end gap-3">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-10 w-10 text-gray-400 hover:text-gray-900 hover:bg-gray-100 rounded-xl transition-all"
-                        >
-                          <Pencil size={20} />
-                        </Button>
-                        <Link href={`/resources/article-details/${articleId}`}>
+                        <Link href={`/edit-article/${articleId}`}>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-10 w-10 text-gray-400 hover:text-gray-900 hover:bg-gray-100 rounded-xl transition-all"
+                          >
+                            <Pencil size={20} />
+                          </Button>
+                        </Link>
+                        {/* <Link href={`/resources/article-details/${articleId}`}>
                           <Button
                             variant="ghost"
                             size="icon"
@@ -279,11 +300,12 @@ export default function MyArticlesPage() {
                           >
                             <Eye size={20} />
                           </Button>
-                        </Link>
+                        </Link> */}
                         <Button
                           variant="ghost"
                           size="icon"
                           className="h-10 w-10 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all"
+                          onClick={() => handleDelete(articleId)}
                         >
                           <Trash2 size={20} />
                         </Button>

@@ -22,6 +22,12 @@ export const screeningAPI = createApi({
     },
   }),
 
+  // Cache data for 1 hour (3600 seconds) - won't refetch if data exists
+  keepUnusedDataFor: 3600,
+
+  // Tag types for cache invalidation
+  tagTypes: ["Screening"],
+  
   endpoints: (build) => ({
     epdsScreening: build.mutation<EPDSQuestion, EPDSQuestion>({
       query: (body) => ({

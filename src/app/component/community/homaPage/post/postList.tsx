@@ -8,6 +8,7 @@ import { PostCard } from "./post-card";
 import { timeAgo } from "@/utills/timeAgo";
 import { PostSkeleton } from "./postSkeleton";
 import { useState } from "react";
+import { toast } from "react-toastify";
 import { useAppSelector } from "@/src/app/Hooks/hook";
 import { selectCurrentUser } from "@/src/app/redux/feature/user/userSlice";
 
@@ -56,7 +57,7 @@ export const PostsList = ({
     // 2. Filter logic (Category or Ownership)
     let matchesFilter = true;
     if (activeFilter === "My Posts") {
-      const pUserId = post.user?.id || post.userId || post.user_id;
+      const pUserId = post.user?.id || post.user.userId || post.user_id;
       const cUserId = currentUser?.userId;
       matchesFilter = normalizeId(pUserId) === normalizeId(cUserId);
     } else if (activeFilter !== "All") {
@@ -77,10 +78,10 @@ export const PostsList = ({
     if (window.confirm("Are you sure you want to delete this post?")) {
       try {
         await deletePost(postId).unwrap();
-        alert("Post deleted successfully!");
+        toast.success("Post deleted successfully!");
       } catch (error: any) {
         console.error("Failed to delete post:", error);
-        alert(error?.data?.message ?? "Failed to delete post");
+        toast.error(error?.data?.message ?? "Failed to delete post");
       }
     }
   };
@@ -137,7 +138,7 @@ export const PostsList = ({
   return (
     <div className="flex flex-col gap-6">
       {currentPosts.map((post: any) => {
-        const pUserId = post.user?.id || post.userId || post.user_id;
+        const pUserId = post.user?.userId || post.user.userId || post.user_id;
         const cUserId = currentUser?.userId;
 
         console.log("post user id", pUserId);

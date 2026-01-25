@@ -91,6 +91,7 @@ const LoginForm = () => {
 
       setEmail("");
       setPassword("");
+     
       console.log("Data after login:", data);
       console.log("Login successful, redirecting...");
 
@@ -106,9 +107,9 @@ const LoginForm = () => {
       }
     }
 
-    if (isError) {
+    if (isError && error) {
       toast.error("Login failed. Please try again.");
-      alert("login failed. Please try again.");
+      // alert("login failed. Please try again.");
       console.error(error); // alert(error) might be object
     }
 

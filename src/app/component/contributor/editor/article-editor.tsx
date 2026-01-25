@@ -20,12 +20,16 @@ export function ArticleEditor({
   // Synchronize content with local state only once on mount if needed,
   // but better to manage via input events to avoid cursor jumping
   useEffect(() => {
-    if (contentRef.current && contentRef.current.innerHTML !== content) {
-      // Only update if external content changed significantly (like a reset)
-      // Otherwise we let the user type naturally
-      if (content === "") {
-        contentRef.current.innerHTML = "";
-      }
+    const el = contentRef.current;
+    if (!el) return;
+
+    // If the editor is focused, avoid overwriting to prevent cursor jump.
+    const isFocused = document.activeElement === el;
+
+    // Only update innerHTML when the external `content` differs from what's rendered
+    // and the user is not actively editing.
+    if (!isFocused && el.innerHTML !== content) {
+      el.innerHTML = content || "";
     }
   }, [content]);
 

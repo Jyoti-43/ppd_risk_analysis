@@ -50,7 +50,7 @@ export default function ScreeningPage() {
               <div className="flex-1 w-full max-w-lg">
                 <div className="relative aspect-square rounded-3xl overflow-hidden shadow-2xl">
                   <img
-                    src="/images/screen.png"
+                    src="/assets/mother-holding-baby-screening-page.jpg"
                     alt="Mother holding baby in warm lighting"
                     className="object-cover w-full h-full"
                   />

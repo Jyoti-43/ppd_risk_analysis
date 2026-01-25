@@ -78,7 +78,7 @@ export const articleApi = createApi({
     }),
 
     // both pending and published articles
-    getArticle: build.query<Article[], void>({
+    getArticle: build.query<Article[], any>({
       query: () => ({
         url: "/contributor/article/list",
         method: "GET",
@@ -88,7 +88,7 @@ export const articleApi = createApi({
     }),
 
     // published articles
-    getPublishedArticle: build.query<Article[], void>({
+    getPublishedArticle: build.query<Article[], any>({
       query: () => ({
         url: "/article/published",
         method: "GET",

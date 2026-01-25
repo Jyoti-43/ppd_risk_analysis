@@ -30,7 +30,7 @@ export function RiskGauge({
         <div className="absolute bottom-0 right-0 text-lg font-bold text-primary">
           {screening === "epds"
             ? `${safeScore} / ${maxScore}`
-            : `${Math.round(safeScore)}%`}
+            : ``}
         </div>
       </div>
 

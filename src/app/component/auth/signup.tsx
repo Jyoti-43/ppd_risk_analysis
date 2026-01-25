@@ -58,12 +58,14 @@ const SignupForm = () => {
     event.preventDefault();
 
     if (!role) {
-      return alert("Please select your role");
+      toast.info("Please select your role");
+      return;
     }
 
     if (password !== confirmPassword) {
       console.log("Passwords do not match");
-      return alert("Passwords do not match");
+      toast.error("Passwords do not match");
+      return;
     }
 
     if (name && email && password && confirmPassword && role) {
@@ -71,15 +73,14 @@ const SignupForm = () => {
     }
     if (isError) {
       console.log("Error during registration:", error);
-      alert(error);
-
+      toast.error(String(error));
 
     }
   };
 
   useEffect(() => {
     if (isSuccess) {
-      alert("Registration Successful");
+      toast.success("Registration Successful");
       console.log("Registered user data:", data);
       dispatch(
         setCredientials({
@@ -94,7 +95,7 @@ const SignupForm = () => {
 
       setFormValue(initialState);
       console.log("Registration successful");
-      router.push("/");
+      router.push("/login");
     }
   }, [isSuccess]);
 

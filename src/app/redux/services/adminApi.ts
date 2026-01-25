@@ -41,7 +41,7 @@ export const adminApi = createApi({
   }),
 
   // Cache data for 5 minutes (300 seconds) - won't refetch if data exists
-  keepUnusedDataFor: 600,
+  keepUnusedDataFor: 36000,
 
   // Tag types for cache invalidation
   tagTypes: ["Articles", "Categories"],
@@ -66,9 +66,9 @@ export const adminApi = createApi({
     }),
 
     // get pending and published article list
-    getArticle: build.query<Article[], void>({
+    getPublishedArticle: build.query<Article[], any>({
       query: () => ({
-        url: "/contributor/article/list",
+        url: "/article/published",
         method: "GET",
       }),
       // Tag this query so it can be invalidated
@@ -84,28 +84,8 @@ export const adminApi = createApi({
       invalidatesTags: ["Articles"],
     }),
 
-    updateArticle: build.mutation<
-      any,
-      {
-        articleId: string;
-        articleBody: {
-          title?: string;
-          preview?: string;
-          content?: string;
-          tags?: string[];
-          categoryId?: string;
-          image?: string;
-        };
-      }
-    >({
-      query: ({ articleId, articleBody }) => ({
-        url: `/contributor/article/update/${articleId}`,
-        method: "PATCH",
-        body: articleBody,
-      }),
-      // Invalidate posts cache when a post is updated
-      invalidatesTags: ["Articles"],
-    }),
+   
+      
   }),
 });
 
@@ -113,5 +93,5 @@ export const {
   useGetPendingArticlesQuery,
   usePublishArticleMutation,
   useDeleteArticleMutation,
-  useUpdateArticleMutation,
+  useGetPublishedArticleQuery,
 } = adminApi;

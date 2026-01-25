@@ -125,7 +125,6 @@ const dispatch = useAppDispatch();
       toast.success("Comment posted successfully");
     } catch (err) {
       console.log(err);
-      alert("Failed to post comment");
       toast.error("Failed to post comment");
     }
   };
@@ -208,6 +207,19 @@ const dispatch = useAppDispatch();
           <span>{timeAgo(post.postedTime || post.createdAt || "")}</span>
           <span className="text-gray-300">•</span>
         </div>
+
+        {/* Cover Image (if available) */}
+        {( post.imageUrl  || post.image) && (
+          <div className="mb-8">
+            <img
+              src={
+                 post.imageUrl || post.image || "" 
+              }
+              alt={post.title || "Post cover image"}
+              className="w-full max-h-96 object-cover rounded-lg"
+            />
+          </div>
+        )}
 
         {/* Article Content */}
         <article className="prose prose-pink prose-lg max-w-none mb-12">

@@ -267,6 +267,31 @@ export default function HybridResultsPage() {
                     <strong>{metrics?.epds_total ?? "—"}</strong> indicates a{" "}
                     <strong>{metrics?.epds_risk ?? "reviewed"} risk</strong>{" "}
                     level.
+                    <p className="text-[14px] text-foreground font-medium leading-relaxed">
+                    {(() => {
+                      if (!explanation)
+                        return "We looked at both your mood and physical health to give you a full picture of how you're doing.";
+                      if (
+                        explanation.includes("Q10=3") ||
+                        explanation.includes("Q10 Override")
+                      ) {
+                        return "Your answers for suicidal thoughts show you are going through a very hard time.";
+                      }
+                      if (
+                        explanation.includes("EPDS >= 13") ||
+                        explanation.includes("Clinical Dominance")
+                      ) {
+                        return "Your emotional responses show patterns that are best to shared with a doctor.";
+                      }
+                      if (explanation.toLowerCase().includes("discordant")) {
+                        return "You have a mix of different feelings and physical signs. Talking this through with someone you trust can help clear things up.";
+                      }
+                      return (
+                        explanation.replace(/^[A-Z0-9>=_\s:]+/, "").trim() ||
+                        "We looked at both your mood and physical health to give you a full picture of how you're doing."
+                      );
+                    })()}
+                  </p>
                   </p>
                 </div>
 
@@ -286,7 +311,7 @@ export default function HybridResultsPage() {
                   </span>
                   <p className="text-[14px] text-foreground font-medium leading-relaxed">
                     There is a{" "}
-                    <strong>{Math.round(final_probability * 100)}%</strong>{" "}
+                     <strong>{metrics?.epds_risk ?? "reviewed"} Risk</strong> {" "}
                     indication of the wellness factors being monitored in this
                     checkup.
                   </p>

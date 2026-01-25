@@ -22,18 +22,24 @@ import {
 } from "lucide-react";
 import { selectCurrentUser } from "@/src/app/redux/feature/user/userSlice";
 import { useAppSelector } from "@/src/app/Hooks/hook";
+import { useGetContributorProfileQuery } from "@/src/app/redux/services/contributorProfileSetupApi";
 
-export default function ArticleDetailPage() {
+export default function ArticleDetailPage(props: { postId?: string }) {
   const { id } = useParams();
   const router = useRouter();
   const currentUser = useAppSelector(selectCurrentUser);
+  const {
+      data: articles = [],
+      isLoading: articlesLoading,
+      refetch,
+    } = useGetArticleQuery({});
 
   // Fetch both published and contributor-specific articles
   const {
     data: publishedArticles,
     isLoading: loadingPublished,
     isError: errorPublished,
-  } = useGetPublishedArticleQuery();
+  } = useGetPublishedArticleQuery({});
 
   const {
     data: contributorArticles,
@@ -72,6 +78,34 @@ export default function ArticleDetailPage() {
   const isError =
     errorPublished || (currentUser?.role === "contributor" && errorContributor);
 
+  // Determine if the current user is the article's contributor (owner)
+  const contributorId =
+    article?.contributor?.id ||
+    article?.contributor?._id ||
+    article?.contributor?.userId ||
+    article?.userId ||
+    article?.user_id ||
+    article?.contributor?.contributor_id;
+
+  const isOwner = Boolean(
+    currentUser?.userId &&
+      contributorId &&
+      String(currentUser.userId) === String(contributorId),
+  );
+
+  // Fetch contributor profile only when viewing own article (to avoid extra calls)
+  const { data: myProfile } = useGetContributorProfileQuery( {
+  });
+
+   const publishedArticlesCount = contributorArticles?.filter((a) => {
+        const s = (a.status || "").toLowerCase();
+        return s === "published" || s === "approved";
+      }).length;
+
+  const profileBasic = myProfile?.step1_basic_profile;
+
+  console.log("Contributor Profile Basic:", profileBasic);
+  console.log("myprofile", myProfile);
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#fdf8f7]">
@@ -224,11 +258,17 @@ export default function ArticleDetailPage() {
               <Avatar className="size-24 border-4 border-[#fff1f0] shadow-sm">
                 <AvatarImage src="https://images.unsplash.com/photo-1559839734-2b71f1536783?q=80&w=200&auto=format&fit=crop" />
                 <AvatarFallback>
-                  {(
-                    article.contributor?.name ||
-                    article.userName ||
-                    "U"
-                  ).charAt(0)}
+                  {isOwner && profileBasic
+                    ? `${profileBasic.first_name || ""}${
+                        profileBasic.last_name
+                          ? ` ${profileBasic.last_name}`
+                          : ""
+                      }`.charAt(0)
+                    : (
+                        article.contributor?.name ||
+                        article.userName ||
+                        "U"
+                      ).charAt(0)}
                 </AvatarFallback>
               </Avatar>
               <div className="absolute bottom-1 right-1 bg-white rounded-full p-1 border border-border/40">
@@ -236,34 +276,44 @@ export default function ArticleDetailPage() {
               </div>
             </div>
             <h3 className="text-xl font-bold text-[#2d3a3a] mb-1">
-              {article.contributor?.name ||
-                article.userName ||
-                "Dr. Sarah Jenkins"}
+              {isOwner && profileBasic
+                ? `${profileBasic.first_name || ""}${
+                    profileBasic.last_name ? ` ${profileBasic.last_name}` : ""
+                  }`
+                : article.contributor?.name ||
+                  article.userName ||
+                  "Dr. Sarah Jenkins"}
             </h3>
             <p className="text-[13px] font-bold text-destructive/80 mb-4 uppercase tracking-tighter">
-              Clinical Psychologist
+              {isOwner && profileBasic
+                ? profileBasic.professional_title || "Prodessional Title"
+                : article.contributor?.professional_title ||
+                  "Prodessional Title"}
             </p>
-            <Badge
+            {/* <Badge
               variant="outline"
               className="text-[11px] font-bold border-primary/20 bg-primary/[0.03] text-primary/70 mb-5 px-3"
             >
               Contributor since 2021
-            </Badge>
+            </Badge> */}
             <p className="text-[13px] text-muted-foreground leading-relaxed mb-8 px-2 lowercase">
-              Specializing in perinatal mental health and family dynamics.
-              Passionate about destigmatizing maternal mental health struggles.
+              {isOwner && profileBasic
+                ? profileBasic.short_bio ||
+                  "Specializing in perinatal mental health and family dynamics. Passionate about destigmatizing maternal mental health struggles."
+                : article.contributor?.short_bio ||
+                  "Bio\nSpecializing in perinatal mental health and family dynamics. Passionate about destigmatizing maternal mental health struggles."}
             </p>
             <div className="grid grid-cols-2 w-full pt-6 border-t border-border/40 mb-8">
               <div className="border-r border-border/40 px-2 lg:px-4">
-                <div className="text-xl font-black text-[#2d3a3a]">12</div>
+                <div className="text-xl font-black text-[#2d3a3a]">{articles.length}</div>
                 <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
                   Articles
                 </div>
               </div>
               <div className="px-2 lg:px-4">
-                <div className="text-xl font-black text-[#2d3a3a]">4.2k</div>
+                <div className="text-xl font-black text-[#2d3a3a]">{publishedArticlesCount}</div>
                 <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
-                  Reads
+                  Published Articles
                 </div>
               </div>
             </div>

@@ -27,7 +27,7 @@ export function PostCard({
   imageUrl,
   isSensitive,
   likeCount,
-  isOwner = false,
+  isOwner,
   onDelete,
 }: PostCardProps) {
   return (
@@ -90,7 +90,7 @@ export function PostCard({
         {/* Footer Actions */}
         <div className="flex items-center justify-between mt-auto">
           <div className="flex items-center gap-4">
-            <div
+            {/* <div
               className="flex items-center gap-1.5 text-muted-foreground"
               title="Likes"
             >
@@ -98,7 +98,7 @@ export function PostCard({
                 favorite
               </span>
               <span className="text-[13px] font-medium">{likeCount || 0}</span>
-            </div>
+            </div> */}
             {/* Edit/Delete buttons - only show if user owns this post */}
             {isOwner && (
               <>

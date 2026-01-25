@@ -36,7 +36,7 @@ export const groupPost = createApi({
   keepUnusedDataFor: 3600,
 
   // Tag types for cache invalidation
-  tagTypes: ["GroupPost", "Categories"],
+  tagTypes: ["GroupPost", "Categories", "Comments"],
 
   endpoints: (build) => ({
     uploadImage: build.mutation<{ url: string } | any, FormData>({
@@ -73,6 +73,45 @@ export const groupPost = createApi({
       }),
       // Invalidate posts cache when a post is liked/unliked
       invalidatesTags: ["GroupPost"],
+    }),
+
+    postGroupComment: build.mutation<
+      any,
+      { postId: string; body: string; parentCommentId?: string }
+    >({
+      query: ({ postId, body, parentCommentId }) => ({
+        url: "/group/comments",
+        method: "POST",
+        body: {
+          postId,
+          text: body,
+          parentCommentId: parentCommentId || null,
+        },
+      }),
+      invalidatesTags: ["Comments"],
+    }),
+
+     getGroupPostsComments: build.query<any, { postId: string }>({
+      query: ({ postId }) => ({
+        url: `/group/comments/${postId}`,
+        method: "GET",
+      }),
+      providesTags: ["Comments"],
+    }),
+
+    groupCommentLike: build.mutation<any, { commentId: string; hasLiked: boolean }>({
+      query: ({ commentId, hasLiked }) => ({
+        url: `/group/comments/${commentId}/toggle-like`,
+        method: "POST",
+        body: { commentId, hasLiked },
+      }),
+      async onQueryStarted(
+        { commentId, hasLiked },
+        { dispatch, queryFulfilled },
+      ) {
+       
+      },
+      invalidatesTags: ["Comments"],
     }),
 
     deleteGroupPost: build.mutation<any, string>({
@@ -116,4 +155,7 @@ export const {
   useGetGroupPostQuery,
   useDeleteGroupPostMutation,
   useUpdateGroupPostMutation,
+  usePostGroupCommentMutation,
+  useGetGroupPostsCommentsQuery,
+  useGroupCommentLikeMutation,
 } = groupPost;

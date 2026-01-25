@@ -39,6 +39,7 @@ import { useDeleteGroupPostMutation } from "@/src/app/redux/services/groupPostAp
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { useRouter } from "next/navigation";
+import ArticleDetailPage from "@/src/app/resources/article-details/[id]/page";
 
 export interface Post {
   id: string;
@@ -151,15 +152,15 @@ function ActionCell({ post }: { post: Post }) {
     if (!window.confirm("Are you sure you want to delete this post?")) return;
 
     setIsDeleting(true);
-    try {
+      try {
       if (post.type === "group") {
         await deleteGroupPost(post.id.replace("post_", "")).unwrap();
       } else {
         await deleteCommunityPost(post.id.replace("post_", "")).unwrap();
       }
-      alert("Post deleted successfully");
+      toast("Post deleted successfully");
     } catch (err) {
-      alert("Failed to delete post");
+      toast("Failed to delete post");
       console.error(err);
     } finally {
       setIsDeleting(false);
@@ -168,7 +169,9 @@ function ActionCell({ post }: { post: Post }) {
 
   const handleEdit = (e: React.MouseEvent) => {
     e.stopPropagation();
-    router.push(`/community/edit-post/${post.id.replace("post_", "")}`);
+    post.type === "group"
+      ? router.push(`/community/group/edit-post/${post.id}`)
+      :router.push(`/community/edit-post/${post.id}`);
   };
 
   return (
@@ -207,6 +210,7 @@ const MyPostsTable = ({ data = [], isLoading }: MyPostsTableProps) => {
   );
   const [globalFilter, setGlobalFilter] = React.useState("");
 
+  const router = useRouter();
   const table = useReactTable({
     data,
     columns,
@@ -248,6 +252,7 @@ const MyPostsTable = ({ data = [], isLoading }: MyPostsTableProps) => {
           />
         </div>
 
+
         <div className="rounded-lg border border-slate-100 overflow-hidden">
           <Table>
             <TableHeader className="bg-slate-50 ">
@@ -272,6 +277,7 @@ const MyPostsTable = ({ data = [], isLoading }: MyPostsTableProps) => {
                 </TableRow>
               ))}
             </TableHeader>
+            
             <TableBody>
               {table.getRowModel().rows.length ? (
                 table.getRowModel().rows.map((row) => (
@@ -280,7 +286,7 @@ const MyPostsTable = ({ data = [], isLoading }: MyPostsTableProps) => {
                     className="cursor-pointer hover:bg-slate-50 transition-colors border-slate-50"
                     onClick={() => {
                       setSelectedRow(row.original);
-                      setOpen(true);
+                      router.push(`/community/post/${row.original.id}`);
                     }}
                   >
                     {row.getVisibleCells().map((cell) => (
@@ -346,54 +352,7 @@ const MyPostsTable = ({ data = [], isLoading }: MyPostsTableProps) => {
             </DialogDescription>
           </DialogHeader>
 
-          <div className="p-6 space-y-6 max-h-[70vh] overflow-y-auto">
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <Badge
-                  variant="secondary"
-                  className="bg-amber-100 text-amber-700"
-                >
-                  {selectedRow?.category?.name}
-                </Badge>
-                <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">
-                  {selectedRow?.type} Post
-                </span>
-              </div>
-              <h2 className="text-2xl font-black text-slate-800 tracking-tight">
-                {selectedRow?.postTitle || "Untitled Post"}
-              </h2>
-            </div>
-
-            <div className="bg-slate-50 p-4 rounded-xl text-slate-700 leading-relaxed font-medium">
-              {selectedRow?.postBody}
-            </div>
-
-            <div className="flex flex-wrap gap-2">
-              {selectedRow?.tags?.map((tag) => (
-                <span
-                  key={tag}
-                  className="text-xs font-bold text-primary bg-primary/10 px-3 py-1 rounded-full px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-tighter border"
-                >
-                  #{tag}
-                </span>
-              ))}
-            </div>
-
-            <div className="flex items-center gap-6 pt-4 border-t border-slate-100">
-              <div className="flex items-center gap-2 text-slate-500">
-                <Heart className="h-5 w-5 text-rose-500" />
-                <span className="font-bold">
-                  {selectedRow?.likeCount || 0} Likes
-                </span>
-              </div>
-              <div className="flex items-center gap-2 text-slate-500">
-                <MessageSquare className="h-5 w-5 text-blue-500" />
-                <span className="font-bold">
-                  {selectedRow?.commentCount || 0} Comments
-                </span>
-              </div>
-            </div>
-          </div>
+          
 
           <DialogFooter className="p-4 bg-slate-50">
             <DialogClose asChild>

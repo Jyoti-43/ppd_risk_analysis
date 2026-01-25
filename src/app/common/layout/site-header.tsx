@@ -11,6 +11,7 @@ import {
   selectCurrentUser,
 } from "../../redux/feature/user/userSlice";
 import { useEffect, useState } from "react";
+import { Avatar } from "@/components/ui/avatar";
 
 export function SiteHeader() {
   const [mounted, setMounted] = useState(false);
@@ -91,7 +92,6 @@ function SiteNavAuth() {
   const currentUser = useAppSelector(selectCurrentUser)?.userName ?? "";
 
   useEffect(() => {}, []);
-  
 
   const pathname = usePathname();
 
@@ -133,6 +133,17 @@ function SiteNavAuth() {
         Resources
       </Link>
       <Link
+        href="/crisis-resources"
+        className={cn(
+          "text-md font-semibold transition-colors hover:text-primary",
+          pathname === "/crisis-resources"
+            ? "text-primary"
+            : "text-foreground",
+        )}
+      >
+        Crisis Support
+      </Link>
+      <Link
         href="/community"
         className={cn(
           "text-md font-semibold transition-colors hover:text-primary",
@@ -148,9 +159,10 @@ function SiteNavAuth() {
           pathname === "/dashboard/mother" ? "text-primary" : "text-foreground",
         )}
       >
-        Profile
+        <Avatar className="h-8 w-8 bg-primary/10 ring-2 ring-primary text-primary font-bold items-center justify-center">
+          {currentUser.charAt(0).toUpperCase()}
+        </Avatar>
       </Link>
-      
     </nav>
   );
 }
@@ -166,8 +178,6 @@ function SiteNavContributor() {
   useEffect(() => {
     setMounted(true);
   }, []);
-
-  
 
   const pathname = usePathname();
 
@@ -212,7 +222,6 @@ function SiteNavContributor() {
       >
         Dashboard
       </Link>
-      
     </nav>
   );
 }
@@ -228,8 +237,6 @@ function SiteNavAdmin() {
   useEffect(() => {
     setMounted(true);
   }, []);
-
-  
 
   const pathname = usePathname();
 
@@ -254,7 +261,6 @@ function SiteNavAdmin() {
       >
         Dashboard
       </Link>
-      
     </nav>
   );
 }
@@ -272,7 +278,7 @@ function SiteNav() {
       >
         Home
       </Link>
-      <Link
+      {/* <Link
         href="/login"
         className={cn(
           "text-md font-semibold transition-colors hover:text-primary",
@@ -298,7 +304,7 @@ function SiteNav() {
         )}
       >
         Community
-      </Link>
+      </Link> */}
       <Link
         href="/login"
         className={cn(

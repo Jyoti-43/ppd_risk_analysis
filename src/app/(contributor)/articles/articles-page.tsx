@@ -1,7 +1,7 @@
 "use client";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useGetPublishedArticleQuery } from "../../redux/services/articleApi";
 
 export default function ArticleResources() {
@@ -12,7 +12,7 @@ export default function ArticleResources() {
     isLoading,
     isError,
     error,
-  } = useGetPublishedArticleQuery();
+  } = useGetPublishedArticleQuery({});
 
   const topicFilters = [
     { id: "all", label: "All Topics", icon: null },
@@ -67,6 +67,15 @@ export default function ArticleResources() {
   console.log("Active Filter:", activeFilter);
   console.log("Search Query:", searchQuery);
   console.log("Filtered Results:", filteredArticles);
+
+  // Pagination
+  const PAGE_SIZE = 6;
+  const [currentPage, setCurrentPage] = useState(1);
+  const totalPages = Math.max(1, Math.ceil(filteredArticles.length / PAGE_SIZE));
+
+  useEffect(() => {
+    if (currentPage > totalPages) setCurrentPage(1);
+  }, [filteredArticles.length, totalPages]);
 
   return (
     <div className="min-h-screen bg-background py-6">
@@ -178,7 +187,9 @@ export default function ArticleResources() {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10 mb-10">
             {filteredArticles && filteredArticles.length > 0 ? (
-              filteredArticles.map((article:any) => {
+              filteredArticles
+                .slice((currentPage - 1) * PAGE_SIZE, (currentPage - 1) * PAGE_SIZE + PAGE_SIZE)
+                .map((article:any) => {
                 const articleId = article.id || (article as any).articleId;
                 return (
                   <Link
@@ -269,13 +280,21 @@ export default function ArticleResources() {
 
         {/* Pagination */}
         <div className="flex justify-center items-center gap-6 pt-8 my-10">
-          <button className="w-10 h-10 rounded-full bg-card hover:bg-muted shadow-sm flex items-center justify-center transition-colors">
+          <button
+            onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+            disabled={currentPage === 1}
+            className={`w-10 h-10 rounded-full bg-card hover:bg-muted shadow-sm flex items-center justify-center transition-colors ${currentPage === 1 ? "opacity-40 cursor-not-allowed" : ""}`}
+          >
             <span className="material-symbols-outlined">chevron_left</span>
           </button>
           <span className="text-sm text-muted-foreground font-medium">
-            Page 1 of 5
+            Page {currentPage} of {totalPages}
           </span>
-          <button className="w-10 h-10 rounded-full bg-card hover:bg-muted shadow-sm flex items-center justify-center transition-colors">
+          <button
+            onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+            disabled={currentPage === totalPages}
+            className={`w-10 h-10 rounded-full bg-card hover:bg-muted shadow-sm flex items-center justify-center transition-colors ${currentPage === totalPages ? "opacity-40 cursor-not-allowed" : ""}`}
+          >
             <span className="material-symbols-outlined">chevron_right</span>
           </button>
         </div>

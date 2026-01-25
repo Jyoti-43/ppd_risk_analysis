@@ -15,9 +15,26 @@ import {
   useGetHybridScreeningHistoryQuery,
   useGetEpdsScreeningHistoryQuery,
 } from "../../redux/services/userDashboardApi";
-import { Activity, FileText, AlertTriangle, Calendar } from "lucide-react";
+import {
+  Activity,
+  FileText,
+  AlertTriangle,
+  Calendar,
+  KeyRound,
+} from "lucide-react";
 import { timeAgo } from "@/utills/timeAgo";
 import { useMemo } from "react";
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@radix-ui/react-dropdown-menu";
+import { SidebarMenuButton } from "@/components/ui/sidebar";
+import { Input } from "@/components/ui/input";
 
 // Interface for screening data structure
 interface ScreeningData {
@@ -52,7 +69,6 @@ export default function MotherDashboard() {
     useGetHybridScreeningHistoryQuery(undefined, {
       refetchOnMountOrArgChange: false,
     });
-  console.log("hybridScreeningHistory", hybridScreeningHistory?.history);
 
   console.log("Dashboard State:", {
     symptoms: { data: symptomsScreeningHistory, loading: isSymptomsLoading },
@@ -170,7 +186,6 @@ export default function MotherDashboard() {
       });
     });
 
-    console.log("al screening", allScreenings);
     // Sort by created_at date (most recent first)
     return allScreenings.sort((a, b) => {
       const dateA = new Date(a.created_at).getTime();
@@ -236,22 +251,59 @@ export default function MotherDashboard() {
   const isAnyScreeningLoading =
     isSymptomsLoading || isEpdsLoading || isHybridLoading;
 
-  console.log("Latest screening selected:", latestScreening);
-  console.log("Time since last screening:", timeSinceLastScreening);
+  const handlePartnerInvite = () => {
+    // Handle partner invite logic here
+  };
 
   return (
     <div className="px-8 space-y-8">
-      <div className="flex pt-2 pb-6">
-        <h2 className="text-2xl font-bold mb-4"></h2>
-        <p>
-          <span className="text-2xl md:text-3xl font-bold text-amber-950/80 tracking-tight text-heading">
-            Welcome back, {user?.userName} !
-          </span>{" "}
-          <br />
-          Here is your wellness overview.
-        </p>
+      <div className="flex justify-between">
+        <div className="flex pt-2 pb-6">
+          <h2 className="text-2xl font-bold mb-4"></h2>
+          <p>
+            <span className="text-2xl md:text-3xl font-bold text-amber-950/80 tracking-tight text-heading">
+              Welcome back, {user?.userName} !
+            </span>{" "}
+            <br />
+            Here is your wellness overview.
+          </p>
+        </div>
+        <div className="relative flex  items-center">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <div className="flex items-center justify-center gap-2">
+                <Button className="bg-primary text-white">+ Add Partner</Button>
+              </div>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent
+              side="left"
+              align="start"
+              className=" absolute  top-[-25px] right-4 w-56  bg-slate-50 p-4 rounded-md shadow-md shadow-primary/20 ring-1 ring-primary/20"
+            >
+              <DropdownMenuLabel className="text-md font-semibold mb-2">
+                Add Partner Email
+              </DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem className="cursor-pointer flex items-center gap-4 ">
+                <span>
+                  <Input
+                    type="email"
+                    placeholder="Enter partner email"
+                    className="hover:border-primary border-primary/20 focus:border-primary hover:bg-primary/10 focus:bg-primary/10"
+                  />
+                </span>
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                className="cursor-pointer flex items-center gap-2 py-2  mt-1"
+                onClick={handlePartnerInvite}
+              >
+                <Button className="bg-primary text-white">Send Invite</Button>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
       </div>
-
       {/* total count cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <Card className="hover:shadow-md transition-shadow">

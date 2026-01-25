@@ -19,6 +19,7 @@ import {
 import { useAppDispatch, useAppSelector } from "@/src/app/Hooks/hook";
 import { useCreateGroupPostMutation } from "@/src/app/redux/services/groupPostApi";
 import { RootState } from "@/src/app/redux/store";
+import { toast } from "react-toastify";
 import { useUploadImageMutation } from "@/src/app/redux/services/communityPostApi";
 
 interface CreatePostModalProps {
@@ -105,17 +106,17 @@ export function CreatePostModal({
   // Submit handler
   const handleSubmit = async () => {
     if (selectedTags.length === 0) {
-      alert("Please select at least one tag");
+      toast.info("Please select at least one tag");
       return;
     }
     if (!selectedCategory) {
-      alert("Please select a category");
+      toast.info("Please select a category");
       return;
     }
 
     console.log("Group ID prop:", groupId);
     if (!groupId) {
-      alert("No group selected. Please select a group before posting.");
+      toast.info("No group selected. Please select a group before posting.");
       return;
     }
 
@@ -134,13 +135,13 @@ export function CreatePostModal({
         groupId: cleanGroupId ?? "",
       }).unwrap();
       console.log("Api response success", response);
-      alert("Story published successfully!");
+      toast.success("Story published successfully!");
       router.push("/community");
       setOpen(false);
       onClose();
     } catch (error: any) {
       console.error("Failed to publish:", error);
-      alert(error?.data?.message ?? "Failed to publish story");
+      toast.error(error?.data?.message ?? "Failed to publish story");
     }
   };
 

@@ -14,6 +14,7 @@ import { SidebarCard } from "./sidebar-card";
 import { useGetCategoryQuery } from "../../../redux/services/communityPostApi";
 import { useArticleUploadImageMutation } from "../../../redux/services/articleApi";
 import { Loader2, X } from "lucide-react";
+import { toast } from "react-toastify";
 
 interface EditorSidebarProps {
   preview: string;
@@ -51,7 +52,7 @@ export function EditorSidebar({
         setImageUrl(res.url);
       } catch (err) {
         console.error("Upload failed:", err);
-        alert("Image upload failed");
+        toast.error("Image upload failed");
       }
     }
   };

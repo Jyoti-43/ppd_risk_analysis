@@ -11,6 +11,7 @@ import {
 } from "@/src/app/redux/services/communityGroupApi";
 
 import { useCustomSelectStyles } from "@/lib/selectStyle";
+import { toast } from "react-toastify";
 import { useCategorySelect } from "@/src/app/Hooks/useCategorySelect";
 import ImageUpload from "../../common-component/imgae-uploader";
 
@@ -43,12 +44,12 @@ export default function ShareJourneyForm() {
 
   const handlePublish = async () => {
     if (!groupName.trim() || !groupDescription.trim()) {
-      alert("Please fill in both group name and groupDescription");
+      toast.info("Please fill in both group name and groupDescription");
       return;
     }
 
     if (!selectedCategory) {
-      alert("Please select a category");
+      toast.info("Please select a category");
       return;
     }
 
@@ -61,7 +62,7 @@ export default function ShareJourneyForm() {
 
     try {
       await createGroup(payload).unwrap();
-      alert("groupDescription published successfully!");
+      toast.success("Group description published successfully!");
       router.push("/community");
       console.log("group:", createGroup);
       // Reset form
@@ -71,7 +72,7 @@ export default function ShareJourneyForm() {
       setUploadedImage(null);
     } catch (error: any) {
       console.error("Failed to publish:", error);
-      alert(error?.data?.message ?? "Failed to publish groupDescription");
+      toast.error(error?.data?.message ?? "Failed to publish groupDescription");
     }
   };
 

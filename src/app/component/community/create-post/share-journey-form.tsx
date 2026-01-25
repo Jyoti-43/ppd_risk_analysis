@@ -9,6 +9,7 @@ import { useCreatePostMutation } from "@/src/app/redux/services/communityPostApi
 
 import { useCustomSelectStyles } from "@/lib/selectStyle";
 import { useCategorySelect } from "@/src/app/Hooks/useCategorySelect";
+import { toast } from "react-toastify";
 
 interface Tag {
   value: string;
@@ -78,15 +79,15 @@ export default function ShareJourneyForm() {
 
   const handlePublish = async () => {
     if (!title.trim() || !story.trim()) {
-      alert("Please fill in both title and story");
+      toast.info("Please fill in both title and story");
       return;
     }
     if (selectedTags.length === 0) {
-      alert("Please select at least one tag");
+      toast.info("Please select at least one tag");
       return;
     }
     if (!selectedCategory) {
-      alert("Please select a category");
+      toast.info("Please select a category");
       return;
     }
 
@@ -101,7 +102,7 @@ export default function ShareJourneyForm() {
 
     try {
       await createPost(payload).unwrap();
-      alert("Story published successfully!");
+      toast.success("Story published successfully!");
       router.push("/community");
       // Reset form
       setTitle("");
@@ -113,7 +114,7 @@ export default function ShareJourneyForm() {
       setPostAnonymously(false);
     } catch (error: any) {
       console.error("Failed to publish:", error);
-      alert(error?.data?.message ?? "Failed to publish story");
+      toast.error(error?.data?.message ?? "Failed to publish story");
     }
   };
 
@@ -202,7 +203,7 @@ export default function ShareJourneyForm() {
       {/* Options */}
       <div className="flex flex-row">
         <div className="space-y-3 flex flex-col flex-1">
-          <label className="flex items-center gap-3 cursor-pointer">
+          {/* <label className="flex items-center gap-3 cursor-pointer">
             <input
               type="checkbox"
               checked={sensitiveContent}
@@ -212,7 +213,7 @@ export default function ShareJourneyForm() {
             <span className="text-sm text-foreground">
               Add sensitive content warning
             </span>
-          </label>
+          </label> */}
           <label className="flex items-center gap-3 cursor-pointer">
             <input
               type="checkbox"

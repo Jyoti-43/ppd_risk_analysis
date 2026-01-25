@@ -13,6 +13,7 @@ import {
 } from "@/src/app/redux/services/screeningApi";
 import { SymptomsQuestion, SymptomsQuestionsResponse } from "@/src/app/type";
 import { useAppDispatch } from "@/src/app/Hooks/hook";
+import { toast } from "react-toastify";
 import {
   setHybridStatus,
   setHybridError,
@@ -124,7 +125,7 @@ export default function HybridAssessmentPage() {
           error instanceof Error ? error.message : "Submission failed",
         ),
       );
-      alert("Failed to submit assessment. Please try again.");
+      toast.error("Failed to submit assessment. Please try again.");
     }
   };
 

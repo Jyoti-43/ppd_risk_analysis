@@ -13,6 +13,7 @@ import {
 import { useParams } from "next/navigation";
 import { useCustomSelectStyles } from "@/lib/selectStyle";
 import { useCategorySelect } from "@/src/app/Hooks/useCategorySelect";
+import { toast } from "react-toastify";
 
 interface Tag {
   value: string;
@@ -45,7 +46,7 @@ export default function EditPostForm() {
 
   const customSelectStyles = useCustomSelectStyles();
   // Fetch all posts and find the one to edit
-  const { data: posts, isLoading: isPostsLoading } = useGetPostQuery();
+  const { data: posts, isLoading: isPostsLoading } = useGetPostQuery(postId);
   const post = posts?.find((p: any) => String(p.id) === String(postId));
 
   const [title, setTitle] = useState<string>("");
@@ -127,15 +128,15 @@ export default function EditPostForm() {
 
   const handlePublish = async () => {
     if (!title.trim() || !story.trim()) {
-      alert("Please fill in both title and story");
+      toast.info("Please fill in both title and story");
       return;
     }
     if (selectedTags.length === 0) {
-      alert("Please select at least one tag");
+      toast.info("Please select at least one tag");
       return;
     }
     if (!selectedCategory) {
-      alert("Please select a category");
+      toast.info("Please select a category");
       return;
     }
 
@@ -150,7 +151,7 @@ export default function EditPostForm() {
 
     try {
       await updatePost({ postId: numericPostId, postBody }).unwrap();
-      alert("Story updated successfully!");
+      toast.success("Story updated successfully!");
 
       setSelectedCategory(null);
       setSelectedTags([]);
@@ -164,7 +165,7 @@ export default function EditPostForm() {
     } catch (error: any) {
       console.error("Failed to update:", error);
       console.log(error?.data?.detail);
-      alert(error?.data?.message ?? "Failed to update story");
+      toast.error(error?.data?.message ?? "Failed to update story");
     }
   };
 

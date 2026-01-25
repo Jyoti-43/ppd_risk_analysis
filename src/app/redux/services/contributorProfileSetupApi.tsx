@@ -26,14 +26,14 @@ export const contributorProfileApi = createApi({
   }),
 
   // Cache data for 5 minutes (300 seconds) - won't refetch if data exists
-  keepUnusedDataFor: 600,
+  keepUnusedDataFor: 30600,
 
   // Tag types for cache invalidation
   tagTypes: ["Articles", "Categories", "ContributorProfile"],
 
   endpoints: (build) => ({
     // get contributor profile
-    getContributorProfile: build.query<any, void>({
+    getContributorProfile: build.query<any, any>({
       query: () => ({
         url: "/contributor/profile",
         method: "GET",

@@ -3,17 +3,17 @@ import Image from "next/image"
 export function ProcessSection() {
   const steps = [
     {
-      image: "/abstract-green-waves.jpg",
+      image: "/assets/image/risk-assessment-home.jpg",
       title: "Risk Assessment",
       description: "Take a gentle, 5-minute screening to help us understand where you are at emotionally.",
     },
     {
-      image: "/coffee-cup-on-table-next-to-window.jpg",
+      image: "/assets/image/personalized-support-home.jpg",
       title: "Personalized Support",
       description: "Receive a curated list of articles, coping strategies, and professional help options.",
     },
     {
-      image: "/two-women-sitting-and-talking.jpg",
+      image: "/assets/image/community-home.jpg",
       title: "Community Connection",
       description: "Join a safe, moderated space to connect with other mothers who understand your journey.",
     },
@@ -31,6 +31,7 @@ export function ProcessSection() {
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 lg:gap-12">
           {steps.map((step, idx) => (
+            
             <div key={idx} className="flex flex-col gap-6">
               <div className="relative aspect-video w-full rounded-2xl overflow-hidden shadow-sm group">
                 <Image

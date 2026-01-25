@@ -20,6 +20,7 @@ import { Progress } from "@/components/ui/progress";
 import { Stepper } from "@/components/ui/stepper";
 import { ProgressBar } from "@/src/app/component/screening/progress-bar";
 import { QuestionCard } from "@/src/app/component/screening/epds-question-card";
+import { toast } from "react-toastify";
 
 export default function AssessmentPage() {
   const router = useRouter();
@@ -86,7 +87,7 @@ export default function AssessmentPage() {
         dispatch(
           setError(err instanceof Error ? err.message : "Submission failed")
         );
-        alert("Failed to submit screening. Please try again.");
+        toast.error("Failed to submit screening. Please try again.");
         console.error("Screening submission error:", err);
       }
     } else {

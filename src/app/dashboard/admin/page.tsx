@@ -36,81 +36,111 @@ import {
   useGetPendingArticlesQuery,
   usePublishArticleMutation,
 } from "../../redux/services/adminApi";
+import { useGetPublishedArticleQuery } from "../../redux/services/articleApi";
+import { toast } from "react-toastify";
+
+// Combine pending and published articles for the "All Articles" tab
+// We'll fetch both datasets and merge them where appropriate.
 
 export default function AdminDashboard() {
   const [activeTab, setActiveTab] = React.useState("All Articles");
   const [searchQuery, setSearchQuery] = React.useState("");
   const [categoryFilter, setCategoryFilter] = React.useState("all");
 
-  const { data: articles, isLoading } = useGetPendingArticlesQuery({});
+  const { data: pendingArticles, isLoading: isLoadingPending } =
+    useGetPendingArticlesQuery({});
+  const { data: publishedArticles, isLoading: isLoadingPublished } =
+    useGetPublishedArticleQuery({});
   const [articlePublish] = usePublishArticleMutation();
 
+  // Merge pending and published articles for the "All Articles" view
+  const allArticles = React.useMemo(() => {
+    const map = new Map<string, any>();
+    (pendingArticles || []).forEach((a) => map.set(a.id, a));
+    (publishedArticles || []).forEach((a) => map.set(a.id, a));
+    return Array.from(map.values());
+  }, [pendingArticles, publishedArticles]);
+
+ 
+
   const tabs = [
-    { name: "All Articles", count: articles?.length || 0 },
+    { name: "All Articles", count: allArticles?.length || 0 },
     {
       name: "Pending Review",
       count:
-        articles?.filter((a) => {
+        pendingArticles?.filter((a) => {
           const s = (a.status || "").toLowerCase();
-          return s === "pending" || s === "pending review" || s === "";
+          return s === "pending" || s === "pending review" ;
         }).length || 0,
     },
-    {
-      name: "Draft",
-      count:
-        articles?.filter((a) => (a.status || "").toLowerCase() === "draft")
-          .length || 0,
-    },
+    // {
+    //   name: "Draft",
+    //   count:
+    //     pendingArticles?.filter(
+    //       (a) => (a.status || "").toLowerCase() === "draft",
+    //     ).length || 0,
+    // },
     {
       name: "Published",
-      count:
-        articles?.filter((a) => {
-          const s = (a.status || "").toLowerCase();
-          return s === "published" || s === "approved";
-        }).length || 0,
+      count: publishedArticles?.length || 0,
     },
-    {
-      name: "Rejected",
-      count:
-        articles?.filter((a) => (a.status || "").toLowerCase() === "rejected")
-          .length || 0,
-    },
+    // {
+    //   name: "Rejected",
+    //   count:
+    //     pendingArticles?.filter(
+    //       (a) => (a.status || "").toLowerCase() === "rejected",
+    //     ).length || 0,
+    // },
   ];
 
-  const filteredArticles = (articles || []).filter((article) => {
-    const matchesSearch = article.title
-      .toLowerCase()
-      .includes(searchQuery.toLowerCase());
-
-    const articleCategory =
-      typeof article.category === "object"
-        ? (article.category as any).name
-        : article.category;
-
-    const matchesCategory =
-      categoryFilter === "all" ||
-      (articleCategory &&
-        articleCategory.toLowerCase() === categoryFilter.toLowerCase());
-
-    // 3. Tab (Status) filtering
-    const status = (article.status || "").toLowerCase();
-    let matchesTab = true;
-
-    if (activeTab === "Pending Review") {
-      matchesTab =
-        status === "pending" || status === "pending review" || status === "";
-    } else if (activeTab === "Draft") {
-      matchesTab = status === "draft";
-    } else if (activeTab === "Published") {
-      matchesTab = status === "published" || status === "approved";
-    } else if (activeTab === "Rejected") {
-      matchesTab = status === "rejected";
+  const filteredArticles = React.useMemo(() => {
+    // Determine which source array to use based on the active tab
+    let sourceArray: any[] = [];
+    if (activeTab === "All Articles") {
+      sourceArray = allArticles;
+    } else if (activeTab === "Pending Review") {
+     sourceArray = pendingArticles || [];
+    } else {
+      // For published Review, Draft, Rejected we use pendingArticles (which includes those statuses)
+       sourceArray = publishedArticles || [];
+      
     }
 
-    return matchesSearch && matchesCategory && matchesTab;
-  });
+    return sourceArray.filter((article) => {
+      const matchesSearch = article.title
+        ?.toLowerCase()
+        .includes(searchQuery.toLowerCase());
 
-  if (isLoading) {
+      const articleCategory =
+        typeof article.category === "object"
+          ? (article.category as any).name
+          : article.category;
+      const matchesCategory =
+        categoryFilter === "all" ||
+        (articleCategory &&
+          articleCategory.toLowerCase() === categoryFilter.toLowerCase());
+
+      const status = (article.status || "").toLowerCase();
+      let matchesTab = true;
+      if (activeTab === "Pending") {
+        matchesTab =
+          status === "pending" || status === "Pending review" || status === "";
+      } else if (activeTab === "Published") {
+        matchesTab = status === "published" || status === "approved" || status === "";
+      } 
+      // For "All Articles" we already set matchesTab = true above
+      return matchesSearch && matchesCategory && matchesTab;
+    });
+  }, [
+    activeTab,
+    searchQuery,
+    categoryFilter,
+    pendingArticles,
+    publishedArticles,
+    allArticles,
+  ]);
+
+  if (isLoadingPending || isLoadingPublished) {
     return <div className="p-8">Loading articles...</div>;
   }
 
@@ -128,11 +158,11 @@ export default function AdminDashboard() {
 
     try {
       await articlePublish(numericId).unwrap();
-      alert("Article published successfully!");
+      toast.success("Article published successfully!");
     } catch (error: any) {
       console.error("Error publishing article:", error);
-      alert(
-        error?.data?.message || "Failed to publish article. Please try again.",
+      toast.error(
+        `Failed to publish article. Please try again. error: ${error?.data?.message || error.message}`,
       );
     }
   };
@@ -149,12 +179,12 @@ export default function AdminDashboard() {
             Review and manage articles submitted by contributors.
           </p>
         </div>
-        <Link href="/new-article">
+        {/* <Link href="/new-article">
           <Button className="bg-primary hover:bg-[#e21e80] text-white px-4 py-2 rounded-2xl text-lg font-semibold shadow-lg shadow-pink-100 transition-all active:scale-95 flex gap-2">
             <Plus size={24} />
             <span>Create New Article</span>
           </Button>
-        </Link>
+        </Link> */}
       </div>
 
       {/* Filters & Search Section */}
@@ -198,10 +228,10 @@ export default function AdminDashboard() {
             </SelectTrigger>
             <SelectContent className="rounded-2xl border-none shadow-xl">
               <SelectItem value="all">All Categories</SelectItem>
-              <SelectItem value="Physical Health">Physical Recovery</SelectItem>
-              <SelectItem value="Mental Health">Mental Health</SelectItem>
-              <SelectItem value="Baby Care">Baby Care</SelectItem>
-              <SelectItem value="Wellness">Wellness</SelectItem>
+              <SelectItem value="Discussion">Discussion</SelectItem>
+              <SelectItem value="Mom">Mom</SelectItem>
+              <SelectItem value="Research">Research</SelectItem>
+              <SelectItem value="Happy">Happy</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -224,9 +254,11 @@ export default function AdminDashboard() {
               <TableHead className="uppercase text-gray-700 font-extrabold tracking-widest text-md py-4">
                 Last Modified
               </TableHead>
-              <TableHead className="uppercase text-gray-700 font-extrabold tracking-widest text-md text-right py-4 px-8">
-                Actions
-              </TableHead>
+              {activeTab === "Pending Review" && (
+                <TableHead className="uppercase text-gray-700 font-extrabold tracking-widest text-md text-right py-4 px-8">
+                  Actions
+                </TableHead>
+              )}
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -234,9 +266,9 @@ export default function AdminDashboard() {
               filteredArticles.map((article) => (
                 <TableRow
                   key={article.id}
-                  className="border-b border-gray-50/50 hover:bg-gray-50/80 transition-colors"
+                  className="border-b border-gray-50/50 py-2 hover:bg-gray-50/80 transition-colors"
                 >
-                  <TableCell className="px-2 py-1">
+                  <TableCell className="px-2 pl-6 py-2">
                     <div className="flex items-center gap-2">
                       <Avatar className="h-7 w-7 rounded-2xl border-none shadow-sm overflow-hidden bg-gray-100 flex-shrink-0">
                         <AvatarImage
@@ -252,21 +284,21 @@ export default function AdminDashboard() {
                       </span>
                     </div>
                   </TableCell>
-                  <TableCell className="py-1">
+                  <TableCell className="py-2">
                     <span className="text-gray-500 font-medium text-lg leading-relaxed">
                       {typeof article.category === "object"
                         ? (article.category as any).name
                         : article.category || "General"}
                     </span>
                   </TableCell>
-                  <TableCell className="py-1 whitespace-nowrap">
+                  <TableCell className="py-2 whitespace-nowrap">
                     <Badge
                       variant="outline"
                       className={cn(
                         "px-4 py-1.5 rounded-xl uppercase text-[10px] font-black border-none tracking-widest",
                         (() => {
                           const s = (article.status || "").toLowerCase();
-                          if (s === "published" || s === "approved")
+                          if (s === "published" || s === "approved" || s === "")
                             return "bg-green-100 text-green-700 hover:bg-green-200";
                           if (s === "pending" || s === "pending review")
                             return "bg-amber-100 text-amber-700 hover:bg-amber-200";
@@ -276,42 +308,37 @@ export default function AdminDashboard() {
                         })(),
                       )}
                     >
-                      {article.status || "Pending"}
+                      {article.status ==="pending" ? "Pending" : "Published"}
                     </Badge>
                   </TableCell>
-                  <TableCell className="py-1">
+                  <TableCell className="py-2">
                     <span className="text-gray-500 font-medium text-lg leading-relaxed">
                       {article.createdAt
                         ? new Date(article.createdAt).toLocaleDateString()
                         : "N/A"}
                     </span>
                   </TableCell>
-                  <TableCell className="px-8 py-1  text-right">
-                    <div className="flex justify-between gap-">
-                      <Button
-                        onClick={() => publishArticle(article.id)}
-                        className="  px-2  py-0 text-primary  text-md font-semibold hover:bg-background bg-green-100 rounded-lg transition-all"
-                      >
-                        Publish
-                      </Button>
-                      {/* <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-10 w-10 text-gray-400 hover:text-gray-900 hover:bg-gray-100 rounded-xl transition-all"
-                      >
-                        <Eye size={20} />
-                      </Button> */}
-                      <Button className=" px-2  py-0 text-primary  text-md font-semibold hover:bg-background bg-red-100 rounded-lg transition-all">
-                        Reject
-                      </Button>
-                    </div>
-                  </TableCell>
+                  {activeTab === "Pending Review" && (
+                    <TableCell className="px-8 py-2  text-right">
+                      <div className="flex justify-between items-center gap-4">
+                        <Button
+                          onClick={() => publishArticle(article.id)}
+                          className=" px-4 py-1 max-h-max text-primary  text-md font-semibold hover:bg-background bg-green-100 rounded-lg transition-all"
+                        >
+                          Publish
+                        </Button>
+                        <Button className=" px-2 py-1 max-h-max text-primary  text-md font-semibold hover:bg-background bg-red-100 rounded-lg transition-all">
+                          Reject
+                        </Button>
+                      </div>
+                    </TableCell>
+                  )}
                 </TableRow>
               ))
             ) : (
               <TableRow>
                 <TableCell
-                  colSpan={5}
+                  colSpan={activeTab === "Pending Review" ? 5 : 4}
                   className="text-center py-20 text-gray-400 font-medium text-xl"
                 >
                   No articles found matching your criteria.

@@ -49,9 +49,9 @@ const chartConfig = {
 } satisfies ChartConfig;
 
 interface PPDRiskAnalysisProps {
-  symptomsHistory?: any[];
-  epdsHistory?: any[];
-  hybridHistory?: any[];
+  symptomsHistory?: any;
+  epdsHistory?: any;
+  hybridHistory?: any;
 }
 
 import { useRouter } from "next/navigation";

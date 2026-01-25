@@ -2,9 +2,9 @@ import { Heart, MessageCircle, Share2, MoreVertical } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useAppDispatch, useAppSelector } from "@/src/app/Hooks/hook";
 import { setGroupPostLikes } from "@/src/app/redux/feature/community/groupPostSlice";
-import { use, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import CreateCommentModal from "../../create-comment-modal";
-import { useGroupPostLikeMutation } from "@/src/app/redux/services/groupPostApi";
+import { useGroupPostLikeMutation, useGetGroupPostsCommentsQuery } from "@/src/app/redux/services/groupPostApi";
 interface DiscussionPostProps {
   id: string;
   author: string;
@@ -70,6 +70,7 @@ export function DiscussionPost({
   }, [id, dispatch, like, likeCount, hasLiked]);
 
   const [groupPostLike] = useGroupPostLikeMutation();
+  const { data: comments } = useGetGroupPostsCommentsQuery({ postId: id });
 
   // 3. In handleLike, update localLikeCount after successful like/unlike
   const handleLike = async () => {
@@ -77,13 +78,13 @@ export function DiscussionPost({
       const response = await groupPostLike({
         id: id.replace(/^post_/, ""),
         hasLiked: !currentHasLiked,
-        likeCount: localLikeCount.toString(),
+        likeCount: localLikeCount,
       }).unwrap();
 
       dispatch(
         setGroupPostLikes({
           id: response.id,
-          likeCount: response.likeCount.toString(),
+          likeCount: response.likeCount,
           hasLiked: response.hasLiked,
         })
       );
@@ -94,27 +95,7 @@ export function DiscussionPost({
     }
   };
 
-  // const handleLike = () => {
-  //   if (hasLiked && likeCount > 0) {
-  //     // Unlike: decrement like count and set hasLiked to false
-  //     dispatch(
-  //       setGroupPostLikes({
-  //         id,
-  //         likeCount: (likeCount - 1).toString(),
-  //         hasLiked: false,
-  //       })
-  //     );
-  //   } else {
-  //     // Like: increment like count and set hasLiked to true
-  //     dispatch(
-  //       setGroupPostLikes({
-  //         id,
-  //         likeCount: (likeCount + 1).toString(),
-  //         hasLiked: true,
-  //       })
-  //     );
-  //   }
-  // };
+ 
   return (
     <>
       <div className="bg-card rounded-lg p-6 mb-6">
@@ -186,7 +167,7 @@ export function DiscussionPost({
             className="flex items-center gap-2 text-muted-foreground hover:text-primary transition"
           >
             <MessageCircle className="w-5 h-5" />
-            <span className="text-sm">5 Comments</span>
+            <span className="text-sm">{(comments ? comments.length : 0) + ` Comment${comments && comments.length === 1 ? "" : "s"}`}</span>
           </button>
           <button className="flex items-center gap-2 text-muted-foreground hover:text-primary transition ml-auto">
             <Share2 className="w-5 h-5" />
@@ -197,6 +178,7 @@ export function DiscussionPost({
       <CreateCommentModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
+        postId={id}
       />
     </>
   );

@@ -15,7 +15,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                         <div className="relative flex items-center justify-between gap-2 px-4 py-2 border-b">
                             <div className="flex items-center gap-2">
                                 <SidebarTrigger />
-                                <h1 className="text-lg font-semibold">Dashboard</h1>
+                              
                             </div>
                         </div>
                         <div className="flex flex-col p-4">

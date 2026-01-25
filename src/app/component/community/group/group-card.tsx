@@ -4,10 +4,13 @@ import Link from "next/link";
 import { useAppDispatch, useAppSelector } from "@/src/app/Hooks/hook";
 import { setCurrentGroupId } from "@/src/app/redux/feature/community/groupSlice";
 import {
+  useDeleteGroupMutation,
   useGetGroupQuery,
   useJoinedGroupMutation,
 } from "@/src/app/redux/services/communityGroupApi";
 import { useState, useEffect } from "react";
+import { Badge } from "@/components/ui/badge";
+import { toast } from "react-toastify";
 
 interface GroupCardProps {
   id: string;
@@ -42,6 +45,7 @@ export function GroupCard({
 }: GroupCardProps) {
   const dispatch = useAppDispatch();
   const [joinedGroup] = useJoinedGroupMutation();
+  const [deleteGroup] = useDeleteGroupMutation();
   // const [isJoinedState, setIsJoinedState] = useState(isJoined);
 
   // useEffect(() => {
@@ -59,12 +63,26 @@ export function GroupCard({
       }).unwrap();
       // setIsJoinedState(true);
       console.log("Api response success join group", response);
-      alert("joined group  successfully!");
+      toast.success("Joined group successfully!");
     } catch (error: any) {
       console.error("Failed to join group:", error);
 
-      alert(error?.data?.detail ?? "Failed to join group");
+      toast.error(error?.data?.detail ?? "Failed to join group");
     }
+  };
+
+  const handleDelete = async () => {
+    const groupId = id.startsWith("group_") ? id.replace("group_", "") : id;
+    try {
+      const response = await deleteGroup(groupId).unwrap();
+      console.log("Api response success delete group", response);
+      toast.success("Deleted group successfully!");
+    } catch (error: any) {
+      console.error("Failed to delete group:", error);
+
+      toast.error(error?.data?.detail ?? "Failed to delete group");
+    }
+    onDelete?.();
   };
 
   return (
@@ -86,7 +104,7 @@ export function GroupCard({
 
       {/* Card Content */}
       <div className="flex flex-col gap-3 p-5">
-        <div className="flex flex-col gap-1.5">
+        <div className="flex flex-col gap-1.5 ">
           <h3 className="font-bold text-[17px] text-foreground leading-tight">
             {name}
           </h3>
@@ -97,18 +115,16 @@ export function GroupCard({
 
         {/* Members Info */}
         <div className="flex items-center gap-4 text-[13px] font-medium text-muted-foreground">
-          <div className="flex items-center gap-1.5">
+          {/* <div className="flex items-center gap-1.5">
             <span className="material-symbols-outlined text-[16px]">group</span>
             <span>
               {members >= 1000 ? `${(members / 1000).toFixed(1)}k` : members}{" "}
               Members
             </span>
-          </div>
+          </div> */}
           <div className="flex items-center gap-1.5">
-            <span className="material-symbols-outlined text-[16px]">
-              category
-            </span>
-            <span>{category}</span>
+            
+            <Badge className="bg-pink-200 text-primary">{category}</Badge>
           </div>
         </div>
 
@@ -145,7 +161,7 @@ export function GroupCard({
                   <button
                     onClick={(e) => {
                       e.preventDefault();
-                      onDelete?.();
+                      handleDelete();
                     }}
                     className="flex items-center gap-1 text-[13px] font-medium text-muted-foreground hover:text-red-500 transition-colors"
                   >

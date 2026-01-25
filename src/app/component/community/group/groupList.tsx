@@ -11,6 +11,7 @@ import {
   useGetGroupQuery,
   useGetMyJoinedgroupQuery,
 } from "@/src/app/redux/services/communityGroupApi";
+import { toast } from "react-toastify";
 import { PostSkeleton } from "../homaPage/post/postSkeleton";
 import { CreateGroupCard } from "./create-group-card";
 
@@ -83,10 +84,10 @@ export const GroupList = ({
 
       try {
         await deleteGroup(numericId).unwrap();
-        alert("Group deleted successfully!");
+        toast.success("Group deleted successfully!");
       } catch (error: any) {
         console.error("Failed to delete group:", error);
-        alert(error?.data?.message ?? "Failed to delete group");
+        toast.error(error?.data?.message ?? "Failed to delete group");
       }
     }
   };

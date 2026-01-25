@@ -38,9 +38,9 @@ const months = [
 ];
 
 const MyProfilePage = () => {
-  const { data: profile, isLoading, error } = useGetContributorProfileQuery();
+  const { data: profile, isLoading, error } = useGetContributorProfileQuery({});
   const currentUser = useAppSelector(selectCurrentUser);
-
+console.log("Contributor Profile Data:", profile);
   if (isLoading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">

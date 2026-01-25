@@ -162,7 +162,7 @@ export default function ResultsPage() {
                   riskInfo.risk === "LOW" ? "text-green-700" : "text-red-700"
                 }`}
               >
-                `${riskInfo.message}
+                {riskInfo.message}
               </p>
             </div>
 
