@@ -2,8 +2,6 @@
 
 MotherCare is a modern web application designed to provide a safe, non-judgmental, and secure space for mothers to assess their postpartum health. The platform offers multiple screening methods for Postpartum Depression (PPD) and provides resources and community support to help mothers navigate their journey.
 
-
-
 ## 🌟 Key Features
 
 ### 🩺 PPD Risk Analysis
@@ -40,7 +38,7 @@ Assess your mental health through scientifically-backed screening methods:
 - **State Management**: [Redux Toolkit](https://redux-toolkit.js.org/)
 - **Backend/Database**: [Firebase](https://firebase.google.com/)
 - **Data Visualization**: [Recharts](https://recharts.org/)
-- **Form Handling**: [React Hook Form](https://react-hook-form.com/) 
+- **Form Handling**: [React Hook Form](https://react-hook-form.com/)
 
 ## 🛠️ Getting Started
 
@@ -64,25 +62,13 @@ Assess your mental health through scientifically-backed screening methods:
    npm install
    ```
 
-3. **Set up Environment Variables:**
-   Create a `.env.local` file in the root directory and add your Firebase credentials:
-
-   ```env
-   NEXT_PUBLIC_FIREBASE_API_KEY=your_api_key
-   NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=your_auth_domain
-   NEXT_PUBLIC_FIREBASE_PROJECT_ID=your_project_id
-   NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=your_storage_bucket
-   NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=your_messaging_sender_id
-   NEXT_PUBLIC_FIREBASE_APP_ID=your_app_id
-   ```
-
-4. **Run the development server:**
+3. **Run the development server:**
 
    ```bash
    npm run dev
    ```
 
-5. **Open the application:**
+4. **Open the application:**
    Navigate to [http://localhost:3000](http://localhost:3000) to see the result.
 
 ## 📂 Project Structure
@@ -93,8 +79,6 @@ Assess your mental health through scientifically-backed screening methods:
 - `src/Hooks`: Custom React hooks.
 - `src/lib`: Shared utility functions and configurations.
 - `public`: Static assets like images and fonts.
-
-
 
 ## 📄 Credits & License
 

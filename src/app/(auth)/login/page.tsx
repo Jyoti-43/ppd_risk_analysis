@@ -12,16 +12,28 @@ import {
 } from "@/components/ui/input-group";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import { cn } from "@/lib/utils";
 
-import { useLoginUserMutation } from "../../redux/services/authApi";
+import {
+  useLoginUserMutation,
+  useVerifyPartnerOtpMutation,
+} from "../../redux/services/authApi";
 import { useAppDispatch } from "../../Hooks/hook";
 import { setCredientials } from "../../redux/feature/user/userSlice";
-import { useSearchParams } from "next/navigation";
 import { communityPost } from "../../redux/services/communityPostApi";
 import { communityGroup } from "../../redux/services/communityGroupApi";
 import { screeningAPI } from "../../redux/services/screeningApi";
 import { groupPost } from "../../redux/services/groupPostApi";
 import { userDashboardApi } from "../../redux/services/userDashboardApi";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
+import { useRouter, useSearchParams } from "next/navigation";
+import { OTPInput, SlotProps } from "input-otp";
 
 const FcGoogle = dynamic(
   () => import("react-icons/fc").then((m) => m.FcGoogle),
@@ -35,15 +47,18 @@ const FaArrowRight = dynamic(
 const LoginForm = () => {
   const [email, setEmail] = React.useState("");
   const [password, setPassword] = React.useState("");
+  const [isOtpOpen, setIsOtpOpen] = React.useState(false);
+  const [otp, setOtp] = React.useState("");
 
-  const router = require("next/navigation").useRouter();
+  const router = useRouter();
   const dispatch = useAppDispatch();
 
   const [loginUser, { data, isSuccess, isError, error }] =
     useLoginUserMutation();
+  const [verifyOtp, { isLoading: isVerifying , isSuccess:isVerifySuccess}] = useVerifyPartnerOtpMutation();
 
   const searchParams = useSearchParams();
-  const callbackUrl = searchParams.get("callbackUrl") || "/"; // default to dashboard
+  const callbackUrl = searchParams.get("callbackUrl");
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -51,6 +66,80 @@ const LoginForm = () => {
     if (email && password) {
       await loginUser({ email, password });
       // Don't navigate here - let useEffect handle it after success
+    }
+  };
+
+  const handleOtpSubmit = async () => {
+    if (otp.length !== 8) {
+      toast.error("Please enter an 8-digit OTP");
+      return;
+    }
+
+    try {
+      const res = await verifyOtp({
+        invite_code: otp,
+      }).unwrap();
+      console.log("OTP Verified Successfully:", res);
+
+      // Normalize response fields for Partner
+      const accessToken = res.access_token || res.accessToken || null;
+      const refreshToken = res.refreshToken || res.refresh_token || null;
+      const userId = res.user?.id ?? res.userId ?? null;
+      const userName = res.user?.name ?? res.userName ?? null;
+      const emailResp = res.user?.email ?? res.email ?? null;
+
+      dispatch(
+        setCredientials({
+          userId: userId || "",
+          userName: userName || "",
+          email: emailResp || "",
+          access_token: accessToken || "",
+          refreshToken: refreshToken || "",
+          role: res.role || "partner",
+          is_verified: true, // If they verified OTP, they are verified
+        }),
+      );
+
+      toast.success("OTP Verified Successfully");
+      setIsOtpOpen(false);
+      router.push("/dashboard/partner");
+    } catch (err: any) {
+      console.error("OTP Verification Error:", err);
+      const detail = err?.data?.detail || err?.data?.message || "";
+
+      // If the code was already used, it means they are already verified
+      if (
+        detail.includes("already been used") ||
+        detail.includes("already verified")
+      ) {
+        // Update credentials to mark as verified
+        if (data) {
+          const accessToken = data.access_token || data.accessToken || null;
+          const refreshToken = data.refreshToken || data.refresh_token || null;
+          const userId = data.user?.id ?? data.userId ?? null;
+          const userName = data.user?.name ?? data.userName ?? null;
+          const emailResp = data.user?.email ?? data.email ?? null;
+
+          dispatch(
+            setCredientials({
+              userId: userId || "",
+              userName: userName || "",
+              email: emailResp || "",
+              access_token: accessToken || "",
+              refreshToken: refreshToken || "",
+              role: data.role || "partner",
+              is_verified: true,
+            }),
+          );
+        }
+
+        toast.success("Identity already verified");
+        setIsOtpOpen(false);
+        router.push("/dashboard/partner");
+        return;
+      }
+
+      toast.error(detail || "Invalid OTP. Please try again.");
     }
   };
 
@@ -77,9 +166,16 @@ const LoginForm = () => {
           userId,
           userName,
           email: emailResp,
-          access_token: accessToken,
-          refreshToken: refreshToken,
+          access_token: accessToken || "",
+          refreshToken: refreshToken || "",
           role: data.role,
+          is_verified:
+            data.user?.is_verified === true ||
+            data.is_verified === true ||
+            (data.user?.is_verified as any) === 1 ||
+            (data.is_verified as any) === 1 ||
+            data.user?.status === "active" ||
+            data.status === "active"
         }),
       );
 
@@ -89,9 +185,11 @@ const LoginForm = () => {
       dispatch(groupPost.util.resetApiState());
       dispatch(userDashboardApi.util.resetApiState());
 
-      setEmail("");
+      if (data.role !== "partner") {
+        setEmail("");
+      }
       setPassword("");
-     
+
       console.log("Data after login:", data);
       console.log("Login successful, redirecting...");
 
@@ -102,8 +200,19 @@ const LoginForm = () => {
         router.push("/dashboard/contributor/profile-setup");
       } else if (data.role === "admin") {
         router.push("/dashboard/admin");
+      } else if (data.role === "partner") {
+        // Broaden verification check to handle different possible backend field names or types
+       
+
+        if (data.status === "active") {
+          router.push("/dashboard/partner");
+        } else {
+          setIsOtpOpen(true);
+        }
+      } else if (data.role === "mother") {
+        router.push((callbackUrl as string) || "/dashboard/mother");
       } else {
-        router.push(callbackUrl);
+        router.push((callbackUrl as string) || "/");
       }
     }
 
@@ -114,6 +223,7 @@ const LoginForm = () => {
     }
 
     if (error) {
+      console.error(error);
     }
   }, [isSuccess, isError, data, error, dispatch, router, callbackUrl]);
 
@@ -276,6 +386,72 @@ const LoginForm = () => {
         </main>
       </div>
       <div></div>
+      <Dialog open={isOtpOpen} onOpenChange={setIsOtpOpen}>
+        <DialogContent className="sm:max-w-md rounded-3xl p-8 backdrop-blur-xl bg-white/90 border-primary/10">
+          <DialogHeader className="space-y-4">
+            <div className="mx-auto size-16 bg-primary/10 rounded-2xl flex items-center justify-center">
+              <Mail className="size-8 text-primary animate-bounce" />
+            </div>
+            <div className="space-y-2 text-center">
+              <DialogTitle className="text-2xl font-bold text-amber-950/80">
+                Verify Your Identity
+              </DialogTitle>
+              <DialogDescription className="text-amber-900/60 font-medium">
+                Please Enter an 8-digit verification code send to your email
+                <span className="block font-bold text-primary mt-1">
+                  {email}
+                </span>
+              </DialogDescription>
+            </div>
+          </DialogHeader>
+
+          <div className="py-6 flex flex-col items-center gap-6">
+            <OTPInput
+              value={otp}
+              onChange={setOtp}
+              maxLength={8}
+              containerClassName="group flex items-center has-[:disabled]:opacity-50"
+              render={({ slots }) => (
+                <div className="flex gap-2">
+                  {slots.map((slot, idx) => (
+                    <div
+                      key={idx}
+                      className={cn(
+                        "relative w-10 h-14 md:w-12 md:h-16 flex items-center justify-center text-2xl font-bold bg-white border-2 rounded-xl transition-all duration-300",
+                        slot.isActive
+                          ? "border-primary ring-4 ring-primary/10 scale-105"
+                          : "border-gray-200",
+                      )}
+                    >
+                      {slot.char !== null ? slot.char : ""}
+                      {slot.hasFakeCaret && (
+                        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                          <div className="w-px h-8 bg-primary animate-caret-blink" />
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+            />
+
+            <Button
+              onClick={handleOtpSubmit}
+              disabled={otp.length !== 8 || isVerifying}
+              className="w-full h-12 rounded-2xl font-bold shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-95 transition-all text-white"
+            >
+              {isVerifying ? "Verifying..." : "Verify & Continue"}
+            </Button>
+
+            {/* <button
+             
+              className="text-sm font-bold text-primary hover:underline transition-all"
+            >
+              Resend Code
+            </button> */}
+          </div>
+        </DialogContent>
+      </Dialog>
     </>
   );
 };

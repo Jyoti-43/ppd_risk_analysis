@@ -14,13 +14,30 @@ import {
   useGetSymptomsScreeningHistoryQuery,
   useGetHybridScreeningHistoryQuery,
   useGetEpdsScreeningHistoryQuery,
+  useInvitePartnerMutation,
+  useGetInvitedPartnersQuery,
 } from "../../redux/services/userDashboardApi";
+import { useState } from "react";
+import { toast } from "react-toastify";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
 import {
   Activity,
   FileText,
   AlertTriangle,
   Calendar,
   KeyRound,
+  UserPlus,
+  Mail,
+  UserCheck,
+  Clock,
+  ChevronRight,
 } from "lucide-react";
 import { timeAgo } from "@/utills/timeAgo";
 import { useMemo } from "react";
@@ -104,7 +121,10 @@ export default function MotherDashboard() {
       allScreenings.push({
         id:
           screening._id ||
-          `symptoms-${screening.createdAt || screening.created_at}`,
+          screening.id ||
+          `symptoms-${screening.createdAt || screening.created_at}-${
+            allScreenings.length
+          }`,
         screeningType: "Symptoms",
         date: new Date(
           screening.createdAt || screening.created_at,
@@ -136,7 +156,10 @@ export default function MotherDashboard() {
         ? "Low"
         : "Moderate";
       allScreenings.push({
-        id: `epds-${index}-${screening.created_at}`,
+        id:
+          screening.id ||
+          screening._id ||
+          `epds-${index}-${screening.created_at}-${allScreenings.length}`,
         screeningType: "EPDS",
         date: new Date(screening.created_at).toLocaleDateString(),
         created_at: screening.created_at,
@@ -172,7 +195,10 @@ export default function MotherDashboard() {
       allScreenings.push({
         id:
           screening._id ||
-          `hybrid-${screening.createdAt || screening.created_at}`,
+          screening.id ||
+          `hybrid-${screening.createdAt || screening.created_at}-${
+            allScreenings.length
+          }`,
         screeningType: "Hybrid",
         date: new Date(
           screening.createdAt || screening.created_at,
@@ -251,8 +277,37 @@ export default function MotherDashboard() {
   const isAnyScreeningLoading =
     isSymptomsLoading || isEpdsLoading || isHybridLoading;
 
-  const handlePartnerInvite = () => {
-    // Handle partner invite logic here
+  const [isInviteDialogOpen, setIsInviteDialogOpen] = useState(false);
+  const [partnerEmail, setPartnerEmail] = useState("");
+  const [screeningTypes, setScreeningTypes] = useState<string[]>([
+    "epds",
+    "ppd",
+    "hybrid",
+  ]);
+  const [invitePartner, { isLoading: isInviting }] = useInvitePartnerMutation();
+  const { data: linkedPartners, isLoading: isPartnersLoading } =
+    useGetInvitedPartnersQuery(undefined, {
+      refetchOnMountOrArgChange: false,
+    });
+    console.log("linkedPartners",linkedPartners);
+
+  const handlePartnerInvite = async () => {
+    if (!partnerEmail) {
+      toast.error("Please enter a partner email");
+      return;
+    }
+    try {
+      await invitePartner({
+        partner_email: partnerEmail,
+        access_level: "latest_summary",
+        screening_types: screeningTypes,
+      }).unwrap();
+      toast.success("Invitation sent successfully!");
+      setIsInviteDialogOpen(false);
+      setPartnerEmail("");
+    } catch (err) {
+      toast.error("Failed to send invitation. Please try again.");
+    }
   };
 
   return (
@@ -268,40 +323,92 @@ export default function MotherDashboard() {
             Here is your wellness overview.
           </p>
         </div>
-        <div className="relative flex  items-center">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <div className="flex items-center justify-center gap-2">
-                <Button className="bg-primary text-white">+ Add Partner</Button>
+        <div className="relative flex items-center">
+          <Button
+            className="bg-primary text-white"
+            onClick={() => setIsInviteDialogOpen(true)}
+          >
+            + Add Partner
+          </Button>
+
+          <Dialog
+            open={isInviteDialogOpen}
+            onOpenChange={setIsInviteDialogOpen}
+          >
+            <DialogContent className="p-0 border-none bg-transparent">
+              <div className="bg-white rounded-[32px] p-8 shadow-2xl space-y-6 max-w-md w-full mx-auto">
+                <DialogHeader>
+                  <DialogTitle className="text-2xl font-bold text-amber-950/80">
+                    Invite Your Partner
+                  </DialogTitle>
+                  <p className="text-amber-900/60 font-medium">
+                    Share your screening results with your support system.
+                  </p>
+                </DialogHeader>
+
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <Label
+                      htmlFor="partner-email"
+                      className="font-semibold text-amber-950/80"
+                    >
+                      Partner's Email
+                    </Label>
+                    <Input
+                      id="partner-email"
+                      type="email"
+                      placeholder="partner@example.com"
+                      value={partnerEmail}
+                      onChange={(e) => setPartnerEmail(e.target.value)}
+                      className="rounded-xl border-amber-100 focus:border-primary focus:ring-primary/20"
+                    />
+                  </div>
+
+                  <div className="space-y-3">
+                    <Label className="font-semibold text-amber-950/80">
+                      Share Screenings
+                    </Label>
+                    <div className="grid grid-cols-1 gap-2">
+                      {["epds", "ppd", "hybrid"].map((type) => (
+                        <div
+                          key={type}
+                          className="flex items-center space-x-3 p-3 rounded-xl border border-amber-50 hover:bg-amber-50/50 transition-colors"
+                        >
+                          <Checkbox
+                            id={type}
+                            checked={screeningTypes.includes(type)}
+                            onCheckedChange={(checked) => {
+                              if (checked) {
+                                setScreeningTypes([...screeningTypes, type]);
+                              } else {
+                                setScreeningTypes(
+                                  screeningTypes.filter((t) => t !== type),
+                                );
+                              }
+                            }}
+                          />
+                          <Label
+                            htmlFor={type}
+                            className="text-sm font-medium uppercase cursor-pointer"
+                          >
+                            {type} Results
+                          </Label>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  <Button
+                    onClick={handlePartnerInvite}
+                    disabled={isInviting || !partnerEmail}
+                    className="w-full h-12 rounded-xl font-bold shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-95 transition-all text-white"
+                  >
+                    {isInviting ? "Sending..." : "Send Invitation"}
+                  </Button>
+                </div>
               </div>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent
-              side="left"
-              align="start"
-              className=" absolute  top-[-25px] right-4 w-56  bg-slate-50 p-4 rounded-md shadow-md shadow-primary/20 ring-1 ring-primary/20"
-            >
-              <DropdownMenuLabel className="text-md font-semibold mb-2">
-                Add Partner Email
-              </DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem className="cursor-pointer flex items-center gap-4 ">
-                <span>
-                  <Input
-                    type="email"
-                    placeholder="Enter partner email"
-                    className="hover:border-primary border-primary/20 focus:border-primary hover:bg-primary/10 focus:bg-primary/10"
-                  />
-                </span>
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem
-                className="cursor-pointer flex items-center gap-2 py-2  mt-1"
-                onClick={handlePartnerInvite}
-              >
-                <Button className="bg-primary text-white">Send Invite</Button>
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+            </DialogContent>
+          </Dialog>
         </div>
       </div>
       {/* total count cards */}
@@ -405,6 +512,95 @@ export default function MotherDashboard() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Linked Partners Section */}
+      <div className="space-y-4">
+        <div className="flex items-center gap-2">
+          <UserPlus className="h-5 w-5 text-gray-400" />
+          <h3 className="text-lg font-bold text-gray-800">
+            Linked Support Partners
+          </h3>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {isPartnersLoading ? (
+            Array.from({ length: 2 }).map((_, i) => (
+              <Card
+                key={i}
+                className="animate-pulse bg-slate-50 border-none h-24"
+              />
+            ))
+          ) : linkedPartners && linkedPartners.length > 0 ? (
+            linkedPartners.map((partner: any, index: number) => (
+              <Card
+                key={partner.id || partner.partner_email || index}
+                className="hover:shadow-md transition-all border-none bg-white/60 backdrop-blur-sm"
+              >
+                <CardContent className="p-4 flex items-center justify-between">
+                  <div className="flex items-center space-x-3">
+                    <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
+                      <Mail className="h-5 w-5 text-primary" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-bold text-gray-800 truncate max-w-[150px]">
+                        {partner.partner_email}
+                      </p>
+                      <div className="flex items-center gap-1.5">
+                        {partner.status === "active" ? (
+                          <div className="flex items-center text-[10px] font-bold text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded-full uppercase tracking-tighter">
+                            <UserCheck className="h-2.5 w-2.5 mr-0.5" />
+                            Connected
+                          </div>
+                        ) : (
+                          <div className="flex items-center text-[10px] font-bold text-amber-600 bg-amber-50 px-1.5 py-0.5 rounded-full uppercase tracking-tighter">
+                            <Clock className="h-2.5 w-2.5 mr-0.5" />
+                            Pending
+                          </div>
+                        )}
+                        <span className="text-[10px] text-gray-400">
+                          {new Date(partner.created_at).toLocaleDateString()}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-8 w-8 p-0 rounded-full hover:bg-gray-100"
+                  >
+                    <ChevronRight className="h-4 w-4 text-gray-400" />
+                  </Button>
+                </CardContent>
+              </Card>
+            ))
+          ) : (
+            <Card className="col-span-full border-dashed border-2 bg-transparent">
+              <CardContent className="flex flex-col items-center justify-center p-8 text-center space-y-3">
+                <div className="h-12 w-12 rounded-full bg-slate-50 flex items-center justify-center">
+                  <UserPlus className="h-6 w-6 text-slate-300" />
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-slate-500">
+                    No support partners linked yet
+                  </p>
+                  <p className="text-xs text-slate-400 max-w-[200px] mt-1">
+                    Invite a partner to share your journey and receive support.
+                  </p>
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="rounded-xl border-primary color-primary hover:bg-primary/5"
+                  onClick={() => setIsInviteDialogOpen(true)}
+                >
+                  Invite Now
+                </Button>
+              </CardContent>
+            </Card>
+          )}
+        </div>
+      </div>
+
       {/* risk analysis overview */}
       <div className="grid grid-cols-1 sm:grid-cols-1  lg:grid-cols-5 gap-4 w-full">
         <div className="grid grid-col-span-1 md:col-span-1 lg:col-span-2 ">

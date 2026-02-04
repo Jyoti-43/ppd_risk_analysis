@@ -14,7 +14,7 @@ import axiosInstance from "../../utils/axiosInstance";
 import { AxiosError, AxiosRequestConfig } from "axios";
 
 // Custom base query using axios instance with refresh token support
-const axiosBaseQuery =
+export const axiosBaseQuery =
   (
     { baseUrl }: { baseUrl: string } = { baseUrl: "" },
   ): BaseQueryFn<
@@ -23,21 +23,35 @@ const axiosBaseQuery =
       method?: AxiosRequestConfig["method"];
       body?: AxiosRequestConfig["data"];
       params?: AxiosRequestConfig["params"];
+      headers?: AxiosRequestConfig["headers"];
     },
     unknown,
     unknown
   > =>
-  async ({ url, method = "GET", body, params }) => {
+  async ({ url, method = "GET", body, params, headers }, api) => {
     try {
+      const state = api.getState() as any;
+      const token = state.user?.currentUser?.access_token;
+
       const result = await axiosInstance({
-        url: baseUrl + url,
+        url,
         method,
         data: body,
         params,
+        headers: {
+          ...headers,
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
       });
       return { data: result.data };
     } catch (axiosError) {
       const err = axiosError as AxiosError;
+
+      // If refresh failed in axiosInstance, it will bubble up here
+      if (err.response?.status === 401) {
+        api.dispatch(logout());
+      }
+
       return {
         error: {
           status: err.response?.status,
@@ -46,6 +60,29 @@ const axiosBaseQuery =
       };
     }
   };
+
+export interface User {
+  id: string;
+  name: string;
+  email: string;
+  is_verified?: boolean;
+  status?: string;
+}
+
+export interface LoginResponse {
+  access_token?: string;
+  accessToken?: string;
+  refresh_token?: string;
+  refreshToken?: string;
+  role: string;
+  user: User;
+  userId?: string;
+  userName?: string;
+  email?: string;
+  message?: string;
+  is_verified?: boolean;
+  status?: string;
+}
 
 export const authUserAPI = createApi({
   reducerPath: "authUser",
@@ -66,8 +103,11 @@ export const authUserAPI = createApi({
       }),
     }),
 
-    loginUser: build.mutation({
-      query: (body: { email: string; password: string }) => ({
+    loginUser: build.mutation<
+      LoginResponse,
+      { email: string; password: string }
+    >({
+      query: (body) => ({
         url: "/login",
         method: "POST",
         body,
@@ -86,6 +126,14 @@ export const authUserAPI = createApi({
       query: (body: { oldPassword: string; newPassword: string }) => ({
         url: "/change-password",
         method: "PATCH",
+        body,
+      }),
+    }),
+
+    verifyPartnerOtp: build.mutation<LoginResponse, { invite_code: string }>({
+      query: (body) => ({
+        url: "/partner/invite/accept",
+        method: "POST",
         body,
       }),
     }),
@@ -125,4 +173,5 @@ export const {
   useLogoutUserMutation,
   useUpdateNameMutation,
   useChangePasswordMutation,
+  useVerifyPartnerOtpMutation,
 } = authUserAPI;

@@ -1,8 +1,7 @@
 "use client";
 
-import type { SymptomsQuestionType, SymptomsQuestion } from "@/src/app/type";
+import type { SymptomsQuestion } from "@/src/app/type";
 import { cn } from "@/lib/utils";
-import type { Question } from "@/lib/screening-data";
 import {
   Select,
   SelectContent,
@@ -11,6 +10,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { CheckCircle2, Heart, HelpCircle } from "lucide-react";
 
 interface SymptomsQuestionCardProps {
   question: SymptomsQuestion;
@@ -25,92 +25,154 @@ export const SymptomsQuestionCard = ({
 }: SymptomsQuestionCardProps) => {
   // Only show default/min for Age, otherwise empty until user selects
   const answerValue = (() => {
-    if (currentAnswer !== undefined && currentAnswer !== null && currentAnswer !== "") return currentAnswer;
-    if (question.type === "number" && (question.id === "Enter Age" || question.id === 17)) {
+    if (
+      currentAnswer !== undefined &&
+      currentAnswer !== null &&
+      currentAnswer !== ""
+    )
+      return currentAnswer;
+    if (
+      question.type === "number" &&
+      (question.id === "Enter Age" || question.id === 17)
+    ) {
       if (question.default !== undefined) return question.default;
       if (question.min !== undefined) return question.min;
     }
     return "";
   })();
+
   return (
-    <Card className="bg-white rounded-3xl px-3 pt-4 mb-2 lg:pt-4 shadow-sm space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-500 flex flex-col h-64">
-      <CardHeader className="">
-        <div className="inline-flex w-max items-center gap-1 px-3 py-1 bg-secondary rounded-full text-xs font-bold text-primary">
-          <span className="material-symbols-outlined text-[12px]">help</span>
-          Question: {question.id}
+    <Card className="bg-white rounded-[2.5rem] p-4 lg:p-6 shadow-xl border-b-4 border-primary/10 relative overflow-hidden animate-in fade-in zoom-in-95 duration-700 min-h-[320px] flex flex-col">
+      {/* Decorative Background Element */}
+      <div className="absolute top-0 right-0 -translate-y-12 translate-x-12 size-48 bg-primary/5 rounded-full blur-3xl pointer-events-none" />
+
+      <CardHeader className="relative space-y-4 pb-2">
+        <div className="flex items-center justify-between">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-primary/10 rounded-full text-sm font-bold text-primary">
+            <Heart className="size-4 fill-primary" />
+            Personal Journey
+          </div>
+          <div className="flex items-center gap-1.5 text-muted-foreground font-medium text-sm">
+            <HelpCircle className="size-4" />
+            Step {typeof question.id === "number" ? question.id : "Detail"}
+          </div>
         </div>
-        <h2 className="text-xl md:text-2xl font-bold text-foreground leading-tight">
-          {question.label}
-        </h2>
-        <p className="text-muted-foreground">
-          Please select the option that comes closest to you .
-        </p>
+
+        <div className="space-y-2">
+          <h2 className="text-2xl lg:text-3xl font-bold text-foreground tracking-tight leading-tight">
+            {question.label}
+          </h2>
+          <p className="text-muted-foreground text-base">
+            Your response helps us understand you better.
+          </p>
+        </div>
       </CardHeader>
 
-
-      <CardContent className="mt-auto w-full">
-        {/* fixed bottom area for input/select so control appears in same place across cards */}
+      <CardContent className="relative mt-auto pt-6 space-y-4">
         {question.type === "dropdown" ? (
-          <Select
-            value={answerValue === "" || answerValue === undefined ? "" : String(answerValue)}
-            onValueChange={(value) => onAnswer(question.id, value)}
-          >
-            <SelectTrigger className="w-full py-2 px-4 rounded-2xl border-2 text-md">
-              <SelectValue placeholder="Select an option" />
-            </SelectTrigger>
-            <SelectContent className=" text-md">
-              {question.options?.map((option, idx) => (
-                <SelectItem key={idx} value={option} className=" text-md">
-                  {option}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        ) : question.type === "number" ? (
-          <input
-            type="number"
-            min={question.min}
-            max={question.max}
-            value={answerValue}
-            onChange={(e) => {
-              const value = Number(e.target.value);
-              if (
-                (question.min === undefined || value >= question.min) &&
-                (question.max === undefined || value <= question.max)
-              ) {
-                onAnswer(question.id, value);
+          <div className="space-y-2">
+            <label className="text-sm font-semibold text-muted-foreground ml-1">
+              Choose an option
+            </label>
+            <Select
+              value={
+                answerValue === "" || answerValue === undefined
+                  ? ""
+                  : String(answerValue)
               }
-            }}
-            className="w-full p-2 px-3 rounded-2xl border-2"
-            placeholder={question.label}
-          />
-        ) : (
-          question.options?.map((option, idx) => (
-            <button
-              key={idx}
-              onClick={() => onAnswer(question.id, option)}
-              className={cn(
-                "w-full flex items-center gap-4 p-3 rounded-2xl border-2 text-left transition-all duration-200 group",
-                answerValue === option
-                  ? "border-primary bg-primary/5 text-primary"
-                  : "border-border hover:border-primary/30 hover:bg-secondary/50"
-              )}
+              onValueChange={(value) => onAnswer(question.id, value)}
             >
-              <div
-                className={cn(
-                  "size-6 rounded-full border-2 flex items-center justify-center transition-colors",
-                  answerValue === option
-                    ? "border-primary bg-primary"
-                    : "border-muted-foreground/30 group-hover:border-primary/50"
-                )}
-              >
-                {answerValue === option && (
-                  <div className="size-2 bg-white rounded-full" />
-                )}
-              </div>
-              <span className="font-semibold">{option}</span>
-            </button>
-          ))
+              <SelectTrigger className="w-full h-14 px-6 rounded-2xl border-2 border-border hover:border-primary/50 transition-all text-lg font-medium bg-secondary/30">
+                <SelectValue placeholder="Select from the list" />
+              </SelectTrigger>
+              <SelectContent className="rounded-2xl border-2 shadow-lg">
+                {question.options?.map((option, idx) => (
+                  <SelectItem
+                    key={idx}
+                    value={option}
+                    className="py-3 px-4 text-lg focus:bg-primary/5 focus:text-primary rounded-xl cursor-pointer"
+                  >
+                    {option}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        ) : question.type === "number" ? (
+          <div className="space-y-2">
+            <label className="text-sm font-semibold text-muted-foreground ml-1">
+              Please enter a number
+            </label>
+            <input
+              type="number"
+              min={question.min}
+              max={question.max}
+              value={answerValue}
+              onChange={(e) => {
+                const value = Number(e.target.value);
+                if (
+                  (question.min === undefined || value >= question.min) &&
+                  (question.max === undefined || value <= question.max)
+                ) {
+                  onAnswer(question.id, value);
+                }
+              }}
+              className="w-full h-14 px-6 rounded-2xl border-2 border-border hover:border-primary/50 focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all text-lg font-bold bg-secondary/30"
+              placeholder={`e.g. ${question.min || 25}`}
+            />
+            {question.min !== undefined && question.max !== undefined && (
+              <p className="text-xs text-muted-foreground ml-1 italic">
+                Range: {question.min} - {question.max}
+              </p>
+            )}
+          </div>
+        ) : (
+          <div className="grid gap-3 sm:gap-4">
+            {question.options?.map((option, idx) => {
+              const isSelected = answerValue === option;
+              return (
+                <button
+                  key={idx}
+                  onClick={() => onAnswer(question.id, option)}
+                  className={cn(
+                    "relative w-full flex items-center justify-between gap-4 p-5 rounded-3xl border-2 text-left transition-all duration-300 group overflow-hidden",
+                    isSelected
+                      ? "border-primary bg-primary/5 shadow-md shadow-primary/5 -translate-y-0.5"
+                      : "border-border hover:border-primary/40 hover:bg-secondary/40 hover:shadow-lg hover:-translate-y-1",
+                  )}
+                >
+                  <div className="flex items-center gap-4 flex-1">
+                    <div
+                      className={cn(
+                        "flex-shrink-0 size-7 rounded-xl border-2 flex items-center justify-center transition-all duration-300",
+                        isSelected
+                          ? "border-primary bg-primary text-white scale-110"
+                          : "border-muted-foreground/20 group-hover:border-primary/50",
+                      )}
+                    >
+                      {isSelected ? (
+                        <CheckCircle2 className="size-4 stroke-[3]" />
+                      ) : (
+                        <span className="text-xs font-bold text-muted-foreground group-hover:text-primary">
+                          {idx + 1}
+                        </span>
+                      )}
+                    </div>
+                    <span
+                      className={cn(
+                        "font-semibold text-lg transition-colors duration-300",
+                        isSelected
+                          ? "text-primary"
+                          : "text-foreground group-hover:text-primary/90",
+                      )}
+                    >
+                      {option}
+                    </span>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
         )}
       </CardContent>
     </Card>

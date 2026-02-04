@@ -1,6 +1,11 @@
 import axios, { AxiosError, InternalAxiosRequestConfig } from "axios";
-import { store } from "../redux/store";
 import { setCredientials, logout } from "../redux/feature/user/userSlice";
+
+// Lazy store access to avoid circular dependency
+let store: any;
+export const injectStore = (_store: any) => {
+  store = _store;
+};
 
 const baseURL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -10,8 +15,9 @@ export const axiosInstance = axios.create({
   headers: {
     "Content-Type": "application/json",
   },
-  // Send cookies (httpOnly refresh token) with requests when needed
-  withCredentials: true,
+  // Default to false to avoid CORS issues on public or standard endpoints
+  // We'll enable it manually for the refresh token call
+  withCredentials: false,
 });
 
 // Flag to prevent multiple refresh attempts
@@ -33,16 +39,9 @@ const processQueue = (error: any, token: string | null = null) => {
   failedQueue = [];
 };
 
-// Request interceptor to add access token
 axiosInstance.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
-    const state = store.getState();
-    const token = state.user.currentUser.access_token;
-
-    if (token && config.headers) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-
+    // We will handle token injection in the baseQuery or via a separate setup
     return config;
   },
   (error) => {
@@ -82,20 +81,6 @@ axiosInstance.interceptors.response.use(
       isRefreshing = true;
 
       try {
-        // Debug: log refresh attempt
-        try {
-          const state = store.getState();
-          const refreshToken = state.user.currentUser.refreshToken;
-          console.debug("[axiosInstance] attempting refresh-token", {
-            refreshToken: refreshToken ? "(present)" : "(missing)",
-            baseURL,
-            trigger:
-              originalRequest?.url || originalRequest?.baseURL || "unknown",
-          });
-        } catch (e) {
-          /* ignore logging errors */
-        }
-
         // Call refresh token endpoint using httpOnly cookie (backend reads cookie)
         const response = await axios.post(
           `${baseURL}/refresh-token`,
@@ -103,50 +88,37 @@ axiosInstance.interceptors.response.use(
           { withCredentials: true },
         );
 
-        // Debug: log refresh response
-        try {
-          console.debug(
-            "[axiosInstance] refresh-token response",
-            response?.data,
-          );
-        } catch (e) {
-          /* ignore logging errors */
-        }
-
         const { access_token, refresh_token: newRefreshToken } =
           response.data || {};
 
-        // Update tokens in Redux store (keep any existing refreshToken value; when using httpOnly cookie
-        // the client won't receive the refresh token in JS. Backend should set the cookie.)
-        const currentUser = store.getState().user.currentUser;
-        store.dispatch(
-          setCredientials({
-            userId: currentUser.userId!,
-            userName: currentUser.userName || undefined,
-            email: currentUser.email!,
-            access_token,
-            // If backend returns a refresh token in response (not recommended with httpOnly cookie), use it;
-            // otherwise preserve the existing stored value (may be null).
-            refreshToken: newRefreshToken || currentUser.refreshToken || null,
-            role: currentUser.role!,
-          }),
-        );
-
-        // Update the original request with new token
-        if (originalRequest.headers) {
-          originalRequest.headers.Authorization = `Bearer ${access_token}`;
+        // Update tokens in Redux store if store is injected
+        if (store) {
+          const currentUser = store.getState().user.currentUser;
+          store.dispatch(
+            setCredientials({
+              userId: currentUser.userId!,
+              userName: currentUser.userName || undefined,
+              email: currentUser.email!,
+              access_token,
+              refreshToken: newRefreshToken || currentUser.refreshToken || null,
+              role: currentUser.role!,
+            }),
+          );
         }
 
         processQueue(null, access_token);
         isRefreshing = false;
 
-        // Retry the original request
+        if (originalRequest.headers) {
+          originalRequest.headers.Authorization = `Bearer ${access_token}`;
+        }
         return axiosInstance(originalRequest);
       } catch (refreshError) {
-        // Refresh failed, logout user
         processQueue(refreshError, null);
         isRefreshing = false;
-        store.dispatch(logout());
+        if (store) {
+          store.dispatch(logout());
+        }
         return Promise.reject(refreshError);
       }
     }

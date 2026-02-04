@@ -65,8 +65,12 @@ export const store = configureStore({
       .concat(contributorProfileApi.middleware)
       .concat(adminApi.middleware)
       .concat(userDashboardApi.middleware),
-
 });
+
+import { injectStore } from "../utils/axiosInstance";
+
+// Inject store into axiosInstance to break circular dependency
+injectStore(store);
 
 export type RootState = ReturnType<typeof store.getState>;
 export type AppDispatch = typeof store.dispatch;

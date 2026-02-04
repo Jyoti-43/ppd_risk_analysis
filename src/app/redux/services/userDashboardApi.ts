@@ -1,34 +1,18 @@
-import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+import { createApi } from "@reduxjs/toolkit/query/react";
+import { axiosBaseQuery } from "./authApi";
 
 //  community post types
 
 export const userDashboardApi = createApi({
   reducerPath: "userDashboardApi",
 
-  baseQuery: fetchBaseQuery({
-    baseUrl: `${process.env.NEXT_PUBLIC_API_URL}`,
-    prepareHeaders: (headers, { endpoint }) => {
-      // Get token from localStorage
-      const userStr = localStorage.getItem("user");
-      if (userStr) {
-        try {
-          const user = JSON.parse(userStr);
-          if (user.access_token) {
-            headers.set("Authorization", `Bearer ${user.access_token}`);
-          }
-        } catch (e) {
-          console.error("Failed to parse user from localStorage", e);
-        }
-      }
-      return headers;
-    },
-  }),
+  baseQuery: axiosBaseQuery({ baseUrl: `${process.env.NEXT_PUBLIC_API_URL}` }),
 
   // Cache data for 1 hour (3600 seconds) - won't refetch if data exists
   keepUnusedDataFor: 3600,
 
   // Tag types for cache invalidation
-  tagTypes: ["Articles", "Categories"],
+  tagTypes: ["Articles", "Categories", "Partners"],
 
   endpoints: (build) => ({
     postCount: build.query<any, void>({
@@ -54,6 +38,22 @@ export const userDashboardApi = createApi({
       }),
       // Invalidate posts cache when a post is deleted
       //   invalidatesTags: [""],
+    }),
+
+    invitePartner: build.mutation<
+      any,
+      {
+        partner_email: string;
+        access_level: string;
+        screening_types: string[];
+      }
+    >({
+      query: (body) => ({
+        url: `/partner/invite/create`,
+        method: "POST",
+        body,
+      }),
+      invalidatesTags: ["Partners" as any],
     }),
 
     getUserGroupJoined: build.query<any, void>({
@@ -112,6 +112,13 @@ export const userDashboardApi = createApi({
         method: "GET",
       }),
     }),
+    getInvitedPartners: build.query<any, void>({
+      query: () => ({
+        url: `/partner/links`,
+        method: "GET",
+      }),
+      providesTags: ["Partners" as any],
+    }),
   }),
 });
 
@@ -127,4 +134,6 @@ export const {
   useGetEpdsScreeningHistoryByIdQuery,
   useGetSymptomsScreeningHistoryByIdQuery,
   useGetHybridScreeningHistoryByIdQuery,
+  useInvitePartnerMutation,
+  useGetInvitedPartnersQuery,
 } = userDashboardApi;

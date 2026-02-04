@@ -1,7 +1,15 @@
 "use client";
 
 import React, { FormEvent, useEffect } from "react";
-import { Headset, LockKeyhole, Mail, MailIcon, UserCircle, Heart } from "lucide-react";
+import {
+  Headset,
+  LockKeyhole,
+  Mail,
+  MailIcon,
+  UserCircle,
+  Heart,
+  Users,
+} from "lucide-react";
 import dynamic from "next/dynamic";
 import BlobBackground from "../../common/ui/backgroundblob";
 import { Label } from "@radix-ui/react-label";
@@ -22,11 +30,11 @@ import { setCredientials } from "../../redux/feature/user/userSlice";
 
 const FcGoogle = dynamic(
   () => import("react-icons/fc").then((m) => m.FcGoogle),
-  { ssr: false }
+  { ssr: false },
 );
 const FaArrowRight = dynamic(
   () => import("react-icons/fa").then((m) => m.FaArrowRight),
-  { ssr: false }
+  { ssr: false },
 );
 
 interface SignupFormState {
@@ -74,7 +82,6 @@ const SignupForm = () => {
     if (isError) {
       console.log("Error during registration:", error);
       toast.error(String(error));
-
     }
   };
 
@@ -90,7 +97,8 @@ const SignupForm = () => {
           refreshToken: data.refreshToken,
           userId: data.userId,
           role: data.role,
-        })
+          is_verified: false,
+        }),
       );
 
       setFormValue(initialState);
@@ -128,24 +136,26 @@ const SignupForm = () => {
             className="w-full px-3 md:px-5"
           >
             <div className="flex flex-col pt-2 gap-3 md:gap-3 w-full max-w-full md:max-w-full">
-
               {/* Role Selection Section */}
               <div className="flex flex-col gap-2 md:gap-2">
                 <Label className="light:text-popover font-semibold">
                   Who are you?
                 </Label>
-                <div className="grid grid-cols-2 gap-2">
+                <div className="grid grid-cols-3 gap-2">
                   <button
                     type="button"
                     onClick={() => handleRoleSelect("mother")}
-                    className={`flex flex-col items-center justify-center gap-2 p-4 rounded-xl border-2 transition-all ${role === "mother"
+                    className={`flex flex-col items-center justify-center gap-2 p-4 rounded-xl border-2 transition-all ${
+                      role === "mother"
                         ? "border-primary bg-primary/5 shadow-md"
                         : "border-gray-200 hover:border-primary/50"
-                      }`}
+                    }`}
                   >
                     <UserCircle
                       size={32}
-                      className={role === "mother" ? "text-primary" : "text-gray-400"}
+                      className={
+                        role === "mother" ? "text-primary" : "text-gray-400"
+                      }
                     />
                     <span className="font-semibold text-sm">Mother</span>
                     <span className="text-xs text-primary text-center">
@@ -155,16 +165,40 @@ const SignupForm = () => {
 
                   <button
                     type="button"
-                    onClick={() => handleRoleSelect("contributor")}
-                    className={`flex flex-col items-center justify-center gap-2 p-4 rounded-xl border-2 transition-all ${role === "contributor"
+                    onClick={() => handleRoleSelect("partner")}
+                    className={`flex flex-col items-center justify-center gap-2 p-4 rounded-xl border-2 transition-all ${
+                      role === "partner"
                         ? "border-primary bg-primary/5 shadow-md"
                         : "border-gray-200 hover:border-primary/50"
-                      }`}
+                    }`}
+                  >
+                    <Users
+                      size={32}
+                      className={
+                        role === "partner" ? "text-primary" : "text-gray-400"
+                      }
+                    />
+                    <span className="font-semibold text-sm">Partner</span>
+                    <span className="text-xs text-primary text-center">
+                      I want to support
+                    </span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => handleRoleSelect("contributor")}
+                    className={`flex flex-col items-center justify-center gap-2 p-4 rounded-xl border-2 transition-all ${
+                      role === "contributor"
+                        ? "border-primary bg-primary/5 shadow-md"
+                        : "border-gray-200 hover:border-primary/50"
+                    }`}
                   >
                     <Heart
                       size={32}
                       className={
-                        role === "contributor" ? "text-primary" : "text-gray-400"
+                        role === "contributor"
+                          ? "text-primary"
+                          : "text-gray-400"
                       }
                     />
                     <span className="font-semibold text-sm">Contributor</span>

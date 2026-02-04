@@ -1,5 +1,5 @@
 import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { RootState } from "../../store";
+import type { RootState } from "../../store";
 import axios from "axios";
 const baseUrl = process.env.NEXT_PUBLIC_API_URL;
 interface UserState {
@@ -10,6 +10,7 @@ interface UserState {
     access_token: string | null;
     refreshToken: string | null;
     role: string | null;
+    is_verified: boolean | null;
   };
   isLoggedIn: boolean;
   status: "idle" | "loading" | "succeeded" | "failed";
@@ -49,6 +50,7 @@ const initialState: UserState = {
     access_token: storedUser?.access_token || null,
     refreshToken: storedUser?.refreshToken || null,
     role: storedUser?.role || null,
+    is_verified: storedUser?.is_verified ?? null,
   },
   isLoggedIn: !!storedUser?.access_token,
   status: "idle",
@@ -118,8 +120,23 @@ export const UserSlice = createSlice({
         access_token: string;
         refreshToken: string;
         role: string;
+        is_verified?: boolean;
       }>,
     ) => {
+      // Logic to preserve verification status if it was already true in storage
+      let alreadyVerified = false;
+      if (typeof window !== "undefined") {
+        const stored = localStorage.getItem("user");
+        if (stored) {
+          try {
+            const user = JSON.parse(stored);
+            alreadyVerified = user.is_verified === true;
+          } catch (e) {}
+        }
+      }
+
+      const finalVerified = action.payload.is_verified ?? alreadyVerified;
+
       localStorage.setItem(
         "user",
         JSON.stringify({
@@ -128,12 +145,14 @@ export const UserSlice = createSlice({
           refreshToken: action.payload.refreshToken,
           userId: action.payload.userId,
           role: action.payload.role,
+          is_verified: finalVerified,
           ...(action.payload.userName && { userName: action.payload.userName }),
         }),
       );
       state.currentUser = {
         ...action.payload,
         userName: action.payload.userName || null, // Default to null if not provided
+        is_verified: finalVerified,
       };
       state.isLoggedIn = true;
     },
@@ -147,6 +166,7 @@ export const UserSlice = createSlice({
         access_token: null,
         refreshToken: null,
         role: null,
+        is_verified: null,
       };
       state.isLoggedIn = false;
     },
