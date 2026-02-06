@@ -4,6 +4,7 @@ import {
   HybridResultState,
   HybridAssessmentResponse,
   EPDSQuestion,
+  RecommendedArticle,
 } from "@/src/app/type";
 
 const initialState: HybridResultState = {
@@ -12,6 +13,8 @@ const initialState: HybridResultState = {
   status: "idle",
   error: null,
   result: null,
+  recommendedArticles: [],
+  recommendationsStatus: "idle",
 };
 
 export const HybridResultSlice = createSlice({
@@ -43,6 +46,18 @@ export const HybridResultSlice = createSlice({
     ) => {
       state.result = action.payload;
     },
+    setHybridRecommendedArticles: (
+      state,
+      action: PayloadAction<RecommendedArticle[]>,
+    ) => {
+      state.recommendedArticles = action.payload;
+    },
+    setHybridRecommendationsStatus: (
+      state,
+      action: PayloadAction<"ok" | "unavailable">,
+    ) => {
+      state.recommendationsStatus = action.payload;
+    },
   },
 });
 
@@ -51,6 +66,8 @@ export const {
   setHybridStatus,
   setHybridError,
   setHybridResult,
+  setHybridRecommendedArticles,
+  setHybridRecommendationsStatus,
 } = HybridResultSlice.actions;
 
 export const selectHybridResult = (state: RootState) =>
@@ -58,5 +75,9 @@ export const selectHybridResult = (state: RootState) =>
 export const selectHybridStatus = (state: RootState) =>
   state.hybridResult.status;
 export const selectHybridError = (state: RootState) => state.hybridResult.error;
+export const selectHybridRecommendedArticles = (state: RootState) =>
+  state.hybridResult.recommendedArticles;
+export const selectHybridRecommendationsStatus = (state: RootState) =>
+  state.hybridResult.recommendationsStatus;
 
 export default HybridResultSlice.reducer;

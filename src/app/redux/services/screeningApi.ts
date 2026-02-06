@@ -1,5 +1,12 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-import { EPDSQuestion, SymptomsQuestion, SymptomsAnswer, SymptomsAssessmentResponse, HybridAssessmentResponse } from "../../type";
+import {
+  EPDSQuestion,
+  SymptomsQuestion,
+  SymptomsAnswer,
+  SymptomsAssessmentResponse,
+  HybridAssessmentResponse,
+  EPDSAssessmentResponse,
+} from "../../type";
 export const screeningAPI = createApi({
   reducerPath: "ppdScreening",
   baseQuery: fetchBaseQuery({
@@ -27,16 +34,15 @@ export const screeningAPI = createApi({
 
   // Tag types for cache invalidation
   tagTypes: ["Screening"],
-  
+
   endpoints: (build) => ({
-    epdsScreening: build.mutation<EPDSQuestion, EPDSQuestion>({
+    epdsScreening: build.mutation<EPDSAssessmentResponse, EPDSQuestion>({
       query: (body) => ({
         url: "/epds-screen",
         method: "POST",
         body,
       }),
     }),
-
 
     symptomsQuestion: build.query<SymptomsQuestion[], void>({
       query: () => ({
@@ -45,7 +51,10 @@ export const screeningAPI = createApi({
       }),
     }),
 
-    symptomsAssessment: build.mutation<SymptomsAssessmentResponse, SymptomsAnswer>({
+    symptomsAssessment: build.mutation<
+      SymptomsAssessmentResponse,
+      SymptomsAnswer
+    >({
       query: (answers) => ({
         url: "/symptom/ppd-risk/assess",
         method: "POST",

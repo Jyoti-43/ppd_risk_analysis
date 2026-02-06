@@ -1,5 +1,6 @@
 import { createApi } from "@reduxjs/toolkit/query/react";
 import { axiosBaseQuery } from "./authApi";
+import { DashboardRecommendationsResponse } from "../../type";
 
 //  community post types
 
@@ -119,6 +120,45 @@ export const userDashboardApi = createApi({
       }),
       providesTags: ["Partners" as any],
     }),
+    getPendingInvites: build.query<any, void>({
+      query: () => ({
+        url: `/partner/invites`,
+        method: "GET",
+      }),
+      providesTags: ["Partners" as any],
+    }),
+
+    // partner dashboard api
+    getLinkedMotherProfile: build.query<any, void>({
+      query: () => ({
+        url: `/partner/linked-mothers`,
+        method: "GET",
+      }),
+    }),
+    getMotherScreeningSummary: build.query<any, string>({
+      query: (mother_id) => ({
+        url: `/screening/${mother_id}/summary`,
+        method: "GET",
+      }),
+    }),
+    getMotherScreeningHistory: build.query<
+      any,
+      { mother_id: string; page?: number; limit?: number }
+    >({
+      query: ({ mother_id, page = 1, limit = 10 }) => ({
+        url: `/screening/${mother_id}/history`,
+        method: "GET",
+        params: { page, limit },
+      }),
+    }),
+    getRecommendedArticles: build.query<DashboardRecommendationsResponse, void>(
+      {
+        query: () => ({
+          url: `/me/recommended-articles`,
+          method: "GET",
+        }),
+      },
+    ),
   }),
 });
 
@@ -136,4 +176,10 @@ export const {
   useGetHybridScreeningHistoryByIdQuery,
   useInvitePartnerMutation,
   useGetInvitedPartnersQuery,
+  useGetPendingInvitesQuery,
+  useGetLinkedMotherProfileQuery,
+  useLazyGetLinkedMotherProfileQuery,
+  useGetMotherScreeningSummaryQuery,
+  useGetMotherScreeningHistoryQuery,
+  useGetRecommendedArticlesQuery,
 } = userDashboardApi;

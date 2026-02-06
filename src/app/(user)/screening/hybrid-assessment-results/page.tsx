@@ -8,6 +8,8 @@ import { useAppSelector } from "@/src/app/Hooks/hook";
 import {
   selectHybridResult,
   selectHybridStatus,
+  selectHybridRecommendedArticles,
+  selectHybridRecommendationsStatus,
 } from "@/src/app/redux/feature/screening/hybrid/hybridSlice";
 import { RootState } from "@/src/app/redux/store";
 import { selectCurrentUser } from "@/src/app/redux/feature/user/userSlice";
@@ -18,13 +20,27 @@ import {
   Info,
   AlertTriangle,
   PhoneCall,
+  BookOpen,
+  ExternalLink,
 } from "lucide-react";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 
 export default function HybridResultsPage() {
   const router = useRouter();
   const result = useAppSelector(selectHybridResult);
   const status = useAppSelector(selectHybridStatus);
   const currentUser = useAppSelector(selectCurrentUser);
+  const recommendedArticles = useAppSelector(selectHybridRecommendedArticles);
+  const recommendationsStatus = useAppSelector(
+    selectHybridRecommendationsStatus,
+  );
   const symptomsAnswers = useAppSelector(
     (state: RootState) => state.hybridResult.symptomsAnswers,
   );
@@ -268,30 +284,30 @@ export default function HybridResultsPage() {
                     <strong>{metrics?.epds_risk ?? "reviewed"} risk</strong>{" "}
                     level.
                     <p className="text-[14px] text-foreground font-medium leading-relaxed">
-                    {(() => {
-                      if (!explanation)
-                        return "We looked at both your mood and physical health to give you a full picture of how you're doing.";
-                      if (
-                        explanation.includes("Q10=3") ||
-                        explanation.includes("Q10 Override")
-                      ) {
-                        return "Your answers for suicidal thoughts show you are going through a very hard time.";
-                      }
-                      if (
-                        explanation.includes("EPDS >= 13") ||
-                        explanation.includes("Clinical Dominance")
-                      ) {
-                        return "Your emotional responses show patterns that are best to shared with a doctor.";
-                      }
-                      if (explanation.toLowerCase().includes("discordant")) {
-                        return "You have a mix of different feelings and physical signs. Talking this through with someone you trust can help clear things up.";
-                      }
-                      return (
-                        explanation.replace(/^[A-Z0-9>=_\s:]+/, "").trim() ||
-                        "We looked at both your mood and physical health to give you a full picture of how you're doing."
-                      );
-                    })()}
-                  </p>
+                      {(() => {
+                        if (!explanation)
+                          return "We looked at both your mood and physical health to give you a full picture of how you're doing.";
+                        if (
+                          explanation.includes("Q10=3") ||
+                          explanation.includes("Q10 Override")
+                        ) {
+                          return "Your answers for suicidal thoughts show you are going through a very hard time.";
+                        }
+                        if (
+                          explanation.includes("EPDS >= 13") ||
+                          explanation.includes("Clinical Dominance")
+                        ) {
+                          return "Your emotional responses show patterns that are best to shared with a doctor.";
+                        }
+                        if (explanation.toLowerCase().includes("discordant")) {
+                          return "You have a mix of different feelings and physical signs. Talking this through with someone you trust can help clear things up.";
+                        }
+                        return (
+                          explanation.replace(/^[A-Z0-9>=_\s:]+/, "").trim() ||
+                          "We looked at both your mood and physical health to give you a full picture of how you're doing."
+                        );
+                      })()}
+                    </p>
                   </p>
                 </div>
 
@@ -311,7 +327,7 @@ export default function HybridResultsPage() {
                   </span>
                   <p className="text-[14px] text-foreground font-medium leading-relaxed">
                     There is a{" "}
-                     <strong>{metrics?.epds_risk ?? "reviewed"} Risk</strong> {" "}
+                    <strong>{metrics?.epds_risk ?? "reviewed"} Risk</strong>{" "}
                     indication of the wellness factors being monitored in this
                     checkup.
                   </p>
@@ -338,6 +354,85 @@ export default function HybridResultsPage() {
                   Get Help Now
                 </Button>
               </Link>
+            </div>
+          )}
+
+          {/* Recommended Articles Section */}
+          {recommendationsStatus === "ok" && recommendedArticles.length > 0 && (
+            <div className="space-y-6 pt-6 no-print">
+              <div className="flex items-center gap-3">
+                <div className="p-2.5 bg-primary/10 rounded-xl">
+                  <BookOpen className="h-6 w-6 text-primary" />
+                </div>
+                <div>
+                  <h2 className="text-2xl font-bold text-gray-900">
+                    Recommended for You
+                  </h2>
+                  <p className="text-muted-foreground">
+                    Based on your hybrid analysis, these resources may be
+                    helpful
+                  </p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pb-6">
+                {recommendedArticles.map((article) => (
+                  <Card
+                    key={article.article_id}
+                    className="group hover:shadow-xl transition-all duration-300 border-none shadow-md overflow-hidden flex flex-col bg-white rounded-3xl"
+                  >
+                    {article.imageUrl && (
+                      <div className="aspect-[16/9] w-full overflow-hidden">
+                        <img
+                          src={article.imageUrl}
+                          alt={article.title}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                        />
+                      </div>
+                    )}
+                    <CardHeader className="pb-2">
+                      <div className="flex justify-between items-start mb-2">
+                        <Badge
+                          variant="secondary"
+                          className="bg-primary/5 text-primary border-none rounded-lg text-[10px] font-bold uppercase tracking-wider"
+                        >
+                          {article.category || "Educational"}
+                        </Badge>
+                        {article.risk_level && (
+                          <Badge
+                            variant="outline"
+                            className="text-[10px] uppercase font-bold px-2 py-0.5 rounded-lg border-primary/20 text-primary/70"
+                          >
+                            {article.risk_level} Risk
+                          </Badge>
+                        )}
+                      </div>
+                      <CardTitle className="text-lg font-bold group-hover:text-primary transition-colors line-clamp-2 leading-tight">
+                        {article.title}
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="flex-1 pb-4">
+                      <p className="text-muted-foreground text-sm line-clamp-3 leading-relaxed italic">
+                        {article.preview
+                          ? `"${article.preview}"`
+                          : `Comprehensive resources regarding ${article.category.toLowerCase()} wellness for your recovery.`}
+                      </p>
+                    </CardContent>
+                    <CardFooter className="pt-0 pb-6 px-6">
+                      <Button
+                        className="w-full bg-primary/5 hover:bg-primary text-primary hover:text-white border-primary/20 hover:border-primary font-bold h-11 rounded-xl transition-all active:scale-95 flex items-center justify-center gap-2"
+                        variant="outline"
+                        onClick={() =>
+                          window.open(article.external_url, "_blank")
+                        }
+                      >
+                        Read Full Article
+                        <ExternalLink className="h-4 w-4" />
+                      </Button>
+                    </CardFooter>
+                  </Card>
+                ))}
+              </div>
             </div>
           )}
 

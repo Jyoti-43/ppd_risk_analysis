@@ -10,9 +10,19 @@ import {
   selectEpdsScore,
   selectEpdsAnswers,
   selectEpdsStatus,
-} from "@/src/app//redux/feature/screening/epds/epdsSlice";
+  selectRecommendedArticles,
+  selectRecommendationsStatus,
+} from "@/src/app/redux/feature/screening/epds/epdsSlice";
 import { selectCurrentUser } from "@/src/app/redux/feature/user/userSlice";
-import { Info } from "lucide-react";
+import { Info, ExternalLink, BookOpen } from "lucide-react";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 
 export default function ResultsPage() {
   const router = useRouter();
@@ -20,6 +30,8 @@ export default function ResultsPage() {
   const answers = useAppSelector(selectEpdsAnswers);
   const status = useAppSelector(selectEpdsStatus);
   const currentUser = useAppSelector(selectCurrentUser);
+  const recommendedArticles = useAppSelector(selectRecommendedArticles);
+  const recommendationsStatus = useAppSelector(selectRecommendationsStatus);
 
   console.log("EPDS Answers from Redux:", answers);
   // Max score for EPDS is 30 (10 questions × 3 max points each)
@@ -148,8 +160,8 @@ export default function ResultsPage() {
                 riskInfo.level === "low"
                   ? "text-green-700 bg-green-50 border border-green-200"
                   : riskInfo.level === "moderate"
-                  ? "text-orange-700 bg-orange-50 border border-orange-200 "
-                  : "text-red-700 bg-red-50 border border-red-200"
+                    ? "text-orange-700 bg-orange-50 border border-orange-200 "
+                    : "text-red-700 bg-red-50 border border-red-200"
               }`}
             >
               {riskInfo.level} RISK
@@ -161,8 +173,8 @@ export default function ResultsPage() {
                 riskInfo.level === "low"
                   ? "bg-green-50 border border-green-200"
                   : riskInfo.level === "moderate"
-                  ? "bg-orange-50 border border-orange-200"
-                  : "bg-red-50 border border-red-200"
+                    ? "bg-orange-50 border border-orange-200"
+                    : "bg-red-50 border border-red-200"
               }`}
             >
               <h3
@@ -170,8 +182,8 @@ export default function ResultsPage() {
                   riskInfo.level === "low"
                     ? "text-green-700"
                     : riskInfo.level === "moderate"
-                    ? "text-orange-700"
-                    : "text-red-700"
+                      ? "text-orange-700"
+                      : "text-red-700"
                 }`}
               >
                 <Info size={20} />
@@ -182,14 +194,13 @@ export default function ResultsPage() {
                   riskInfo.level === "low"
                     ? "text-green-700"
                     : riskInfo.level === "moderate"
-                    ? "text-orange-700"
-                    : "text-red-700"
+                      ? "text-orange-700"
+                      : "text-red-700"
                 }`}
               >
                 {riskInfo.message}
               </p>
             </div>
-
             {/* Disclaimer */}
             <div className="pt-6 border-t border-gray-100 print:mt-20">
               <p className="text-sm text-muted-foreground text-center italic">
@@ -199,6 +210,84 @@ export default function ResultsPage() {
               </p>
             </div>
           </div>
+
+          {/* Recommended Articles Section */}
+          {recommendationsStatus === "ok" && recommendedArticles.length > 0 && (
+            <div className="space-y-6 pt-6 no-print">
+              <div className="flex items-center gap-3">
+                <div className="p-2.5 bg-primary/10 rounded-xl">
+                  <BookOpen className="h-6 w-6 text-primary" />
+                </div>
+                <div>
+                  <h2 className="text-2xl font-bold text-gray-900">
+                    Recommended for You
+                  </h2>
+                  <p className="text-muted-foreground">
+                    Based on your risk level, these resources may be helpful
+                  </p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pb-6">
+                {recommendedArticles.map((article) => (
+                  <Card
+                    key={article.article_id}
+                    className="group hover:shadow-xl transition-all duration-300 border-none shadow-md overflow-hidden flex flex-col bg-white rounded-3xl"
+                  >
+                    {article.imageUrl && (
+                      <div className="aspect-[16/9] w-full overflow-hidden">
+                        <img
+                          src={article.imageUrl}
+                          alt={article.title}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                        />
+                      </div>
+                    )}
+                    <CardHeader className="pb-2">
+                      <div className="flex justify-between items-start mb-2">
+                        <Badge
+                          variant="secondary"
+                          className="bg-primary/5 text-primary border-none rounded-lg text-[10px] font-bold uppercase tracking-wider"
+                        >
+                          {article.category || "Educational"}
+                        </Badge>
+                        {article.risk_level && (
+                          <Badge
+                            variant="outline"
+                            className="text-[10px] uppercase font-bold px-2 py-0.5 rounded-lg border-primary/20 text-primary/70"
+                          >
+                            {article.risk_level} Risk
+                          </Badge>
+                        )}
+                      </div>
+                      <CardTitle className="text-lg font-bold group-hover:text-primary transition-colors line-clamp-2 leading-tight">
+                        {article.title}
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="flex-1 pb-4">
+                      <p className="text-muted-foreground text-sm line-clamp-3 leading-relaxed italic">
+                        {article.preview
+                          ? `"${article.preview}"`
+                          : `Resources and guidance regarding ${article.category.toLowerCase()} health during your postpartum journey.`}
+                      </p>
+                    </CardContent>
+                    <CardFooter className="pt-0 pb-6 px-6">
+                      <Button
+                        className="w-full bg-primary/5 hover:bg-primary text-primary hover:text-white border-primary/20 hover:border-primary font-bold h-11 rounded-xl transition-all active:scale-95 flex items-center justify-center gap-2"
+                        variant="outline"
+                        onClick={() =>
+                          window.open(article.external_url, "_blank")
+                        }
+                      >
+                        Read Full Article
+                        <ExternalLink className="h-4 w-4" />
+                      </Button>
+                    </CardFooter>
+                  </Card>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* Action Buttons */}
           <div className="flex flex-col sm:flex-row items-center justify-evenly gap-8">

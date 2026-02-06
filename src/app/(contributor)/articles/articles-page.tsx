@@ -3,6 +3,16 @@ import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { useGetPublishedArticleQuery } from "../../redux/services/articleApi";
+import { useGetRecommendedArticlesQuery } from "../../redux/services/userDashboardApi";
+import { BookOpen, ExternalLink, RefreshCw } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 
 export default function ArticleResources() {
   const [activeFilter, setActiveFilter] = useState("all");
@@ -13,6 +23,12 @@ export default function ArticleResources() {
     isError,
     error,
   } = useGetPublishedArticleQuery({});
+
+  const {
+    data: recommendations,
+    isLoading: isRecLoading,
+    refetch: refetchRecs,
+  } = useGetRecommendedArticlesQuery();
 
   const topicFilters = [
     { id: "all", label: "All Topics", icon: null },
@@ -71,7 +87,10 @@ export default function ArticleResources() {
   // Pagination
   const PAGE_SIZE = 6;
   const [currentPage, setCurrentPage] = useState(1);
-  const totalPages = Math.max(1, Math.ceil(filteredArticles.length / PAGE_SIZE));
+  const totalPages = Math.max(
+    1,
+    Math.ceil(filteredArticles.length / PAGE_SIZE),
+  );
 
   useEffect(() => {
     if (currentPage > totalPages) setCurrentPage(1);
@@ -127,6 +146,7 @@ export default function ArticleResources() {
       </div>
 
       {/* Main Content */}
+
       <div className="max-w-7xl mx-auto px-5 py-10">
         {/* Browse by Topic */}
         <div className="mb-12">
@@ -160,6 +180,109 @@ export default function ArticleResources() {
           </div>
         </div>
 
+        {/* Recommended Section */}
+        {recommendations &&
+          recommendations.recommended_articles &&
+          recommendations.recommended_articles.length > 0 && (
+            <div className="max-w-7xl mx-auto px-5 py-8">
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+                <div className="space-y-1">
+                  <h2 className="text-3xl font-black text-gray-900 tracking-tight">
+                    Recommended for{" "}
+                    <span className="text-primary italic">You</span>
+                  </h2>
+                  <p className="text-muted-foreground text-sm flex items-center gap-2 font-medium">
+                    Personalized guidance based on your last{" "}
+                    {recommendations.source_screening_type || "assessment"}{" "}
+                    screening.
+                  </p>
+                </div>
+
+                <Button
+                  variant="outline"
+                  onClick={() => refetchRecs()}
+                  className="rounded-full border-primary/20 text-primary hover:bg-primary/5 font-bold h-11"
+                >
+                  <RefreshCw
+                    className={`h-4 w-4 mr-2 ${isRecLoading ? "animate-spin" : ""}`}
+                  />
+                  Refresh Latest
+                </Button>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {recommendations.recommended_articles.map((article: any) => (
+                  <Card
+                    key={article.article_id}
+                    className="group hover:shadow-2xl transition-all duration-500 border-none bg-white rounded-[32px] overflow-hidden flex flex-col shadow-sm"
+                  >
+                    {article.imageUrl && (
+                      <div className="aspect-[21/9] w-full overflow-hidden">
+                        <img
+                          src={article.imageUrl}
+                          alt={article.title}
+                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                        />
+                      </div>
+                    )}
+                    <CardHeader className="pb-2 pt-4 px-6">
+                      <div className="flex flex-wrap gap-2 mb-2">
+                        <Badge
+                          variant="secondary"
+                          className="bg-primary/5 text-primary border-none rounded-lg text-[10px] font-bold uppercase tracking-widest px-2.5"
+                        >
+                          {article.category || "Wellness"}
+                        </Badge>
+                        {article.risk_level && (
+                          <Badge
+                            variant="outline"
+                            className="text-[10px] uppercase font-bold px-2.5 rounded-lg border-primary/10 text-primary/60"
+                          >
+                            {article.risk_level} Risk Scale
+                          </Badge>
+                        )}
+                      </div>
+                      <CardTitle className="text-lg font-bold group-hover:text-primary transition-colors line-clamp-1 leading-tight">
+                        {article.title}
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="flex-1 pb-2 px-6">
+                      <p className="text-muted-foreground text-sm line-clamp-2 leading-relaxed italic opacity-80">
+                        {article.preview
+                          ? `"${article.preview}"`
+                          : `Comprehensive resources regarding ${article.category.toLowerCase()} wellness for your postpartum journey.`}
+                      </p>
+                    </CardContent>
+                    <CardFooter className="pt-2 pb-5 px-6">
+                      <Button
+                        className="w-full bg-primary/5 hover:bg-primary text-primary hover:text-white border-primary/10 hover:border-primary font-black h-10 rounded-xl transition-all active:scale-95 flex items-center justify-center gap-2 shadow-sm"
+                        variant="outline"
+                        onClick={() =>
+                          window.open(article.external_url, "_blank")
+                        }
+                      >
+                        Read Full Article
+                        <ExternalLink className="h-4 w-4" />
+                      </Button>
+                    </CardFooter>
+                  </Card>
+                ))}
+              </div>
+
+              <div className="mt-8 bg-white/50 rounded-3xl p-6 flex items-center gap-4 border border-dashed border-primary/20">
+                <div className="h-12 w-12 bg-primary/10 rounded-2xl flex items-center justify-center shrink-0">
+                  <BookOpen className="h-6 w-6 text-primary" />
+                </div>
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  <strong>Medical Disclaimer:</strong> These articles are for
+                  educational purposes only and are automatically curated based
+                  on your screening responses. Always consult with your
+                  healthcare provider for medical diagnosis and treatment.
+                </p>
+              </div>
+            </div>
+          )}
+
         {/* Latest Articles */}
         <div className="flex justify-between items-center">
           <h2 className="text-2xl font-bold text-foreground mb-6">
@@ -188,73 +311,87 @@ export default function ArticleResources() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10 mb-10">
             {filteredArticles && filteredArticles.length > 0 ? (
               filteredArticles
-                .slice((currentPage - 1) * PAGE_SIZE, (currentPage - 1) * PAGE_SIZE + PAGE_SIZE)
-                .map((article:any) => {
-                const articleId = article.id || (article as any).articleId;
-                return (
-                  <Link
-                    key={articleId}
-                    href={`/resources/article-details/${articleId}`}
-                  >
-                    <article className="flex flex-col gap-6 p-5 bg-white rounded-[20px] border border-border shadow-sm hover:shadow-md transition-shadow h-full cursor-pointer">
-                      {/* Image Container */}
-                      <div className="relative md:w-full shrink-0 aspect-[4/3] rounded-xl overflow-hidden bg-muted">
-                        <img
-                          src={(() => {
-                            const imgPath = article.image || article.imageUrl;
-                            if (!imgPath) return "/placeholder.svg";
-                            if (imgPath.startsWith("http")) return imgPath;
-                            return `${process.env.NEXT_PUBLIC_API_URL}${
-                              imgPath.startsWith("/") ? "" : "/"
-                            }${imgPath}`;
-                          })()}
-                          alt={article.title}
-                          className="w-full h-full object-cover"
-                        />
+                .slice(
+                  (currentPage - 1) * PAGE_SIZE,
+                  (currentPage - 1) * PAGE_SIZE + PAGE_SIZE,
+                )
+                .map((article: any) => {
+                  const articleId = article.id || (article as any).articleId;
+                  return (
+                    <Link
+                      key={articleId}
+                      href={`/resources/article-details/${articleId}`}
+                    >
+                      <article className="flex flex-col gap-3 p-3 bg-white rounded-[20px] border border-border shadow-sm hover:shadow-md transition-shadow h-full cursor-pointer">
+                        {/* Image Container */}
+                        <div className="relative md:w-full shrink-0 aspect-[4/2] rounded-xl overflow-hidden bg-muted">
+                          <img
+                            src={(() => {
+                              const imgPath = article.image || article.imageUrl;
+                              if (!imgPath) return "/placeholder.svg";
+                              if (imgPath.startsWith("http")) return imgPath;
+                              return `${process.env.NEXT_PUBLIC_API_URL}${
+                                imgPath.startsWith("/") ? "" : "/"
+                              }${imgPath}`;
+                            })()}
+                            alt={article.title}
+                            className="w-full h-full object-cover "
+                          />
 
-                        {/* Category Badge */}
-                        <div className="absolute top-3 left-3">
-                          <Badge className="bg-white/90 hover:bg-white text-foreground/80 text-[11px] font-bold px-2 py-0.5 border-none shadow-sm backdrop-blur-sm rounded-md">
-                            {typeof article.category === "object" &&
-                            article.category !== null
-                              ? (article.category as any).name
-                              : article.category || "General"}
-                          </Badge>
+                          {/* Category Badge */}
+                          <div className="absolute top-3 left-3">
+                            <Badge className="bg-white/90 hover:bg-white text-foreground/80 text-[11px] font-bold px-2 py-0.5 border-none shadow-sm backdrop-blur-sm rounded-md">
+                              {typeof article.category === "object" &&
+                              article.category !== null
+                                ? (article.category as any).name
+                                : article.category || "General"}
+                            </Badge>
+                          </div>
                         </div>
-                      </div>
 
-                      {/* card Content Section */}
-                      <div className="flex flex-col flex-1 py-1">
-                        <div className="flex items-center gap-2.5 mb-2.5">
-                          <div className="size-6 rounded-full bg-primary/10 flex items-center justify-center text-primary overflow-hidden">
-                            <span className="material-symbols-outlined text-[16px] fill">
-                              account_circle
+                        {/* card Content Section */}
+                        <div className="flex flex-col flex-1 py-1">
+                          <div className="flex items-center gap-2 mb-2.5">
+                            <div className="size-6 rounded-full bg-primary/10 flex items-center justify-center text-primary overflow-hidden">
+                              <span className="material-symbols-outlined text-[16px] fill">
+                                account_circle
+                              </span>
+                            </div>
+                            <span className="text-[13px] font-semibold text-foreground/90">
+                              {article.contributor.name || "Contributor"}
+                            </span>
+                            <span className="text-[13px] text-muted-foreground">
+                              •
+                            </span>
+                            <span className="text-[13px] text-muted-foreground">
+                              {article.createdAt
+                                ? new Date(
+                                    article.createdAt,
+                                  ).toLocaleDateString()
+                                : "Recent"}
                             </span>
                           </div>
-                          <span className="text-[13px] font-semibold text-foreground/90">
-                            {article.contributor.name || "Contributor"}
-                          </span>
-                          <span className="text-[13px] text-muted-foreground">
-                            •
-                          </span>
-                          <span className="text-[13px] text-muted-foreground">
-                            {article.createdAt
-                              ? new Date(article.createdAt).toLocaleDateString()
-                              : "Recent"}
-                          </span>
-                        </div>
 
-                        <h3 className="text-[20px] font-extrabold text-foreground leading-snug mb-3 line-clamp-2">
-                          {article.title}
-                        </h3>
-                        <p className="text-sm text-muted-foreground leading-relaxed line-clamp-3">
-                          {article.preview}
-                        </p>
-                      </div>
-                    </article>
-                  </Link>
-                );
-              })
+                          <h3 className="text-[20px] font-extrabold text-foreground leading-snug mb-3 line-clamp-2 hover:text-primary transition-all">
+                            {article.title}
+                          </h3>
+                          <p className="text-sm text-muted-foreground leading-relaxed line-clamp-3">
+                            {article.preview}
+                          </p>
+
+                          <div className="mt-auto pt-3 ">
+                            <div className="w-1/2  bg-primary/5 group-hover:bg-primary hover:bg-primary hover:text-white text-primary group-hover:text-white border border-primary/10 group-hover:border-primary font-bold h-9 rounded-xl transition-all flex items-center justify-center gap-2 text-sm shadow-sm">
+                              Read Full Article
+                              <span className="material-symbols-outlined text-sm">
+                                arrow_forward
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      </article>
+                    </Link>
+                  );
+                })
             ) : (
               <div className="col-span-full py-20 text-center">
                 <p className="text-muted-foreground text-lg">

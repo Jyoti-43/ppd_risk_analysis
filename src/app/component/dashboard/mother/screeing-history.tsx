@@ -78,63 +78,40 @@ export function ScreeningHistory<TData, TValue>({
   return (
     <div className=" space-y-4">
       <Card className="border-none shadow-sm overflow-hidden pt-0 gap-0">
-        <CardHeader className="bg-primary/10 pt-3 pb-4">
-          <div className="flex flex-col md:flex-row md:items-center justify-between ">
-            <div>
+        <CardHeader className="pt-4 bg-primary/10 rounded-t-xl pb-4">
+          <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-4">
+            <div className="space-y-1">
               <CardTitle className="text-xl font-bold text-slate-800">
                 Screening History
               </CardTitle>
-              <CardDescription className="text-slate-500">
+              <CardDescription className="text-slate-500 text-xs sm:text-sm font-medium">
                 Track your well-being progress over time
               </CardDescription>
             </div>
-            <div className="flex  items-center gap-3">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
               {/* Search Box */}
-              <div className="relative max-w-sm">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-3 text-slate-400" />
+              <div className="relative w-full sm:w-[280px]">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
                 <Input
                   placeholder="Search method or risk..."
                   value={globalFilter ?? ""}
                   onChange={(event) => setGlobalFilter(event.target.value)}
-                  className="pl-9 w-[250px] bg-slate-50 border-slate-200 focus:bg-white transition-all"
+                  className="pl-9 h-10 sm:h-9 bg-white border-slate-200 focus:ring-primary/20 transition-all rounded-lg"
                 />
               </div>
 
-              {/* Risk Filter */}
-              {/* <Select
-                value={
-                  (table.getColumn("risk")?.getFilterValue() as string) ?? "all"
-                }
-                onValueChange={(value) =>
-                  table
-                    .getColumn("risk")
-                    ?.setFilterValue(value === "all" ? "" : value)
-                }
-              >
-                <SelectTrigger className="w-[140px] bg-slate-50 border-slate-200">
-                  <Filter className="mr-2 h-4 w-4 text-slate-400" />
-                  <SelectValue placeholder="Risk Level" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Risks</SelectItem>
-                  <SelectItem value="High">High Risk</SelectItem>
-                  <SelectItem value="Moderate">Moderate Risk</SelectItem>
-                  <SelectItem value="Low">Low Risk</SelectItem>
-                </SelectContent>
-              </Select> */}
-
-              {/* Date Sort Toggle - Handled by column header, but adding a shortcut here could be nice */}
+              {/* Date Sort Toggle */}
               <Button
                 variant="outline"
                 size="sm"
-                className="bg-slate-50 border-slate-200 text-slate-600"
+                className="h-10 sm:h-9 bg-white border-slate-200 text-slate-600 font-bold px-4 rounded-lg"
                 onClick={() => {
                   const isDesc =
                     table.getColumn("date")?.getIsSorted() === "desc";
                   table.getColumn("date")?.toggleSorting(!isDesc);
                 }}
               >
-                <ArrowUpDown className="mr-1 h-4 w-4" />
+                <ArrowUpDown className="mr-2 h-4 w-4" />
                 {table.getColumn("date")?.getIsSorted() === "asc"
                   ? "Oldest First"
                   : "Recent First"}

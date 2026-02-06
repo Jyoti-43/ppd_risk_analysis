@@ -1,29 +1,28 @@
-import { AppSidebar } from "@/components/app-sidebar"
+import { AppSidebar } from "@/components/app-sidebar";
 import {
-    SidebarInset,
-    SidebarProvider,
-    SidebarTrigger,
-} from "@/components/ui/sidebar"
+  SidebarInset,
+  SidebarProvider,
+  SidebarTrigger,
+} from "@/components/ui/sidebar";
 
 export default function Layout({ children }: { children: React.ReactNode }) {
-    return (
-        <div className="[--header-height:calc(--spacing(14))]">
-            <SidebarProvider className="flex flex-col">
-                <div className="flex flex-1">
-                    <AppSidebar />
-                    <SidebarInset>
-                        <div className="relative flex items-center justify-between gap-2 px-4 py-2 border-b">
-                            <div className="flex items-center gap-2">
-                                <SidebarTrigger />
-                              
-                            </div>
-                        </div>
-                        <div className="flex flex-col p-4">
-                            {children}
-                        </div>
-                    </SidebarInset>
-                </div>
-            </SidebarProvider>
+  return (
+    <div className="[--header-height:calc(--spacing(14))]">
+      <SidebarProvider className="flex flex-col">
+        <div className="flex flex-1">
+          <AppSidebar />
+          <SidebarInset>
+            <div className="relative flex items-center justify-between gap-2 px-4 py-2 border-b">
+              <div className="flex items-center gap-2">
+                <SidebarTrigger />
+              </div>
+            </div>
+            <div className="flex flex-col p-4 w-full overflow-x-hidden min-w-0">
+              {children}
+            </div>
+          </SidebarInset>
         </div>
-    )
+      </SidebarProvider>
+    </div>
+  );
 }

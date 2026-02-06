@@ -7,10 +7,11 @@ import { Button } from "@/components/ui/button";
 import { SCREENING_QUESTIONS as EPDS_QUESTIONS } from "@/lib/screening-data";
 import Link from "next/link";
 
-
 import {
   setAnswers,
   setScore,
+  setRecommendedArticles,
+  setRecommendationsStatus,
   setStatus,
   setError,
 } from "@/src/app/redux/feature/screening/epds/epdsSlice";
@@ -70,12 +71,19 @@ export default function AssessmentPage() {
         dispatch(setAnswers(formattedAnswers));
         dispatch(setStatus("succeeded"));
 
-        // Calculate total score (sum of all answers)
-        const totalScore = Object.values(answers).reduce(
-          (sum, val) => sum + val,
-          0
-        );
-        dispatch(setScore(totalScore));
+        // Store recommended articles and status from API
+        if (result.recommended_articles) {
+          dispatch(setRecommendedArticles(result.recommended_articles));
+        }
+        if (result.recommendations_status) {
+          dispatch(setRecommendationsStatus(result.recommendations_status));
+        }
+
+        // Use score from API if available, otherwise calculate locally
+        const finalScore =
+          result.score ??
+          Object.values(answers).reduce((sum, val) => sum + (val as number), 0);
+        dispatch(setScore(finalScore));
 
         // Also save to localStorage as backup
         localStorage.setItem("screeningAnswers", JSON.stringify(answers));
@@ -85,7 +93,7 @@ export default function AssessmentPage() {
       } catch (err) {
         dispatch(setStatus("failed"));
         dispatch(
-          setError(err instanceof Error ? err.message : "Submission failed")
+          setError(err instanceof Error ? err.message : "Submission failed"),
         );
         toast.error("Failed to submit screening. Please try again.");
         console.error("Screening submission error:", err);
@@ -113,7 +121,7 @@ export default function AssessmentPage() {
               onStepClick={setCurrentStep}
               // label={"Quest"}
             /> */}
-            
+
             <ProgressBar
               current={currentQuestionIndex + 1}
               total={totalQuestions}
@@ -150,8 +158,8 @@ export default function AssessmentPage() {
               {isLoading
                 ? "Submitting..."
                 : isLastQuestion
-                ? "Submit"
-                : "Next Question"}
+                  ? "Submit"
+                  : "Next Question"}
               <span className="material-symbols-outlined text-[20px] ml-2">
                 arrow_forward
               </span>

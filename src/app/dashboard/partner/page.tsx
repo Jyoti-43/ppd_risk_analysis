@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo } from "react";
+import React, { useMemo, useEffect } from "react";
 import {
   Card,
   CardContent,
@@ -20,16 +20,20 @@ import {
   Mail,
   Clock,
   FileText,
-  Share2,
   Bell,
-  CheckCircle2,
   AlertCircle,
+  LockKeyhole,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { PPD_Risk_Analysis } from "@/src/app/component/dashboard/mother/ppd-risk-analysis";
 import { ScreeningHistory } from "@/src/app/component/dashboard/mother/screeing-history";
 import { columns } from "@/src/app/component/dashboard/mother/ppd-risk-analysis-column-defination";
 import ProtectedRoute from "@/src/app/component/auth/ProtectedRoute/ProtectedRoute";
+import {
+  useGetMotherScreeningSummaryQuery,
+  useGetMotherScreeningHistoryQuery,
+  useGetLinkedMotherProfileQuery,
+} from "../../redux/services/userDashboardApi";
 
 // Mock User Data for the Single Assigned Mother
 const ASSIGNED_MOTHER = {
@@ -44,26 +48,6 @@ const ASSIGNED_MOTHER = {
   riskLevel: "High",
   image: "/avatars/01.png",
   latestScore: 18, // EPDS Score
-};
-
-// Mock Screening Data Generators
-const generateHistory = (
-  count: number,
-  riskType: "High" | "Low" | "Moderate" | "Critical",
-) => {
-  return Array.from({ length: count }).map((_, i) => ({
-    _id: `mock-${i}`,
-    created_at: new Date(Date.now() - i * 86400000 * 3).toISOString(), // Every 3 days
-    risk_level: i === 0 ? riskType : "Low", // Latest is the riskType
-    total_score: i === 0 ? (riskType === "Critical" ? 22 : 10) : 5,
-    result: {
-      prediction: i === 0 ? riskType : "Low",
-      flag: i === 0 ? 1 : 0,
-    },
-    answers: [],
-    risk_label: i === 0 ? riskType : "Low",
-    prediction: i === 0 ? riskType : "Low",
-  }));
 };
 
 // Simplified Mock Notifications
@@ -97,66 +81,205 @@ const MOCK_NOTIFICATIONS = [
 export default function PartnerDashboard() {
   const router = useRouter();
 
-  // Mock Data matching the structure expected by components
-  const symptomsHistory = useMemo(
-    () => ({
-      data: generateHistory(5, ASSIGNED_MOTHER.status as any),
-    }),
-    [],
+  const { data: motherProfile, isLoading: isProfileLoading } =
+    useGetLinkedMotherProfileQuery();
+
+  const profile = useMemo(() => {
+    if (!motherProfile) return null;
+
+    // Handle various response shapes: array, { data: [] }, { mothers: [] }, { mother: {} }
+    if (Array.isArray(motherProfile)) return motherProfile[0];
+    if (Array.isArray(motherProfile.data)) return motherProfile.data[0];
+    if (Array.isArray(motherProfile.mothers)) return motherProfile.mothers[0];
+    if (motherProfile.mother) return motherProfile.mother;
+    if (motherProfile.data) return motherProfile.data; // might be a single object
+
+    return motherProfile;
+  }, [motherProfile]);
+
+  const motherId =
+    profile?.id ||
+    profile?._id ||
+    profile?.mother_id ||
+    profile?.userId ||
+    profile?.user_id;
+
+  const {
+    data: screeningSummary,
+    isLoading: isSummaryLoading,
+    error: summaryError,
+  } = useGetMotherScreeningSummaryQuery(motherId, { skip: !motherId });
+
+  const {
+    data: screeningHistoryData,
+    isLoading: isHistoryLoading,
+    error: historyError,
+  } = useGetMotherScreeningHistoryQuery(
+    { mother_id: motherId, limit: 100 },
+    { skip: !motherId },
   );
-  const epdsHistory = useMemo(
-    () => ({
-      history: generateHistory(5, ASSIGNED_MOTHER.status as any),
-    }),
-    [],
-  );
-  const hybridHistory = useMemo(
-    () => ({
-      history: generateHistory(5, ASSIGNED_MOTHER.status as any),
-    }),
-    [],
-  );
+
+  const isHistoryForbidden = (historyError as any)?.status === 403;
+
+  const isLoading = isProfileLoading || isSummaryLoading || isHistoryLoading;
+
+  // Map real data to ASSIGNED_MOTHER structure
+  const motherData = useMemo(() => {
+    if (!profile) return ASSIGNED_MOTHER;
+
+    // Use summary data for metrics
+    const latestEpds = screeningSummary?.latest_epds || screeningSummary?.epds;
+    const latestSymp =
+      screeningSummary?.latest_ppd ||
+      screeningSummary?.latest_symptom ||
+      screeningSummary?.ppd ||
+      screeningSummary?.symptom;
+    const latestHybrid =
+      screeningSummary?.latest_hybrid || screeningSummary?.hybrid;
+
+    // Determine which screening is absolute latest
+    const dates = [
+      { type: "epds", date: latestEpds?.created_at, data: latestEpds },
+      { type: "symptom", date: latestSymp?.created_at, data: latestSymp },
+      { type: "hybrid", date: latestHybrid?.created_at, data: latestHybrid },
+    ]
+      .filter((d) => d.date)
+      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+
+    const absoluteLatest = dates[0];
+
+    return {
+      ...ASSIGNED_MOTHER,
+      name: profile.mother_name || profile.name || profile.userName || "Mother",
+      email: profile.mother_email || profile.email || "",
+      phone: profile.phone || ASSIGNED_MOTHER.phone,
+      age: profile.age || ASSIGNED_MOTHER.age,
+      weeksPostpartum:
+        profile.weeksPostpartum || ASSIGNED_MOTHER.weeksPostpartum,
+      image: profile.image || ASSIGNED_MOTHER.image,
+      riskLevel:
+        screeningSummary?.overall_risk ||
+        absoluteLatest?.data?.risk_level ||
+        absoluteLatest?.data?.result?.risk_level ||
+        absoluteLatest?.data?.result?.prediction ||
+        absoluteLatest?.data?.prediction ||
+        "Low",
+      latestScore:
+        latestEpds?.total_score || latestEpds?.result?.total_score || 0,
+      lastScreeningDate:
+        absoluteLatest?.date ||
+        screeningSummary?.last_screening_date ||
+        new Date().toISOString(),
+    };
+  }, [profile, screeningSummary]);
 
   // Prepare data for ScreeningHistory table
   const screeningHistory = useMemo(() => {
     const allScreenings: any[] = [];
+    const history =
+      screeningHistoryData?.items ||
+      screeningHistoryData?.history ||
+      screeningHistoryData?.data ||
+      (Array.isArray(screeningHistoryData) ? screeningHistoryData : []);
 
-    [...epdsHistory.history].forEach((item, idx) => {
-      allScreenings.push({
-        id: `epds-${idx}`,
-        screeningType: "EPDS",
-        date: new Date(item.created_at).toLocaleDateString(),
-        created_at: item.created_at,
-        risk: item.risk_level,
-        prediction: item.risk_level,
-        action: "View Details",
-        method: "epds",
-        raw: item,
-      });
-    });
+    if (Array.isArray(history)) {
+      history.forEach((item: any, idx: number) => {
+        let type =
+          item.type ||
+          item.screening_type ||
+          item.method ||
+          (item.total_score !== undefined ||
+          item.result?.total_score !== undefined
+            ? "EPDS"
+            : "Symptoms");
 
-    [...symptomsHistory.data].forEach((item, idx) => {
-      allScreenings.push({
-        id: `sym-${idx}`,
-        screeningType: "Symptoms",
-        date: new Date(item.created_at).toLocaleDateString(),
-        created_at: item.created_at,
-        risk: item.result.prediction,
-        prediction: item.result.prediction,
-        action: "View Details",
-        method: "symptoms",
-        raw: item,
+        // Normalize for UI
+        const lowerType = type.toLowerCase();
+        if (lowerType.includes("symptom") || lowerType.includes("ppd")) {
+          type = "Symptoms";
+        } else if (lowerType.includes("epds")) {
+          type = "EPDS";
+        } else if (lowerType.includes("hybrid")) {
+          type = "Hybrid";
+        }
+
+        const risk =
+          item.risk_level ||
+          item.result?.risk_level ||
+          item.result?.prediction ||
+          item.prediction ||
+          "Low";
+
+        allScreenings.push({
+          id: item.id || item._id || `${type}-${idx}`,
+          screeningType: type,
+          date: new Date(item.created_at).toLocaleDateString(),
+          created_at: item.created_at,
+          risk: risk,
+          prediction: risk,
+          action: "View Details",
+          method: type.toLowerCase(),
+          raw: item,
+        });
       });
-    });
+    }
 
     return allScreenings.sort(
       (a, b) =>
         new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
     );
-  }, [epdsHistory, symptomsHistory]);
+  }, [screeningHistoryData]);
+
+  const separatedHistories = useMemo(() => {
+    const history =
+      screeningHistoryData?.items ||
+      screeningHistoryData?.history ||
+      screeningHistoryData?.data ||
+      (Array.isArray(screeningHistoryData) ? screeningHistoryData : []);
+
+    return {
+      epds: {
+        history: history.filter((i: any) => {
+          const type = (
+            i.type ||
+            i.screening_type ||
+            i.method ||
+            ""
+          ).toLowerCase();
+          return type.includes("epds");
+        }),
+      },
+      symptoms: {
+        data: history.filter((i: any) => {
+          const type = (
+            i.type ||
+            i.screening_type ||
+            i.method ||
+            ""
+          ).toLowerCase();
+          return (
+            type.includes("symptom") ||
+            type.includes("ppd") ||
+            type.includes("risk")
+          );
+        }),
+      },
+      hybrid: {
+        history: history.filter((i: any) => {
+          const type = (
+            i.type ||
+            i.screening_type ||
+            i.method ||
+            ""
+          ).toLowerCase();
+          return type.includes("hybrid");
+        }),
+      },
+    };
+  }, [screeningHistoryData]);
 
   const getRiskColor = (risk: string) => {
-    switch (risk.toLowerCase()) {
+    switch (risk?.toLowerCase()) {
       case "critical":
         return "text-red-600 bg-red-50 border-red-200";
       case "high":
@@ -170,6 +293,14 @@ export default function PartnerDashboard() {
     }
   };
 
+  if (isLoading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-gray-50/50">
+        <Activity className="h-12 w-12 text-primary animate-spin" />
+      </div>
+    );
+  }
+
   return (
     <ProtectedRoute roles={["partner"]}>
       <div className="p-8 min-h-screen bg-gray-50/50">
@@ -179,13 +310,13 @@ export default function PartnerDashboard() {
             {/* Header Section */}
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
               <div>
-                <h1 className="text-3xl font-bold text-gray-900 tracking-tight">
-                  Partner Dashboard
+                <h1 className="text-3xl font-bold text-slate-900 tracking-tight">
+                  Support Hub
                 </h1>
-                <p className="text-muted-foreground mt-1">
-                  Monitoring progress for{" "}
-                  <span className="font-semibold text-gray-800">
-                    {ASSIGNED_MOTHER.name}
+                <p className="text-slate-500 mt-1">
+                  Viewing screening results for{" "}
+                  <span className="font-bold text-primary">
+                    {motherData.name}
                   </span>
                 </p>
               </div>
@@ -203,8 +334,8 @@ export default function PartnerDashboard() {
                   <div className="flex gap-4">
                     <div className="h-24 w-24 rounded-full bg-gray-200 overflow-hidden ring-4 ring-pink-50 flex-shrink-0">
                       <img
-                        src={ASSIGNED_MOTHER.image}
-                        alt={ASSIGNED_MOTHER.name}
+                        src={motherData.image}
+                        alt={motherData.name}
                         className="h-full w-full object-cover"
                         onError={(e) =>
                           (e.currentTarget.src =
@@ -215,12 +346,12 @@ export default function PartnerDashboard() {
                     <div className="space-y-2">
                       <div>
                         <h2 className="text-2xl font-bold text-gray-900">
-                          {ASSIGNED_MOTHER.name}
+                          {motherData.name}
                         </h2>
                         <div className="flex items-center gap-2 text-sm text-gray-500 mt-1">
-                          <span>{ASSIGNED_MOTHER.age} years old</span> •{" "}
+                          <span>{motherData.age} years old</span> •{" "}
                           <span>
-                            {ASSIGNED_MOTHER.weeksPostpartum} weeks postpartum
+                            {motherData.weeksPostpartum} weeks postpartum
                           </span>
                         </div>
                       </div>
@@ -228,15 +359,15 @@ export default function PartnerDashboard() {
                       <div className="flex items-center gap-3 pt-1">
                         <Badge
                           className={`${getRiskColor(
-                            ASSIGNED_MOTHER.riskLevel,
+                            motherData.riskLevel,
                           )} border px-3 py-1 text-sm`}
                         >
-                          {ASSIGNED_MOTHER.riskLevel} Risk
+                          {motherData.riskLevel} Risk
                         </Badge>
                         <span className="text-xs text-muted-foreground flex items-center bg-gray-100 px-2 py-1 rounded-full">
                           <Clock className="h-3 w-3 mr-1" /> Last screened:{" "}
                           {new Date(
-                            ASSIGNED_MOTHER.lastScreeningDate,
+                            motherData.lastScreeningDate,
                           ).toLocaleDateString()}
                         </span>
                       </div>
@@ -250,11 +381,11 @@ export default function PartnerDashboard() {
                     <div className="space-y-2">
                       <div className="flex items-center gap-3 text-sm text-gray-700 bg-gray-50 p-2 rounded-md">
                         <Mail className="h-4 w-4 text-gray-400" />{" "}
-                        {ASSIGNED_MOTHER.email}
+                        {motherData.email}
                       </div>
                       <div className="flex items-center gap-3 text-sm text-gray-700 bg-gray-50 p-2 rounded-md">
                         <Phone className="h-4 w-4 text-gray-400" />{" "}
-                        {ASSIGNED_MOTHER.phone}
+                        {motherData.phone}
                       </div>
                     </div>
                   </div>
@@ -262,55 +393,68 @@ export default function PartnerDashboard() {
               </CardContent>
             </Card>
 
-            {/* Key Metrics Grid */}
+            {/* Key Metrics Grid - Aligned with Mother Dashboard styling */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-              <Card className="border-none shadow-sm bg-white hover:shadow-md transition-all duration-200">
-                <CardContent className="p-6 flex items-center justify-between">
-                  <div>
-                    <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
-                      Weekly Screenings
-                    </p>
-                    <h3 className="text-3xl font-bold text-gray-900 mt-2">
-                      On Track
-                    </h3>
+              {/* Card 1: Risk Status (Equivalent to Mother's Risk card) */}
+              <Card className="hover:shadow-md transition-shadow">
+                <CardContent className="flex items-center space-x-4 p-2 h-full">
+                  <div
+                    className={`${
+                      motherData.riskLevel === "Critical" ||
+                      motherData.riskLevel === "High"
+                        ? "bg-[#fff1f2] text-[#fb7185]"
+                        : "bg-[#ecfdf5] text-[#10b981]"
+                    } flex-shrink-0 w-12 h-12 rounded-2xl flex items-center justify-center`}
+                  >
+                    <AlertTriangle className="h-7 w-7" />
                   </div>
-                  <div className="h-12 w-12 bg-green-50 rounded-full flex items-center justify-center">
-                    <Activity className="h-6 w-6 text-green-500" />
+                  <div className="flex flex-col">
+                    <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                      OVERALL RISK
+                    </span>
+                    <h3 className="text-xl font-bold text-slate-700 mt-0.5">
+                      {motherData.riskLevel}
+                    </h3>
                   </div>
                 </CardContent>
               </Card>
 
-              <Card className="border-none shadow-sm bg-white hover:shadow-md transition-all duration-200">
-                <CardContent className="p-6 flex items-center justify-between">
-                  <div>
-                    <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
-                      Latest EPDS Score
-                    </p>
-                    <div className="flex items-baseline gap-2 mt-2">
-                      <h3 className="text-3xl font-bold text-gray-900">
-                        {ASSIGNED_MOTHER.latestScore}
-                      </h3>
-                      <span className="text-sm text-gray-400">/ 30</span>
-                    </div>
+              {/* Card 2: Total Screenings Shared */}
+              <Card className="hover:shadow-md transition-shadow">
+                <CardContent className="flex items-center space-x-4 p-2 h-full">
+                  <div className="flex-shrink-0 w-12 h-12 bg-[#eff6ff] rounded-2xl flex items-center justify-center">
+                    <Activity className="h-7 w-7 text-[#3b82f6]" />
                   </div>
-                  <div className="h-12 w-12 bg-blue-50 rounded-full flex items-center justify-center">
-                    <UserCheck className="h-6 w-6 text-blue-500" />
+                  <div className="flex flex-col">
+                    <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                      TOTAL RECORDED
+                    </span>
+                    <h3 className="text-xl font-bold text-slate-700 mt-0.5">
+                      {screeningSummary?.total_screenings || 0}
+                    </h3>
                   </div>
                 </CardContent>
               </Card>
 
-              <Card className="border-none shadow-sm bg-white hover:shadow-md transition-all duration-200">
-                <CardContent className="p-6 flex items-center justify-between">
-                  <div>
-                    <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
-                      Next Check-in
-                    </p>
-                    <h3 className="text-3xl font-bold text-gray-900 mt-2">
-                      Tomorrow
-                    </h3>
+              {/* Card 3: Latest Check-in */}
+              <Card className="hover:shadow-md transition-shadow">
+                <CardContent className="flex items-center space-x-4 p-2 h-full">
+                  <div className="flex-shrink-0 w-12 h-12 bg-[#fff7ed] rounded-2xl flex items-center justify-center">
+                    <Calendar className="h-7 w-7 text-[#f97316]" />
                   </div>
-                  <div className="h-12 w-12 bg-orange-50 rounded-full flex items-center justify-center">
-                    <Calendar className="h-6 w-6 text-orange-500" />
+                  <div className="flex flex-col">
+                    <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                      LATEST ENTRY
+                    </span>
+                    <h3 className="text-xl font-bold text-slate-700 mt-0.5">
+                      {new Date(
+                        motherData.lastScreeningDate,
+                      ).toLocaleDateString("en-US", {
+                        month: "short",
+                        day: "numeric",
+                        year: "numeric",
+                      })}
+                    </h3>
                   </div>
                 </CardContent>
               </Card>
@@ -335,9 +479,9 @@ export default function PartnerDashboard() {
                 className="space-y-6 animate-in fade-in-50"
               >
                 <PPD_Risk_Analysis
-                  symptomsHistory={symptomsHistory}
-                  epdsHistory={epdsHistory}
-                  hybridHistory={hybridHistory}
+                  symptomsHistory={separatedHistories.symptoms}
+                  epdsHistory={separatedHistories.epds}
+                  hybridHistory={separatedHistories.hybrid}
                 />
               </TabsContent>
 
@@ -345,7 +489,26 @@ export default function PartnerDashboard() {
                 value="history"
                 className="space-y-6 animate-in fade-in-50"
               >
-                <ScreeningHistory columns={columns} data={screeningHistory} />
+                {isHistoryForbidden ? (
+                  <Card className="min-h-[300px] flex flex-col items-center justify-center border-dashed bg-slate-50/50 p-8 text-center">
+                    <div className="h-16 w-16 bg-amber-50 rounded-full flex items-center justify-center mb-4">
+                      <LockKeyhole className="h-8 w-8 text-amber-500" />
+                    </div>
+                    <h3 className="text-xl font-bold text-gray-900 mb-2">
+                      Restricted Access
+                    </h3>
+                    <p className="text-muted-foreground max-w-[350px] leading-relaxed">
+                      You currently have "Latest Summary" access. Full screening
+                      history is only available to partners with "Full History"
+                      permissions.
+                    </p>
+                    <p className="text-xs text-amber-600 font-medium mt-4 bg-amber-50 px-3 py-1 rounded-full border border-amber-100 italic">
+                      Please contact the mother to request full history access.
+                    </p>
+                  </Card>
+                ) : (
+                  <ScreeningHistory columns={columns} data={screeningHistory} />
+                )}
               </TabsContent>
 
               <TabsContent value="notes">
@@ -394,8 +557,8 @@ export default function PartnerDashboard() {
                           notification.type === "CRITICAL"
                             ? "bg-red-500"
                             : notification.type === "REMINDER"
-                            ? "bg-orange-500"
-                            : "bg-blue-500"
+                              ? "bg-orange-500"
+                              : "bg-blue-500"
                         }`}
                       />
                       <div className="flex-1 min-w-0">

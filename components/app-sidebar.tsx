@@ -15,6 +15,7 @@ import {
   LogOut,
   Bell,
   LifeBuoy,
+  BookOpen,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -237,6 +238,47 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <SidebarMenuButton
+                    asChild
+                    isActive={
+                      pathname === "/dashboard/mother/recommended-articles"
+                    }
+                    tooltip="Recommendations"
+                    className={cn(
+                      "text-gray-600 hover:text-gray-900 group-data-[collapsible=icon]:!p-0 group-data-[collapsible=icon]:justify-center",
+                      pathname === "/dashboard/mother/recommended-articles" &&
+                        "bg-[#FFF0F3] !text-primary hover:bg-[#ffe0e9] font-semibold",
+                    )}
+                  >
+                    <Link
+                      href="/dashboard/mother/recommended-articles"
+                      className="flex "
+                    >
+                      <div className="flex items-center gap-2 group-data-[collapsible=icon]:justify-center">
+                        <BookOpen
+                          size={22}
+                          className={cn(
+                            "text-primary",
+                            pathname ===
+                              "/dashboard/mother/recommended-articles" &&
+                              "!text-primary",
+                          )}
+                        />
+                        <span
+                          className={cn(
+                            "group-data-[collapsible=icon]:hidden",
+                            pathname ===
+                              "/dashboard/mother/recommended-articles" &&
+                              "!text-primary",
+                          )}
+                        >
+                          Recommended articles
+                        </span>
+                      </div>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
               </SidebarMenu>
             </SidebarGroupContent>
           </SidebarGroup>
@@ -369,73 +411,71 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         )}
 
         {/* PARTNER MENU */}
-        {role === "partner" ||
-          (role === "mother" && (
-            <SidebarGroup>
-              <SidebarGroupLabel className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2 group-data-[collapsible=icon]:hidden">
-                Partner Hub
-              </SidebarGroupLabel>
-              <SidebarGroupContent>
-                <SidebarMenu>
-                  <SidebarMenuItem>
-                    <SidebarMenuButton
-                      asChild
-                      isActive={pathname === "/dashboard/partner"}
-                      tooltip="Dashboard"
-                      className={cn(
-                        "text-gray-600 hover:text-gray-900 group-data-[collapsible=icon]:!p-0 group-data-[collapsible=icon]:justify-center",
-                        pathname === "/dashboard/partner" &&
-                          "bg-[#FFF0F3] text-[#FF6B98] hover:bg-[#ffe0e9] hover:text-[#FF6B98] font-semibold",
-                      )}
+        {role === "partner" && (
+          <SidebarGroup>
+            <SidebarGroupLabel className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2 group-data-[collapsible=icon]:hidden">
+              Partner Hub
+            </SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                <SidebarMenuItem>
+                  <SidebarMenuButton
+                    asChild
+                    isActive={pathname === "/dashboard/partner"}
+                    tooltip="Dashboard"
+                    className={cn(
+                      "text-gray-600 hover:text-gray-900 group-data-[collapsible=icon]:!p-0 group-data-[collapsible=icon]:justify-center",
+                      pathname === "/dashboard/partner" &&
+                        "bg-[#FFF0F3] text-[#FF6B98] hover:bg-[#ffe0e9] hover:text-[#FF6B98] font-semibold",
+                    )}
+                  >
+                    <Link href="/dashboard/partner" className="flex ">
+                      <LayoutDashboard
+                        size={22}
+                        className={cn(
+                          "text-primary",
+                          pathname === "/dashboard/partner" && "text-[#FF6B98]",
+                        )}
+                      />
+                      <span className="group-data-[collapsible=icon]:hidden">
+                        Dashboard
+                      </span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <SidebarMenuButton
+                    asChild
+                    isActive={pathname === "/dashboard/partner/notifications"}
+                    tooltip="Notifications"
+                    className={cn(
+                      "text-gray-600 hover:text-gray-900 group-data-[collapsible=icon]:!p-0 group-data-[collapsible=icon]:justify-center",
+                      pathname === "/dashboard/partner/notifications" &&
+                        "bg-[#FFF0F3] text-[#FF6B98] hover:bg-[#ffe0e9] hover:text-[#FF6B98] font-semibold",
+                    )}
+                  >
+                    <Link
+                      href="/dashboard/partner/notifications"
+                      className="flex "
                     >
-                      <Link href="/dashboard/partner" className="flex ">
-                        <LayoutDashboard
-                          size={22}
-                          className={cn(
-                            "text-primary",
-                            pathname === "/dashboard/partner" &&
-                              "text-[#FF6B98]",
-                          )}
-                        />
-                        <span className="group-data-[collapsible=icon]:hidden">
-                          Dashboard
-                        </span>
-                      </Link>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                  <SidebarMenuItem>
-                    <SidebarMenuButton
-                      asChild
-                      isActive={pathname === "/dashboard/partner/notifications"}
-                      tooltip="Notifications"
-                      className={cn(
-                        "text-gray-600 hover:text-gray-900 group-data-[collapsible=icon]:!p-0 group-data-[collapsible=icon]:justify-center",
-                        pathname === "/dashboard/partner/notifications" &&
-                          "bg-[#FFF0F3] text-[#FF6B98] hover:bg-[#ffe0e9] hover:text-[#FF6B98] font-semibold",
-                      )}
-                    >
-                      <Link
-                        href="/dashboard/partner/notifications"
-                        className="flex "
-                      >
-                        <Bell
-                          size={22}
-                          className={cn(
-                            "text-primary",
-                            pathname === "/dashboard/partner/notifications" &&
-                              "text-[#FF6B98]",
-                          )}
-                        />
-                        <span className="group-data-[collapsible=icon]:hidden">
-                          Notifications
-                        </span>
-                      </Link>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                </SidebarMenu>
-              </SidebarGroupContent>
-            </SidebarGroup>
-          ))}
+                      <Bell
+                        size={22}
+                        className={cn(
+                          "text-primary",
+                          pathname === "/dashboard/partner/notifications" &&
+                            "text-[#FF6B98]",
+                        )}
+                      />
+                      <span className="group-data-[collapsible=icon]:hidden">
+                        Notifications
+                      </span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        )}
 
         {/* ADMIN MENU */}
         {role === "admin" && (

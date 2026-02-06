@@ -18,6 +18,8 @@ import {
   setHybridStatus,
   setHybridError,
   setHybridResult,
+  setHybridRecommendedArticles,
+  setHybridRecommendationsStatus,
 } from "@/src/app/redux/feature/screening/hybrid/hybridSlice";
 
 const QUESTIONS_PER_PAGE_SYMPTOMS = 4;
@@ -113,6 +115,15 @@ export default function HybridAssessmentPage() {
       dispatch(setHybridStatus("loading"));
       const res = await submitHybrid(payload).unwrap();
       dispatch(setHybridResult(res));
+
+      // Store recommended articles and status from API
+      if (res.recommended_articles) {
+        dispatch(setHybridRecommendedArticles(res.recommended_articles));
+      }
+      if (res.recommendations_status) {
+        dispatch(setHybridRecommendationsStatus(res.recommendations_status));
+      }
+
       dispatch(setHybridStatus("succeeded"));
       console.log("Hybrid Assessment Submitted Successfully:", res);
 
@@ -234,8 +245,8 @@ export default function HybridAssessmentPage() {
               {isSubmitting
                 ? "Submitting..."
                 : currentStep === totalSteps - 1
-                ? "Submit Assessment"
-                : "Next"}
+                  ? "Submit Assessment"
+                  : "Next"}
               <span className="material-symbols-outlined text-[20px] ml-2">
                 arrow_forward
               </span>

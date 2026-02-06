@@ -2,7 +2,10 @@
 
 import { useEffect } from "react";
 import { useAppSelector } from "../../Hooks/hook";
-import { selectIsLoggedIn } from "../../redux/feature/user/userSlice";
+import {
+  selectIsLoggedIn,
+  selectCurrentUser,
+} from "../../redux/feature/user/userSlice";
 import { communityPost } from "../../redux/services/communityPostApi";
 import { communityGroup } from "../../redux/services/communityGroupApi";
 import { groupPost } from "../../redux/services/groupPostApi";
@@ -10,6 +13,8 @@ import { userDashboardApi } from "../../redux/services/userDashboardApi";
 
 export function CommunityPrefetcher() {
   const isLoggedIn = useAppSelector(selectIsLoggedIn);
+  const user = useAppSelector(selectCurrentUser);
+  const role = user?.role?.toLowerCase();
 
   // Get prefetch functions
   const prefetchPosts = communityPost.usePrefetch("getPost");
@@ -31,12 +36,16 @@ export function CommunityPrefetcher() {
 
   useEffect(() => {
     if (isLoggedIn) {
-      // Step 1: Immediate Dashboard Data (High priority)
-      prefetchSymptoms(undefined, { force: false });
-      prefetchEpds(undefined, { force: false });
-      prefetchHybrid(undefined, { force: false });
+      // Step 1: Immediate Dashboard Data - ONLY for mothers
+      if (role === "mother") {
+        prefetchSymptoms(undefined, { force: false });
+        prefetchEpds(undefined, { force: false });
+        prefetchHybrid(undefined, { force: false });
+        prefetchScreeningCount(undefined, { force: false });
+      }
+
+      // Shared prefetching
       prefetchPostCount(undefined, { force: false });
-      prefetchScreeningCount(undefined, { force: false });
 
       // Step 2: Community Data (Background priority, staggered by 1s)
       const timeoutId = setTimeout(() => {
@@ -48,11 +57,12 @@ export function CommunityPrefetcher() {
         console.log("Community background cache warmed.");
       }, 1000);
 
-      console.log("App data prefetching sequence started...");
+      console.log(`App data prefetching sequence started for ${role}...`);
       return () => clearTimeout(timeoutId);
     }
   }, [
     isLoggedIn,
+    role,
     prefetchPosts,
     prefetchGroups,
     prefetchMyGroups,

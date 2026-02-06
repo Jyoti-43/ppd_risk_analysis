@@ -24,7 +24,13 @@ import { communityPost } from "../../redux/services/communityPostApi";
 import { communityGroup } from "../../redux/services/communityGroupApi";
 import { screeningAPI } from "../../redux/services/screeningApi";
 import { groupPost } from "../../redux/services/groupPostApi";
-import { userDashboardApi } from "../../redux/services/userDashboardApi";
+import {
+  useInvitePartnerMutation,
+  useGetInvitedPartnersQuery,
+  useGetLinkedMotherProfileQuery,
+  useLazyGetLinkedMotherProfileQuery,
+  userDashboardApi,
+} from "../../redux/services/userDashboardApi";
 import {
   Dialog,
   DialogContent,
@@ -55,7 +61,9 @@ const LoginForm = () => {
 
   const [loginUser, { data, isSuccess, isError, error }] =
     useLoginUserMutation();
-  const [verifyOtp, { isLoading: isVerifying , isSuccess:isVerifySuccess}] = useVerifyPartnerOtpMutation();
+  const [verifyOtp, { isLoading: isVerifying, isSuccess: isVerifySuccess }] =
+    useVerifyPartnerOtpMutation();
+  const [triggerGetLinkedMothers] = useLazyGetLinkedMotherProfileQuery();
 
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get("callbackUrl");
@@ -161,6 +169,9 @@ const LoginForm = () => {
         hasRefreshToken: !!refreshToken,
       });
 
+      const userRoleAttr = (data.role || "").toLowerCase();
+      console.log("User Role for redirection:", userRoleAttr);
+
       dispatch(
         setCredientials({
           userId,
@@ -168,14 +179,14 @@ const LoginForm = () => {
           email: emailResp,
           access_token: accessToken || "",
           refreshToken: refreshToken || "",
-          role: data.role,
+          role: userRoleAttr,
           is_verified:
             data.user?.is_verified === true ||
             data.is_verified === true ||
             (data.user?.is_verified as any) === 1 ||
             (data.is_verified as any) === 1 ||
             data.user?.status === "active" ||
-            data.status === "active"
+            data.status === "active",
         }),
       );
 
@@ -185,31 +196,60 @@ const LoginForm = () => {
       dispatch(groupPost.util.resetApiState());
       dispatch(userDashboardApi.util.resetApiState());
 
-      if (data.role !== "partner") {
+      if (userRoleAttr !== "partner") {
         setEmail("");
       }
       setPassword("");
 
-      console.log("Data after login:", data);
-      console.log("Login successful, redirecting...");
-
-      const setupCompleted = localStorage.getItem(
-        `setup_completed_${data.user.id}`,
-      );
-      if (data.role === "contributor" && !setupCompleted) {
+      const setupCompleted = localStorage.getItem(`setup_completed_${userId}`);
+      if (userRoleAttr === "contributor" && !setupCompleted) {
         router.push("/dashboard/contributor/profile-setup");
-      } else if (data.role === "admin") {
+      } else if (userRoleAttr === "admin") {
         router.push("/dashboard/admin");
-      } else if (data.role === "partner") {
-        // Broaden verification check to handle different possible backend field names or types
-       
+      } else if (userRoleAttr === "partner") {
+        // Broad verification check including numerical and status based
+        const isPartnerVerifiedDirectly =
+          data.user?.is_verified === true ||
+          data.is_verified === true ||
+          (data.user?.is_verified as any) === 1 ||
+          (data.is_verified as any) === 1 ||
+          data.user?.status === "active" ||
+          data.status === "active";
 
-        if (data.status === "active") {
-          router.push("/dashboard/partner");
-        } else {
-          setIsOtpOpen(true);
-        }
-      } else if (data.role === "mother") {
+        const checkPartnerStatus = async () => {
+          try {
+            // Check if they have linked mothers
+            const mothersResponse = await triggerGetLinkedMothers().unwrap();
+
+            // If they have any linked mothers, they are effectively verified for skipping OTP
+            const hasMothers =
+              mothersResponse &&
+              (Array.isArray(mothersResponse)
+                ? mothersResponse.length > 0
+                : !!mothersResponse.data?.length);
+
+            if (isPartnerVerifiedDirectly || hasMothers) {
+              console.log("Partner is verified or linked, redirecting...");
+              router.push("/dashboard/partner");
+            } else {
+              console.log(
+                "New/Unverified partner without links, opening OTP...",
+              );
+              setIsOtpOpen(true);
+            }
+          } catch (err) {
+            console.error("Error checking linked mothers:", err);
+            // Fallback to direct check
+            if (isPartnerVerifiedDirectly) {
+              router.push("/dashboard/partner");
+            } else {
+              setIsOtpOpen(true);
+            }
+          }
+        };
+
+        checkPartnerStatus();
+      } else if (userRoleAttr === "mother") {
         router.push((callbackUrl as string) || "/dashboard/mother");
       } else {
         router.push((callbackUrl as string) || "/");

@@ -131,9 +131,29 @@ export interface EPDSQuestion {
   q10: number;
 }
 
+export interface RecommendedArticle {
+  article_id: string;
+  title: string;
+  category: string;
+  risk_level: string;
+  external_url: string;
+  score: number;
+  imageUrl?: string;
+  preview?: string;
+}
+
+export interface EPDSAssessmentResponse {
+  score: number;
+  risk_level: string;
+  recommended_articles: RecommendedArticle[];
+  recommendations_status: "ok" | "unavailable";
+}
+
 export interface EpdsResultState {
   answers: EPDSQuestion | null;
   score: number | null;
+  recommendedArticles: RecommendedArticle[];
+  recommendationsStatus: "ok" | "unavailable" | "idle";
   status: "idle" | "loading" | "succeeded" | "failed";
   error: string | null;
 }
@@ -198,6 +218,8 @@ export interface HybridAssessmentResponse {
   };
   risk_label: string;
   system_disclaimer: string;
+  recommended_articles: RecommendedArticle[];
+  recommendations_status: "ok" | "unavailable";
 }
 
 export interface HybridResultState {
@@ -206,4 +228,13 @@ export interface HybridResultState {
   status: "idle" | "loading" | "succeeded" | "failed";
   error: string | null;
   result: HybridAssessmentResponse | null;
+  recommendedArticles: RecommendedArticle[];
+  recommendationsStatus: "ok" | "unavailable" | "idle";
+}
+
+export interface DashboardRecommendationsResponse {
+  recommended_articles: RecommendedArticle[];
+  source_screening_type: "epds" | "hybrid" | null;
+  generated_at: string | null;
+  status: string;
 }

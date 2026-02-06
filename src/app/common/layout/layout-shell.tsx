@@ -27,7 +27,7 @@ export function LayoutShell({ children }: { children: React.ReactNode }) {
   }
 
   if (isDashboardRoute) {
-    let allowedRoles = ["mother", "contributor", "admin"];
+    let allowedRoles = ["mother", "contributor", "admin", "partner"];
 
     if (pathname?.startsWith("/dashboard/mother")) {
       allowedRoles = ["mother"];
@@ -35,6 +35,8 @@ export function LayoutShell({ children }: { children: React.ReactNode }) {
       allowedRoles = ["contributor"];
     } else if (pathname?.startsWith("/dashboard/admin")) {
       allowedRoles = ["admin"];
+    } else if (pathname?.startsWith("/dashboard/partner")) {
+      allowedRoles = ["partner"];
     }
 
     return (
@@ -59,7 +61,7 @@ export function LayoutShell({ children }: { children: React.ReactNode }) {
 
   // Protected routes: header/footer + authentication required
   return (
-    <ProtectedRoute roles={["mother", "contributor", "admin"]}>
+    <ProtectedRoute roles={["mother", "contributor", "admin", "partner"]}>
       <CommunityPrefetcher />
       <SiteHeader />
       {children}
