@@ -71,7 +71,7 @@ export default function RecommendedArticlesPage() {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="space-y-1">
-          <div className="flex items-center gap-2 mb-2">
+          {/* <div className="flex items-center gap-2 mb-2">
             <Link
               href="/dashboard/mother"
               className="text-primary hover:text-primary/70 transition-colors"
@@ -81,7 +81,7 @@ export default function RecommendedArticlesPage() {
             <span className="text-xs font-bold text-primary/50 uppercase tracking-widest">
               Dashboard / Wellness
             </span>
-          </div>
+          </div> */}
           <h1 className="text-3xl font-black text-gray-900 tracking-tight">
             Recommended for <span className="text-primary italic">You</span>
           </h1>

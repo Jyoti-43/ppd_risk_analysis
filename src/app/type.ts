@@ -238,3 +238,39 @@ export interface DashboardRecommendationsResponse {
   generated_at: string | null;
   status: string;
 }
+// Crisis Resources types
+export interface CrisisResourceRecommendationRequest {
+  risk_level: string;
+  lat?: number;
+  lng?: number;
+  city?: string;
+  limit?: number;
+}
+
+export type ResourceType =
+  | "hospital"
+  | "emergency"
+  | "counseling"
+  | "community_support"
+  | "wellness";
+
+export interface CrisisResource {
+  id: string;
+  name: string;
+  type: ResourceType;
+  province: string;
+  city: string;
+  address: string;
+  phone: string;
+  hotline?: boolean;
+  email?: string;
+  website?: string;
+  hours: string;
+  description: string;
+  lat: number;
+  lng: number;
+  risk_supported?: string[];
+  is_active?: boolean;
+  distance_km?: number;
+  distance?: number; // Keep for compatibility with existing code
+}

@@ -52,6 +52,8 @@ export function SiteHeader() {
           <SiteNavContributor />
         ) : isLoggedIn && role === "admin" ? (
           <SiteNavAdmin />
+        ) : isLoggedIn && role === "partner" ? (
+          <SiteNavPartner />
         ) : (
           <SiteNav />
         )}
@@ -136,9 +138,7 @@ function SiteNavAuth() {
         href="/crisis-resources"
         className={cn(
           "text-md font-semibold transition-colors hover:text-primary",
-          pathname === "/crisis-resources"
-            ? "text-primary"
-            : "text-foreground",
+          pathname === "/crisis-resources" ? "text-primary" : "text-foreground",
         )}
       >
         Crisis Support
@@ -251,10 +251,69 @@ function SiteNavAdmin() {
   return (
     <nav className="hidden lg:flex gap-9 items-center px-6">
       <Link
-        href="/dashboard/contributor"
+        href="/dashboard/admin"
         className={cn(
           "text-md font-semibold transition-colors hover:text-primary",
-          pathname.startsWith("/dashboard/contributor")
+          pathname.startsWith("/dashboard/admin")
+            ? "text-primary"
+            : "text-foreground",
+        )}
+      >
+        Dashboard
+      </Link>
+    </nav>
+  );
+}
+
+function SiteNavPartner() {
+  const dispatch = useAppDispatch();
+
+  const router = require("next/navigation").useRouter();
+  const role = useAppSelector(selectCurrentUser)?.role ?? "";
+
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const pathname = usePathname();
+
+  if (!mounted) {
+    return (
+      <nav className="hidden lg:flex items-center gap-9 ">
+        {/* Render a placeholder or skeleton that matches server output */}
+      </nav>
+    );
+  }
+
+  return (
+    <nav className="hidden lg:flex gap-9 items-center px-6">
+      {/* <Link
+        href="/"
+        className={cn(
+          "text-md font-semibold transition-colors hover:text-primary",
+          pathname === "/" ? "text-primary" : "text-foreground",
+        )}
+      >
+        Home
+      </Link>
+
+      <Link
+        href="/resources"
+        className={cn(
+          "text-md font-semibold transition-colors hover:text-primary",
+          pathname === "/resources" ? "text-primary" : "text-foreground",
+        )}
+      >
+        Resources
+      </Link> */}
+
+      <Link
+        href="/dashboard/partner"
+        className={cn(
+          "text-md font-semibold transition-colors hover:text-primary",
+          pathname.startsWith("/dashboard/partner")
             ? "text-primary"
             : "text-foreground",
         )}

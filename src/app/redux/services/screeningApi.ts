@@ -42,6 +42,7 @@ export const screeningAPI = createApi({
         method: "POST",
         body,
       }),
+      invalidatesTags: ["Screening"],
     }),
 
     symptomsQuestion: build.query<SymptomsQuestion[], void>({

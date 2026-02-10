@@ -28,11 +28,6 @@ export default function ArticleDetailPage(props: { postId?: string }) {
   const { id } = useParams();
   const router = useRouter();
   const currentUser = useAppSelector(selectCurrentUser);
-  const {
-      data: articles = [],
-      isLoading: articlesLoading,
-      refetch,
-    } = useGetArticleQuery({});
 
   // Fetch both published and contributor-specific articles
   const {
@@ -89,18 +84,42 @@ export default function ArticleDetailPage(props: { postId?: string }) {
 
   const isOwner = Boolean(
     currentUser?.userId &&
-      contributorId &&
-      String(currentUser.userId) === String(contributorId),
+    contributorId &&
+    String(currentUser.userId) === String(contributorId),
   );
 
   // Fetch contributor profile only when viewing own article (to avoid extra calls)
-  const { data: myProfile } = useGetContributorProfileQuery( {
-  });
+  const { data: myProfile } = useGetContributorProfileQuery({});
 
-   const publishedArticlesCount = contributorArticles?.filter((a) => {
-        const s = (a.status || "").toLowerCase();
-        return s === "published" || s === "approved";
-      }).length;
+  // Calculate statistics for the author of THIS article
+  const getAuthorStats = () => {
+    // Collect all articles by this author that we have access to
+    const authorPublished = (publishedArticles || []).filter((a: any) => {
+      const aId =
+        a.userId ||
+        a.user_id ||
+        a.contributor?.id ||
+        a.contributor?._id ||
+        a.contributor?.userId;
+      return String(aId) === String(contributorId);
+    });
+
+    if (isOwner) {
+      // If viewing own article, we have access to full contributorArticles (including pending)
+      const total = (contributorArticles || []).length;
+      const published = (contributorArticles || []).filter((a: any) =>
+        ["published", "approved"].includes((a.status || "").toLowerCase()),
+      ).length;
+      const pending = total - published;
+      return { total, published, pending };
+    } else {
+      // For public view, we only see published articles
+      const published = authorPublished.length;
+      return { total: published, published, pending: 0 };
+    }
+  };
+
+  const authorStats = getAuthorStats();
 
   const profileBasic = myProfile?.step1_basic_profile;
 
@@ -153,7 +172,7 @@ export default function ArticleDetailPage(props: { postId?: string }) {
         {/* Main Content Card */}
         <div className="bg-white rounded-[32px] p-8 md:p-12 shadow-sm border border-border/40">
           {/* Header Metadata */}
-          <div className="flex flex-wrap items-center gap-4 mb-2 text-[13px] font-bold uppercase tracking-wider">
+          <div className="flex flex-wrap items-center gap-4 mb-2 text-[10px] font-bold uppercase tracking-wider">
             {/* <span className="text-primary/60">|</span> */}
             <span className="text-primary bg-secondary/50 rounded-md p-1">
               {categoryName || "General"}
@@ -164,7 +183,7 @@ export default function ArticleDetailPage(props: { postId?: string }) {
                 <Badge
                   key={tag}
                   variant="secondary"
-                  className="bg-primary/20 text-[12px] text-primary px-3 font-semibold rounded-xl"
+                  className="bg-primary/20 text-[10px] text-primary px-3 font-semibold rounded-xl"
                 >
                   #{tag}
                 </Badge>
@@ -239,10 +258,10 @@ export default function ArticleDetailPage(props: { postId?: string }) {
                 <Eye size={18} className="text-muted-foreground/60" />
                 <span>1,240 Views</span>
               </div> */}
-              <div className="flex items-center gap-2">
+              {/* <div className="flex items-center gap-2">
                 <Heart size={18} className="text-[#ff8172]" />
                 <span>42 Likes</span>
-              </div>
+              </div> */}
               {/* <div className="flex items-center gap-2 cursor-pointer hover:text-primary transition-colors">
                 <Share2 size={18} />
               </div> */}
@@ -286,9 +305,9 @@ export default function ArticleDetailPage(props: { postId?: string }) {
             </h3>
             <p className="text-[13px] font-bold text-destructive/80 mb-4 uppercase tracking-tighter">
               {isOwner && profileBasic
-                ? profileBasic.professional_title || "Prodessional Title"
+                ? profileBasic.professional_title || "Professional Title"
                 : article.contributor?.professional_title ||
-                  "Prodessional Title"}
+                  "Professional Title"}
             </p>
             {/* <Badge
               variant="outline"
@@ -305,17 +324,21 @@ export default function ArticleDetailPage(props: { postId?: string }) {
             </p>
             <div className="grid grid-cols-2 w-full pt-6 border-t border-border/40 mb-8">
               <div className="border-r border-border/40 px-2 lg:px-4">
-                <div className="text-xl font-black text-[#2d3a3a]">{articles.length}</div>
+                <div className="text-xl font-black text-[#2d3a3a]">
+                  {authorStats.total}
+                </div>
                 <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
-                  Articles
+                  Total Articles
                 </div>
               </div>
-              <div className="px-2 lg:px-4">
-                <div className="text-xl font-black text-[#2d3a3a]">{publishedArticlesCount}</div>
-                <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
-                  Published Articles
+              {/* <div className="px-2 lg:px-4">
+                <div className="text-xl font-black text-[#2d3a3a]">
+                  {authorStats.published}
                 </div>
-              </div>
+                <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
+                  Published
+                </div>
+              </div> */}
             </div>
             {/* <Button
               variant="outline"
@@ -346,7 +369,7 @@ export default function ArticleDetailPage(props: { postId?: string }) {
       </div>
 
       {/* Footer / Contributor Notes */}
-      <div className="max-w-7xl mx-auto mt-8">
+      {/* <div className="max-w-7xl mx-auto mt-8">
         <div className="bg-white rounded-[32px] p-8 md:p-10 shadow-sm border border-border/40">
           <div className="flex justify-between items-center mb-8 pb-4 border-b border-border/40">
             <h4 className="text-sm font-bold text-[#2d3a3a]">
@@ -365,7 +388,7 @@ export default function ArticleDetailPage(props: { postId?: string }) {
             </p>
           </div>
         </div>
-      </div>
+      </div> */}
     </div>
   );
 }

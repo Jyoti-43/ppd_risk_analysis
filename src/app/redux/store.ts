@@ -16,6 +16,7 @@ import { articleApi } from "./services/articleApi";
 import { contributorProfileApi } from "./services/contributorProfileSetupApi";
 import { adminApi } from "./services/adminApi";
 import { userDashboardApi } from "./services/userDashboardApi";
+import { crisisResourceApi } from "./services/crisisResourceApi";
 
 export const store = configureStore({
   reducer: {
@@ -51,6 +52,7 @@ export const store = configureStore({
     [adminApi.reducerPath]: adminApi.reducer,
     userDashboard: userDashboardApi.reducer,
     [userDashboardApi.reducerPath]: userDashboardApi.reducer,
+    [crisisResourceApi.reducerPath]: crisisResourceApi.reducer,
   },
 
   // Adding the middleware for the APIs that helps in caching, invalidation, polling, etc.
@@ -64,7 +66,8 @@ export const store = configureStore({
       .concat(articleApi.middleware)
       .concat(contributorProfileApi.middleware)
       .concat(adminApi.middleware)
-      .concat(userDashboardApi.middleware),
+      .concat(userDashboardApi.middleware)
+      .concat(crisisResourceApi.middleware),
 });
 
 import { injectStore } from "../utils/axiosInstance";

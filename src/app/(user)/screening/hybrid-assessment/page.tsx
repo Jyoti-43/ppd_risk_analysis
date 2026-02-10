@@ -47,12 +47,36 @@ export default function HybridAssessmentPage() {
     Record<string, string | number>
   >({});
 
+  // Effect to load questions from cache initially
+  useEffect(() => {
+    const cached = localStorage.getItem("symptomsQuestions");
+    if (cached) {
+      try {
+        const parsed = JSON.parse(cached);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          setQuestions(parsed);
+          console.log("Loaded symptoms questions from cache:", parsed.length);
+        }
+      } catch (e) {
+        console.error("Failed to parse cached symptoms questions", e);
+      }
+    }
+  }, []);
+
+  // Effect to handle API questions and update cache
   useEffect(() => {
     if (apiQuestions) {
-      if (Array.isArray(apiQuestions.fields)) {
-        setQuestions(apiQuestions.fields);
+      let fields: SymptomsQuestion[] = [];
+      if (Array.isArray((apiQuestions as any).fields)) {
+        fields = (apiQuestions as any).fields;
       } else if (Array.isArray(apiQuestions)) {
-        setQuestions(apiQuestions);
+        fields = apiQuestions as any;
+      }
+
+      if (fields.length > 0) {
+        setQuestions(fields);
+        localStorage.setItem("symptomsQuestions", JSON.stringify(fields));
+        console.log("Updated symptoms questions from API:", fields.length);
       }
     }
   }, [apiQuestions]);
@@ -198,8 +222,24 @@ export default function HybridAssessmentPage() {
                 ))}
               </div>
             ) : isQuestionsLoading ? (
-              <div className="flex items-center justify-center h-64 text-muted-foreground">
+              <div className="flex items-center justify-center h-64 text-muted-foreground flex-col gap-4">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
                 Loading symptom questions...
+              </div>
+            ) : questions.length === 0 ? (
+              <div className="flex items-center justify-center h-64 text-destructive flex-col gap-4 bg-white rounded-2xl shadow-sm">
+                <span className="material-symbols-outlined text-4xl">
+                  error
+                </span>
+                <p className="font-semibold text-lg">
+                  Failed to load symptom questions.
+                </p>
+                <Button
+                  variant="outline"
+                  onClick={() => window.location.reload()}
+                >
+                  Try Refreshing
+                </Button>
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

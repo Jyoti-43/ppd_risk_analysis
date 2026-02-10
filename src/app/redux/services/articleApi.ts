@@ -128,6 +128,13 @@ export const articleApi = createApi({
       // Invalidate posts cache when a post is updated
       invalidatesTags: ["Articles"],
     }),
+
+    getPubMedArticles: build.query<{ articles: any[] }, string>({
+      query: (query) => ({
+        url: `${window.location.origin}/pubmed/search?query=${encodeURIComponent(query)}`,
+        method: "GET",
+      }),
+    }),
   }),
 });
 
@@ -135,8 +142,8 @@ export const {
   useArticleUploadImageMutation,
   useCreateArticleMutation,
   useGetPublishedArticleQuery,
-
   useDeleteArticleMutation,
   useUpdateArticleMutation,
   useGetArticleQuery,
+  useGetPubMedArticlesQuery,
 } = articleApi;

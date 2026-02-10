@@ -61,6 +61,13 @@ export default function HybridResultsPage() {
     );
   }
 
+  const showRecommendations =
+    recommendationsStatus === "ok" &&
+    recommendedArticles &&
+    recommendedArticles.length > 0;
+
+  const articlesToDisplay = recommendedArticles || [];
+
   const {
     risk_label,
     clinical_recommendation,
@@ -171,14 +178,6 @@ export default function HybridResultsPage() {
                     {currentUser?.email || "—"}
                   </p>
                 </div>
-                {/* <div>
-                  <span className="text-muted-foreground block uppercase text-[10px] font-bold tracking-wider">
-                    Age
-                  </span>
-                  <p className="font-semibold text-foreground text-md">
-                    {symptomsAnswers?.AGE || "—"}
-                  </p>
-                </div> */}
               </div>
             </div>
           </div>
@@ -278,12 +277,12 @@ export default function HybridResultsPage() {
                   <span className="text-[10px] font-bold text-rose-600 uppercase tracking-widest block mb-1">
                     Emotional Check-in
                   </span>
-                  <p className="text-[14px] text-foreground font-medium leading-relaxed">
+                  <div className="text-[14px] text-foreground font-medium leading-relaxed">
                     Your emotional score of{" "}
                     <strong>{metrics?.epds_total ?? "—"}</strong> indicates a{" "}
                     <strong>{metrics?.epds_risk ?? "reviewed"} risk</strong>{" "}
                     level.
-                    <p className="text-[14px] text-foreground font-medium leading-relaxed">
+                    <p className="text-[14px] text-foreground font-medium leading-relaxed mt-2">
                       {(() => {
                         if (!explanation)
                           return "We looked at both your mood and physical health to give you a full picture of how you're doing.";
@@ -308,7 +307,7 @@ export default function HybridResultsPage() {
                         );
                       })()}
                     </p>
-                  </p>
+                  </div>
                 </div>
 
                 <div className="bg-blue-50/50 border border-blue-100 p-5 rounded-3xl shadow-sm">
@@ -358,7 +357,7 @@ export default function HybridResultsPage() {
           )}
 
           {/* Recommended Articles Section */}
-          {recommendationsStatus === "ok" && recommendedArticles.length > 0 && (
+          {showRecommendations && (
             <div className="space-y-6 pt-6 no-print">
               <div className="flex items-center gap-3">
                 <div className="p-2.5 bg-primary/10 rounded-xl">
@@ -376,7 +375,7 @@ export default function HybridResultsPage() {
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pb-6">
-                {recommendedArticles.map((article) => (
+                {articlesToDisplay.map((article) => (
                   <Card
                     key={article.article_id}
                     className="group hover:shadow-xl transition-all duration-300 border-none shadow-md overflow-hidden flex flex-col bg-white rounded-3xl"

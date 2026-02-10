@@ -70,7 +70,7 @@ export default function ResultsPage() {
         </p>
       </div>
       <main className="flex-1 px-6 lg:px-10 py-6 lg:py-12">
-        <div className="max-w-2xl mx-auto space-y-8">
+        <div className="max-w-4xl mx-auto space-y-8">
           {/* Header */}
           <div className="text-center space-y-2 mx-auto">
             <h1 className="text-2xl md:text-3xl font-bold text-primary tracking-tight">
@@ -158,7 +158,7 @@ export default function ResultsPage() {
                 Suggested Next Step
               </h3>
               <p
-                className={`text-sm font-medium text-center ${
+                className={`text-sm font-medium text-left ${
                   riskInfo.risk === "LOW" ? "text-green-700" : "text-red-700"
                 }`}
               >

@@ -17,7 +17,7 @@ export const QuestionCard =({ question, onAnswer, currentAnswer }: QuestionCardP
           <span className="material-symbols-outlined text-[16px]">help</span>
           Question {question.id}
         </div>
-        <h2 className="text-xl lg:text-2xl font-bold text-foreground leading-tight">{question.text}</h2>
+        <h2 className="text-xl lg:text-2xl font-semibold text-foreground leading-tight">{question.text}</h2>
         <p className="text-muted-foreground text-sm">
           Please select the option that comes closest to How you have felt in the past 7 days.
         </p>

@@ -44,22 +44,22 @@ export const SymptomsQuestionCard = ({
   return (
     <Card className="bg-white rounded-[2.5rem] p-4 lg:p-6 shadow-xl border-b-4 border-primary/10 relative overflow-hidden animate-in fade-in zoom-in-95 duration-700 min-h-[320px] flex flex-col">
       {/* Decorative Background Element */}
-      <div className="absolute top-0 right-0 -translate-y-12 translate-x-12 size-48 bg-primary/5 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute top-0 right-0 -translate-y-12 translate-x-12 size-45 bg-primary/5 rounded-full blur-3xl pointer-events-none" />
 
-      <CardHeader className="relative space-y-4 pb-2">
+      <CardHeader className="relative space-y-4 ">
         <div className="flex items-center justify-between">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-primary/10 rounded-full text-sm font-bold text-primary">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-primary/10 rounded-full text-xs font-bold text-primary">
             <Heart className="size-4 fill-primary" />
             Personal Journey
           </div>
-          <div className="flex items-center gap-1.5 text-muted-foreground font-medium text-sm">
+          {/* <div className="flex items-center gap-1.5 text-muted-foreground font-medium text-xs">
             <HelpCircle className="size-4" />
             Step {typeof question.id === "number" ? question.id : "Detail"}
-          </div>
+          </div> */}
         </div>
 
         <div className="space-y-2">
-          <h2 className="text-2xl lg:text-3xl font-bold text-foreground tracking-tight leading-tight">
+          <h2 className="text-lg lg:text-2xl font-bold text-foreground tracking-tight leading-tight">
             {question.label}
           </h2>
           <p className="text-muted-foreground text-base">
@@ -68,10 +68,10 @@ export const SymptomsQuestionCard = ({
         </div>
       </CardHeader>
 
-      <CardContent className="relative mt-auto pt-6 space-y-4">
+      <CardContent className="relative mt-auto  space-y-2">
         {question.type === "dropdown" ? (
-          <div className="space-y-2">
-            <label className="text-sm font-semibold text-muted-foreground ml-1">
+          <div className="space-y-2 ">
+            <label className="text-sm font-semibold text-muted-foreground ml-1 mb-2">
               Choose an option
             </label>
             <Select
@@ -82,8 +82,8 @@ export const SymptomsQuestionCard = ({
               }
               onValueChange={(value) => onAnswer(question.id, value)}
             >
-              <SelectTrigger className="w-full h-14 px-6 rounded-2xl border-2 border-border hover:border-primary/50 transition-all text-lg font-medium bg-secondary/30">
-                <SelectValue placeholder="Select from the list" />
+              <SelectTrigger className="w-full h-18 py-5 px-6 mt-2 rounded-2xl border-2 border-border hover:border-primary/50 transition-all text-lg font-medium bg-secondary/30">
+                <SelectValue placeholder="Select from the list " />
               </SelectTrigger>
               <SelectContent className="rounded-2xl border-2 shadow-lg">
                 {question.options?.map((option, idx) => (
