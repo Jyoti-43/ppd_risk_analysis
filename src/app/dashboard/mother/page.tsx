@@ -18,7 +18,7 @@ import {
   useGetInvitedPartnersQuery,
   useGetPendingInvitesQuery,
 } from "../../redux/services/userDashboardApi";
-import { useState } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { toast } from "react-toastify";
 import {
   Dialog,
@@ -42,7 +42,6 @@ import {
   ChevronRight,
 } from "lucide-react";
 import { timeAgo } from "@/utills/timeAgo";
-import { useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -95,15 +94,75 @@ export default function MotherDashboard() {
     hybrid: { data: hybridScreeningHistory?.history, loading: isHybridLoading },
     counts: screeningCount,
   });
+
+  // Local storage caching for faster initial load
+  const [cachedData, setCachedData] = useState<any>({});
+  const cacheKey = useMemo(
+    () => (user?.userId ? `mother_dashboard_cache_${user.userId}` : null),
+    [user?.userId],
+  );
+
+  useEffect(() => {
+    if (cacheKey) {
+      const savedData = localStorage.getItem(cacheKey);
+      if (savedData) {
+        try {
+          const parsed = JSON.parse(savedData);
+          setCachedData(parsed);
+          console.log("Loaded dashboard from cache:", cacheKey);
+        } catch (e) {
+          console.error("Failed to load dashboard cache", e);
+        }
+      }
+    }
+  }, [cacheKey]);
+
+  useEffect(() => {
+    if (
+      cacheKey &&
+      !isSymptomsLoading &&
+      !isEpdsLoading &&
+      !isHybridLoading &&
+      !isScreeningLoading &&
+      !isPostLoading
+    ) {
+      const dataToCache = {
+        symptoms: symptomsScreeningHistory || cachedData.symptoms,
+        epds: epdsScreeningHistory || cachedData.epds,
+        hybrid: hybridScreeningHistory || cachedData.hybrid,
+        counts: screeningCount || cachedData.counts,
+        posts: postCount || cachedData.posts,
+      };
+      localStorage.setItem(cacheKey, JSON.stringify(dataToCache));
+    }
+  }, [
+    cacheKey,
+    symptomsScreeningHistory,
+    epdsScreeningHistory,
+    hybridScreeningHistory,
+    screeningCount,
+    postCount,
+    isSymptomsLoading,
+    isEpdsLoading,
+    isHybridLoading,
+    isScreeningLoading,
+    isPostLoading,
+  ]);
+
   // Aggregated screening history from all sources, mapped to table format
   const screeningHistory = useMemo(() => {
     const allScreenings: any[] = [];
 
+    // Use current API data if available, otherwise fallback to cached data
+    const activeSymptoms = symptomsScreeningHistory || cachedData.symptoms;
+    const activeEpds = epdsScreeningHistory || cachedData.epds;
+    const activeHybrid = hybridScreeningHistory || cachedData.hybrid;
+
     // 1. Symptoms Screening History
-    const symptomsData = Array.isArray(symptomsScreeningHistory?.data)
-      ? symptomsScreeningHistory.data
-      : Array.isArray(symptomsScreeningHistory)
-        ? symptomsScreeningHistory
+    const symptomsData = Array.isArray(activeSymptoms?.data)
+      ? activeSymptoms.data
+      : Array.isArray(activeSymptoms)
+        ? activeSymptoms
         : [];
 
     symptomsData.forEach((screening: any) => {
@@ -141,10 +200,10 @@ export default function MotherDashboard() {
     });
 
     // 2. EPDS Screening History
-    const epdsData = Array.isArray(epdsScreeningHistory?.history)
-      ? epdsScreeningHistory.history
-      : Array.isArray(epdsScreeningHistory)
-        ? epdsScreeningHistory
+    const epdsData = Array.isArray(activeEpds?.history)
+      ? activeEpds.history
+      : Array.isArray(activeEpds)
+        ? activeEpds
         : [];
 
     epdsData.forEach((screening: any, index: number) => {
@@ -159,8 +218,8 @@ export default function MotherDashboard() {
             : "Moderate";
       allScreenings.push({
         id:
-          screening.id ||
           screening._id ||
+          screening.id ||
           `epds-${index}-${screening.created_at}-${allScreenings.length}`,
         screeningType: "EPDS",
         date: new Date(screening.created_at).toLocaleDateString(),
@@ -174,10 +233,10 @@ export default function MotherDashboard() {
     });
 
     // 3. Hybrid Screening History
-    const hybridData = Array.isArray(hybridScreeningHistory?.history)
-      ? hybridScreeningHistory.history
-      : Array.isArray(hybridScreeningHistory)
-        ? hybridScreeningHistory
+    const hybridData = Array.isArray(activeHybrid?.history)
+      ? activeHybrid.history
+      : Array.isArray(activeHybrid)
+        ? activeHybrid
         : [];
 
     hybridData.forEach((screening: any) => {
@@ -220,7 +279,12 @@ export default function MotherDashboard() {
       const dateB = new Date(b.created_at).getTime();
       return dateB - dateA;
     });
-  }, [symptomsScreeningHistory, epdsScreeningHistory, hybridScreeningHistory]);
+  }, [
+    symptomsScreeningHistory,
+    epdsScreeningHistory,
+    hybridScreeningHistory,
+    cachedData,
+  ]);
 
   // Calculate the latest screening from sorted history
   const latestScreening = useMemo(() => {
@@ -479,9 +543,11 @@ export default function MotherDashboard() {
                 Total screenings
               </span>
               <p className="text-2xl font-bold text-slate-800">
-                {isScreeningLoading
+                {isScreeningLoading && !cachedData.counts
                   ? "..."
-                  : screeningCount?.total_screening_count}
+                  : screeningCount?.total_screening_count ||
+                    cachedData.counts?.total_screening_count ||
+                    0}
               </p>
             </div>
           </CardContent>
@@ -497,7 +563,11 @@ export default function MotherDashboard() {
                 Total Posts
               </span>
               <p className="text-2xl font-bold text-slate-800">
-                {isPostLoading ? "..." : postCount?.total_post_count}
+                {isPostLoading && !cachedData.posts
+                  ? "..."
+                  : postCount?.total_post_count ||
+                    cachedData.posts?.total_post_count ||
+                    0}
               </p>
             </div>
           </CardContent>
@@ -512,7 +582,11 @@ export default function MotherDashboard() {
                 Current Risk Level
               </span>
               <p className="text-2xl font-bold capitalize text-slate-800">
-                {isAnyScreeningLoading ? "..." : currentRiskLevel}
+                {isAnyScreeningLoading && !cachedData.counts
+                  ? "..."
+                  : screeningCount?.latest_screening?.risk_level ||
+                    cachedData.counts?.latest_screening?.risk_level ||
+                    "N/A"}
               </p>
               {!isAnyScreeningLoading && currentRiskLevel !== "N/A" && (
                 <p
@@ -548,17 +622,17 @@ export default function MotherDashboard() {
                 LATEST SCREENING
               </span>
               <h3 className="text-xl font-bold text-slate-700 mt-0.5">
-                {isAnyScreeningLoading
+                {isAnyScreeningLoading && !cachedData.counts
                   ? "..."
-                  : latestScreening
-                    ? new Date(latestScreening.created_at).toLocaleDateString(
-                        "en-US",
-                        {
-                          month: "short",
-                          day: "numeric",
-                          year: "numeric",
-                        },
-                      )
+                  : latestScreening || cachedData.counts?.latest_screening
+                    ? new Date(
+                        latestScreening?.created_at ||
+                          cachedData.counts?.latest_screening?.created_at,
+                      ).toLocaleDateString("en-US", {
+                        month: "short",
+                        day: "numeric",
+                        year: "numeric",
+                      })
                     : "No data"}
               </h3>
               <p className="text-sm font-medium text-emerald-500 mt-0.5">

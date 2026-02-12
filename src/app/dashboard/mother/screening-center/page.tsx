@@ -18,7 +18,7 @@ import {
   Info,
   Play,
 } from "lucide-react";
-import React, { useMemo } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 
 // Interface for screening data structure
 interface ScreeningData {
@@ -46,6 +46,51 @@ export default function SelectScreeningMethod() {
   const { data: hybridScreeningHistory, isLoading: isHybridLoading } =
     useGetHybridScreeningHistoryQuery();
 
+  // Local storage caching for faster initial load
+  const [cachedHistory, setCachedHistory] = useState<{
+    symptoms?: any;
+    epds?: any;
+    hybrid?: any;
+  }>({});
+
+  useEffect(() => {
+    const savedData = localStorage.getItem("screening_history_cache");
+    if (savedData) {
+      try {
+        setCachedHistory(JSON.parse(savedData));
+      } catch (e) {
+        console.error("Failed to load screening history cache", e);
+      }
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!isSymptomsLoading && !isEpdsLoading && !isHybridLoading) {
+      if (
+        symptomsScreeningHistory ||
+        epdsScreeningHistory ||
+        hybridScreeningHistory
+      ) {
+        const dataToCache = {
+          symptoms: symptomsScreeningHistory || cachedHistory.symptoms,
+          epds: epdsScreeningHistory || cachedHistory.epds,
+          hybrid: hybridScreeningHistory || cachedHistory.hybrid,
+        };
+        localStorage.setItem(
+          "screening_history_cache",
+          JSON.stringify(dataToCache),
+        );
+      }
+    }
+  }, [
+    symptomsScreeningHistory,
+    epdsScreeningHistory,
+    hybridScreeningHistory,
+    isSymptomsLoading,
+    isEpdsLoading,
+    isHybridLoading,
+  ]);
+
   console.log("symptoms screeningHistory", symptomsScreeningHistory);
   console.log("epds screeningHistory", epdsScreeningHistory);
   console.log("hybrid screeningHistory", hybridScreeningHistory);
@@ -54,16 +99,15 @@ export default function SelectScreeningMethod() {
   const latestScreening = useMemo(() => {
     const allScreenings: ScreeningData[] = [];
 
+    const activeSymptoms = symptomsScreeningHistory || cachedHistory.symptoms;
+    const activeEpds = epdsScreeningHistory || cachedHistory.epds;
+    const activeHybrid = hybridScreeningHistory || cachedHistory.hybrid;
+
     // Add symptoms screening history with method tag
-    // Symptoms API structure: { data: [...], createdAt, result: { prediction } }
-    if (
-      symptomsScreeningHistory?.data &&
-      Array.isArray(symptomsScreeningHistory.data)
-    ) {
-      symptomsScreeningHistory.data.forEach((screening: any) => {
+    if (activeSymptoms?.data && Array.isArray(activeSymptoms.data)) {
+      activeSymptoms.data.forEach((screening: any) => {
         allScreenings.push({
           ...screening,
-          // Normalize createdAt to created_at for consistent sorting
           created_at: screening.createdAt || screening.created_at,
           method: "symptoms",
         });
@@ -71,12 +115,8 @@ export default function SelectScreeningMethod() {
     }
 
     // Add EPDS screening history with method tag
-    // EPDS API structure: { history: [...], created_at, risk_level }
-    if (
-      epdsScreeningHistory?.history &&
-      Array.isArray(epdsScreeningHistory.history)
-    ) {
-      epdsScreeningHistory.history.forEach((screening: any) => {
+    if (activeEpds?.history && Array.isArray(activeEpds.history)) {
+      activeEpds.history.forEach((screening: any) => {
         allScreenings.push({
           ...screening,
           method: "epds",
@@ -84,12 +124,9 @@ export default function SelectScreeningMethod() {
       });
     }
 
-    // Add hybrid screening history with method tag (when API is ready)
-    if (
-      hybridScreeningHistory?.data &&
-      Array.isArray(hybridScreeningHistory.data)
-    ) {
-      hybridScreeningHistory.data.forEach((screening: any) => {
+    // Add hybrid screening history with method tag
+    if (activeHybrid?.data && Array.isArray(activeHybrid.data)) {
+      activeHybrid.data.forEach((screening: any) => {
         allScreenings.push({
           ...screening,
           created_at: screening.createdAt || screening.created_at,
@@ -107,11 +144,16 @@ export default function SelectScreeningMethod() {
     const sorted = allScreenings.sort((a, b) => {
       const dateA = new Date(a.created_at).getTime();
       const dateB = new Date(b.created_at).getTime();
-      return dateB - dateA; // Descending order (latest first)
+      return dateB - dateA;
     });
 
     return sorted[0];
-  }, [symptomsScreeningHistory, epdsScreeningHistory, hybridScreeningHistory]);
+  }, [
+    symptomsScreeningHistory,
+    epdsScreeningHistory,
+    hybridScreeningHistory,
+    cachedHistory,
+  ]);
 
   // Calculate time since last screening (days, hours, or minutes)
   const calculateTimeSince = (
@@ -235,8 +277,8 @@ export default function SelectScreeningMethod() {
                               timeSinceLastScreening.unit === "DAYS"
                                 ? (timeSinceLastScreening.value / 30) * 251.2
                                 : timeSinceLastScreening.unit === "HOURS"
-                                ? (timeSinceLastScreening.value / 24) * 251.2
-                                : (timeSinceLastScreening.value / 60) * 251.2,
+                                  ? (timeSinceLastScreening.value / 24) * 251.2
+                                  : (timeSinceLastScreening.value / 60) * 251.2,
                               251.2,
                             )} 251.2`}
                             className="transition-all duration-500"
@@ -290,8 +332,6 @@ export default function SelectScreeningMethod() {
           </Card>
         </div>
         <div className=" text-center md:text-left gap-4  min-h-min">
-         
-
           <p className="text-muted-foreground text-lg leading-relaxed">
             Select the screening method that feels right for you today.
           </p>

@@ -19,12 +19,18 @@ import Link from "next/link";
 const ClientDashboard = () => {
   const { data: postCount, isLoading: isPostLoading } = usePostCountQuery();
   const { data: userGroupsJoined, isLoading: isGroupsLoading } =
-    useGetUserGroupJoinedQuery();
+    useGetUserGroupJoinedQuery(undefined, {
+      refetchOnMountOrArgChange: false,
+    });
   const { data: postsData, isLoading: isUserPostsLoading } =
-    useGetUserPostsQuery();
+    useGetUserPostsQuery(undefined, {
+      refetchOnMountOrArgChange: false,
+    });
   const userPosts = postsData?.posts;
   const { data: groupCreated, isLoading: isGroupCreatedLoading } =
-    useGetUserGroupCreatedQuery();
+    useGetUserGroupCreatedQuery(undefined, {
+      refetchOnMountOrArgChange: false,
+    });
   const [activeGroupTab, setActiveGroupTab] = React.useState("all");
   const currentUser = useAppSelector(selectCurrentUser);
 
@@ -199,6 +205,7 @@ const ClientDashboard = () => {
           </div>
         </div>
 
+        {/* my groups  */}
         {isGroupsLoading || isGroupCreatedLoading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {[...Array(3)].map((_, i) => (

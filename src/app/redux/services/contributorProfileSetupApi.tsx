@@ -130,9 +130,6 @@ export const contributorProfileApi = createApi({
       //   invalidatesTags: ["ContributorProfile"],
     }),
 
-
-
-
     // skill ,experties and publication
     expertiesProfileSetup: build.mutation<
       any,

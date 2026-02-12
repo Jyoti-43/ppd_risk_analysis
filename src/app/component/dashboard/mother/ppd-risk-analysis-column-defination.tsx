@@ -11,15 +11,25 @@ import {
   setStatus as setEpdsStatus,
   setScore as setEpdsScore,
   setAnswers as setEpdsAnswers,
+  setEpdsResult,
 } from "@/src/app/redux/feature/screening/epds/epdsSlice";
 import {
-  setResult as setSymptomsResult,
-  setStatus as setSymptomsStatus,
+  setSymptomsResult,
+  setSymptomsStatus,
 } from "@/src/app/redux/feature/screening/symptoms/symptomsSlice";
 import {
   setHybridResult,
   setHybridStatus,
 } from "@/src/app/redux/feature/screening/hybrid/hybridSlice";
+import {
+  useLazyGetEpdsScreeningHistoryByIdQuery,
+  useLazyGetSymptomsScreeningHistoryByIdQuery,
+  useLazyGetHybridScreeningHistoryByIdQuery,
+} from "@/src/app/redux/services/userDashboardApi";
+import { useRecommendCrisisResourcesMutation } from "@/src/app/redux/services/crisisResourceApi";
+import { useState } from "react";
+import { Loader2 } from "lucide-react";
+import { toast } from "react-toastify";
 
 // This type is used to define the shape of our data.
 // You can use a Zod schema here if you want.
@@ -123,23 +133,140 @@ function ViewDetailsCell({ row }: { row: any }) {
   const router = useRouter();
   const dispatch = useAppDispatch();
   const { method, raw, action } = row.original;
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleViewDetails = () => {
-    if (!raw) return;
+  // Lazy queries and mutations
+  const [getEpdsById] = useLazyGetEpdsScreeningHistoryByIdQuery();
+  const [getSymptomsById] = useLazyGetSymptomsScreeningHistoryByIdQuery();
+  const [getHybridById] = useLazyGetHybridScreeningHistoryByIdQuery();
+  const [recommendCrisis] = useRecommendCrisisResourcesMutation();
 
-    if (method === "epds") {
-      dispatch(setEpdsScore(raw.score || raw.total_score || 0));
-      dispatch(setEpdsAnswers(raw.answers || []));
-      dispatch(setEpdsStatus("succeeded"));
-      router.push("/screening/epds-assessment-results");
-    } else if (method === "symptoms") {
-      dispatch(setSymptomsResult(raw));
-      dispatch(setSymptomsStatus("succeeded"));
-      router.push("/screening/symptoms-assessment-result");
-    } else if (method === "hybrid") {
-      dispatch(setHybridResult(raw));
-      dispatch(setHybridStatus("succeeded"));
-      router.push("/screening/hybrid-assessment-results");
+  const handleViewDetails = async () => {
+    // Determine if we have a real database ID
+    const resultId = raw?._id || raw?.id;
+    const isSyntheticId =
+      !resultId ||
+      resultId.startsWith("epds-") ||
+      resultId.startsWith("symptoms-") ||
+      resultId.startsWith("hybrid-");
+
+    setIsLoading(true);
+    try {
+      if (method === "epds") {
+        let finalData = { ...raw };
+        if (!isSyntheticId) {
+          try {
+            const response = await getEpdsById(resultId).unwrap();
+            finalData = response?.data || response;
+          } catch (err) {
+            console.warn("EPDS detail fetch failed, using history data", err);
+          }
+        }
+
+        // Proactively fetch crisis resources if missing
+        const hasCrisisRes =
+          finalData.crisis_resources && finalData.crisis_resources.length > 0;
+        if (!hasCrisisRes) {
+          try {
+            // Use the normalized risk from the row itself to ensure a valid enum value
+            const normalizedRisk = (row.original.risk || "Low").toLowerCase();
+            const city = finalData.answers?.city || "Kathmandu";
+            const crisisRes = await recommendCrisis({
+              risk_level: normalizedRisk,
+              city,
+            }).unwrap();
+            finalData = { ...finalData, crisis_resources: crisisRes };
+          } catch (e) {
+            console.warn("Failed to fetch crisis resources proactively", e);
+          }
+        }
+
+        dispatch(setEpdsResult(finalData));
+        dispatch(setEpdsStatus("succeeded"));
+        localStorage.setItem("screeningResult", JSON.stringify(finalData));
+        router.push("/screening/epds-assessment-results");
+      } else if (method === "symptoms") {
+        let finalData = { ...raw };
+        if (!isSyntheticId) {
+          try {
+            const response = await getSymptomsById(resultId).unwrap();
+            finalData = response?.data || response;
+          } catch (err) {
+            console.warn(
+              "Symptoms detail fetch failed, using history data",
+              err,
+            );
+          }
+        }
+
+        // Proactively fetch crisis resources if missing
+        const hasCrisisRes =
+          finalData.crisis_resources && finalData.crisis_resources.length > 0;
+        if (!hasCrisisRes) {
+          try {
+            // Use the normalized risk from the row itself
+            const normalizedRisk = (row.original.risk || "Low").toLowerCase();
+            const city = finalData.answers?.city || "Kathmandu";
+            const crisisRes = await recommendCrisis({
+              risk_level: normalizedRisk,
+              city,
+            }).unwrap();
+            finalData = { ...finalData, crisis_resources: crisisRes };
+          } catch (e) {
+            console.warn("Failed to fetch crisis resources proactively", e);
+          }
+        }
+
+        dispatch(setSymptomsResult(finalData));
+        dispatch(setSymptomsStatus("succeeded"));
+        localStorage.setItem(
+          "symptoms_screening_result",
+          JSON.stringify(finalData),
+        );
+        router.push("/screening/symptoms-assessment-result");
+      } else if (method === "hybrid") {
+        let finalData = { ...raw };
+        if (!isSyntheticId) {
+          try {
+            const response = await getHybridById(resultId).unwrap();
+            finalData = response?.data || response;
+          } catch (err) {
+            console.warn("Hybrid detail fetch failed, using history data", err);
+          }
+        }
+
+        // Proactively fetch crisis resources if missing
+        const hasCrisisRes =
+          finalData.crisis_resources && finalData.crisis_resources.length > 0;
+        if (!hasCrisisRes) {
+          try {
+            // Use the normalized risk from the row itself
+            const normalizedRisk = (row.original.risk || "Low").toLowerCase();
+            const city =
+              (finalData as any).symptomsAnswers?.city || "Kathmandu";
+            const crisisRes = await recommendCrisis({
+              risk_level: normalizedRisk,
+              city,
+            }).unwrap();
+            finalData = { ...finalData, crisis_resources: crisisRes };
+          } catch (e) {
+            console.warn("Failed to fetch crisis resources proactively", e);
+          }
+        }
+
+        dispatch(setHybridResult(finalData));
+        dispatch(setHybridStatus("succeeded"));
+        localStorage.setItem(
+          "hybrid_screening_result",
+          JSON.stringify(finalData),
+        );
+        router.push("/screening/hybrid-assessment-results");
+      }
+    } catch (err) {
+      console.error(`Critical error in ${method} view details:`, err);
+      toast.error(`Could not load screening details.`);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -147,10 +274,11 @@ function ViewDetailsCell({ row }: { row: any }) {
     <Button
       variant="secondary"
       size="sm"
-      className="h-8 bg-slate-100 text-slate-600 hover:bg-slate-200 font-medium"
+      className="h-8 bg-slate-100 text-slate-600 hover:bg-slate-200 font-medium min-w-[100px]"
       onClick={handleViewDetails}
+      disabled={isLoading}
     >
-      {action}
+      {isLoading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : action}
     </Button>
   );
 }

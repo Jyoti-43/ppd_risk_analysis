@@ -61,8 +61,6 @@ export default function AdminDashboard() {
     return Array.from(map.values());
   }, [pendingArticles, publishedArticles]);
 
- 
-
   const tabs = [
     { name: "All Articles", count: allArticles?.length || 0 },
     {
@@ -70,7 +68,7 @@ export default function AdminDashboard() {
       count:
         pendingArticles?.filter((a) => {
           const s = (a.status || "").toLowerCase();
-          return s === "pending" || s === "pending review" ;
+          return s === "pending" || s === "pending review";
         }).length || 0,
     },
     // {
@@ -99,11 +97,10 @@ export default function AdminDashboard() {
     if (activeTab === "All Articles") {
       sourceArray = allArticles;
     } else if (activeTab === "Pending Review") {
-     sourceArray = pendingArticles || [];
+      sourceArray = pendingArticles || [];
     } else {
       // For published Review, Draft, Rejected we use pendingArticles (which includes those statuses)
-       sourceArray = publishedArticles || [];
-      
+      sourceArray = publishedArticles || [];
     }
 
     return sourceArray.filter((article) => {
@@ -126,8 +123,9 @@ export default function AdminDashboard() {
         matchesTab =
           status === "pending" || status === "Pending review" || status === "";
       } else if (activeTab === "Published") {
-        matchesTab = status === "published" || status === "approved" || status === "";
-      } 
+        matchesTab =
+          status === "published" || status === "approved" || status === "";
+      }
       // For "All Articles" we already set matchesTab = true above
       return matchesSearch && matchesCategory && matchesTab;
     });
@@ -308,7 +306,7 @@ export default function AdminDashboard() {
                         })(),
                       )}
                     >
-                      {article.status ==="pending" ? "Pending" : "Published"}
+                      {article.status === "pending" ? "Pending" : "Published"}
                     </Badge>
                   </TableCell>
                   <TableCell className="py-2">

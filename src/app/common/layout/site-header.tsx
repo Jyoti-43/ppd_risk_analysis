@@ -11,7 +11,8 @@ import {
   selectCurrentUser,
 } from "../../redux/feature/user/userSlice";
 import { useEffect, useState } from "react";
-import { Avatar } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { CircleUser } from "lucide-react";
 
 export function SiteHeader() {
   const [mounted, setMounted] = useState(false);
@@ -155,13 +156,16 @@ function SiteNavAuth() {
       <Link
         href="/dashboard/mother"
         className={cn(
-          "text-md font-semibold transition-colors hover:text-primary",
-          pathname === "/dashboard/mother" ? "text-primary" : "text-foreground",
+          "flex items-center gap-3 px-3 py-1.5 rounded-full transition-all bg-primary/5",
+          pathname.startsWith("/dashboard/mother")
+            ? "text-primary bg-primary/5"
+            : "text-foreground",
         )}
       >
-        <Avatar className="h-8 w-8 bg-primary/10 ring-2 ring-primary text-primary font-bold items-center justify-center">
-          {currentUser.charAt(0).toUpperCase()}
-        </Avatar>
+        <CircleUser className="h-5 w-5 text-primary" />
+        <span className="text-md font-bold max-w-[120px] truncate">
+          {currentUser || "Profile"}
+        </span>
       </Link>
     </nav>
   );
@@ -171,14 +175,12 @@ function SiteNavContributor() {
   const dispatch = useAppDispatch();
 
   const router = require("next/navigation").useRouter();
-  const role = useAppSelector(selectCurrentUser)?.role ?? "";
-
+  const currentUser = useAppSelector(selectCurrentUser)?.userName ?? "";
+  // const role = useAppSelector(selectCurrentUser)?.role ?? "";
   const [mounted, setMounted] = useState(false);
-
   useEffect(() => {
     setMounted(true);
   }, []);
-
   const pathname = usePathname();
 
   if (!mounted) {
@@ -214,13 +216,16 @@ function SiteNavContributor() {
       <Link
         href="/dashboard/contributor"
         className={cn(
-          "text-md font-semibold transition-colors hover:text-primary",
+          "flex items-center gap-2 px-3 py-1.5 rounded-full transition-all bg-primary/5",
           pathname.startsWith("/dashboard/contributor")
-            ? "text-primary"
+            ? "text-primary bg-primary/5"
             : "text-foreground",
         )}
       >
-        Dashboard
+        <CircleUser className="h-5 w-5 text-primary" />
+        <span className="text-md font-bold max-w-[120px] truncate">
+          {currentUser || "Contributor"}
+        </span>
       </Link>
     </nav>
   );
@@ -230,14 +235,11 @@ function SiteNavAdmin() {
   const dispatch = useAppDispatch();
 
   const router = require("next/navigation").useRouter();
-  const role = useAppSelector(selectCurrentUser)?.role ?? "";
-
+  const currentUser = useAppSelector(selectCurrentUser)?.userName ?? "";
   const [mounted, setMounted] = useState(false);
-
   useEffect(() => {
     setMounted(true);
   }, []);
-
   const pathname = usePathname();
 
   if (!mounted) {
@@ -253,13 +255,16 @@ function SiteNavAdmin() {
       <Link
         href="/dashboard/admin"
         className={cn(
-          "text-md font-semibold transition-colors hover:text-primary",
+          "flex items-center gap-2 px-3 py-1.5 rounded-full transition-all bg-primary/5",
           pathname.startsWith("/dashboard/admin")
-            ? "text-primary"
+            ? "text-primary bg-primary/5"
             : "text-foreground",
         )}
       >
-        Dashboard
+        <CircleUser className="h-5 w-5 text-primary" />
+        <span className="text-md font-bold max-w-[120px] truncate">
+          {currentUser || "Admin"}
+        </span>
       </Link>
     </nav>
   );
@@ -269,7 +274,7 @@ function SiteNavPartner() {
   const dispatch = useAppDispatch();
 
   const router = require("next/navigation").useRouter();
-  const role = useAppSelector(selectCurrentUser)?.role ?? "";
+  const currentUser = useAppSelector(selectCurrentUser)?.userName ?? "";
 
   const [mounted, setMounted] = useState(false);
 
@@ -289,36 +294,19 @@ function SiteNavPartner() {
 
   return (
     <nav className="hidden lg:flex gap-9 items-center px-6">
-      {/* <Link
-        href="/"
-        className={cn(
-          "text-md font-semibold transition-colors hover:text-primary",
-          pathname === "/" ? "text-primary" : "text-foreground",
-        )}
-      >
-        Home
-      </Link>
-
-      <Link
-        href="/resources"
-        className={cn(
-          "text-md font-semibold transition-colors hover:text-primary",
-          pathname === "/resources" ? "text-primary" : "text-foreground",
-        )}
-      >
-        Resources
-      </Link> */}
-
       <Link
         href="/dashboard/partner"
         className={cn(
-          "text-md font-semibold transition-colors hover:text-primary",
+          "flex items-center gap-2 px-3 py-1.5 rounded-full transition-all bg-primary/5",
           pathname.startsWith("/dashboard/partner")
-            ? "text-primary"
+            ? "text-primary bg-primary/5"
             : "text-foreground",
         )}
       >
-        Dashboard
+        <CircleUser className="h-5 w-5 text-primary" />
+        <span className="text-md font-bold max-w-[120px] truncate">
+          {currentUser || "Partner"}
+        </span>
       </Link>
     </nav>
   );

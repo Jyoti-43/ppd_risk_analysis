@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import {useRouter} from "next/navigation"
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { useSymptomsQuestionQuery } from "@/src/app/redux/services/screeningApi";
 import { ProgressBar } from "@/src/app/component/screening/progress-bar";
@@ -11,11 +11,10 @@ import { SymptomsQuestion, SymptomsQuestionsResponse } from "@/src/app/type";
 import { screeningAPI } from "@/src/app/redux/services/screeningApi";
 import { useAppDispatch } from "@/src/app/Hooks/hook";
 import {
-  setAnswers,
-  setScore,
-  setStatus,
-  setError,
-  setResult,
+  setSymptomsAnswers,
+  setSymptomsStatus,
+  setSymptomsError,
+  setSymptomsResult,
 } from "@/src/app/redux/feature/screening/symptoms/symptomsSlice";
 import { toast } from "react-toastify";
 
@@ -32,7 +31,7 @@ const SymptomsAssessmentPage = () => {
   const QUESTIONS_PER_PAGE = 4;
   const [currentPage, setCurrentPage] = useState(0);
   const [answers, setLocalAnswers] = useState<Record<string, string | number>>(
-    {}
+    {},
   );
   const [isLoading, setIsLoading] = useState(false);
   const [
@@ -42,6 +41,7 @@ const SymptomsAssessmentPage = () => {
   const dispatch = useAppDispatch();
 
   useEffect(() => {
+    // 1. Load questions
     const cached = localStorage.getItem("symptomsQuestions");
     if (cached) {
       try {
@@ -50,7 +50,29 @@ const SymptomsAssessmentPage = () => {
         setQuestions([]);
       }
     }
+
+    // 2. Load progress
+    const saved = localStorage.getItem("symptoms_assessment_progress");
+    if (saved) {
+      try {
+        const { page, answers: savedAnswers } = JSON.parse(saved);
+        if (page !== undefined) setCurrentPage(page);
+        if (savedAnswers) setLocalAnswers(savedAnswers);
+        console.log("Restored symptoms assessment progress");
+      } catch (e) {
+        console.error("Failed to restore symptoms progress", e);
+      }
+    }
   }, []);
+
+  // Save progress when state changes
+  useEffect(() => {
+    const progress = { page: currentPage, answers };
+    localStorage.setItem(
+      "symptoms_assessment_progress",
+      JSON.stringify(progress),
+    );
+  }, [currentPage, answers]);
 
   useEffect(() => {
     if (apiQuestions) {
@@ -61,18 +83,18 @@ const SymptomsAssessmentPage = () => {
         setQuestions(apiQuestions.fields);
         localStorage.setItem(
           "symptomsQuestions",
-          JSON.stringify(apiQuestions.fields)
+          JSON.stringify(apiQuestions.fields),
         );
         console.log(
           "Fetched and cached symptoms questions from API (fields)",
-          apiQuestions.fields
+          apiQuestions.fields,
         );
       } else if (Array.isArray(apiQuestions) && apiQuestions.length > 0) {
         setQuestions(apiQuestions);
         localStorage.setItem("symptomsQuestions", JSON.stringify(apiQuestions));
         console.log(
           "Fetched and cached symptoms questions from API (array)",
-          apiQuestions
+          apiQuestions,
         );
       } else {
         setQuestions([]);
@@ -97,7 +119,7 @@ const SymptomsAssessmentPage = () => {
   // Handle answer selection
   const handleAnswer = (
     questionId: string | number,
-    value: string | number
+    value: string | number,
   ) => {
     const key = String(questionId);
     // if numeric-like, store as number, otherwise store as string
@@ -127,25 +149,40 @@ const SymptomsAssessmentPage = () => {
     // If last page, submit
     const submit = async () => {
       try {
-        dispatch(setStatus("loading"));
+        dispatch(setSymptomsStatus("loading"));
         setIsLoading(true);
-        const payload = answers; // send collected answers as-is; backend should accept mapping
+        const payload = {
+          ...answers,
+          include_crisis_resources: true,
+          city: "Kathmandu",
+          lat: 27.7172,
+          lng: 85.324,
+          limit: 3,
+        };
         const res = await submitSymptoms(payload).unwrap();
         console.log("Submitted symptoms assessment", res);
-        router.push("/screening/symptoms-assessment-result");
+
         // store answers and result in redux
-        dispatch(setAnswers(null));
-        dispatch(setResult(res));
-        dispatch(setStatus("succeeded"));
+        dispatch(setSymptomsAnswers(answers));
+        dispatch(setSymptomsResult(res));
+
+        // Save result to localStorage for persistence on result page
+        localStorage.setItem("symptoms_screening_result", JSON.stringify(res));
+
+        // Clear progress on success
+        localStorage.removeItem("symptoms_assessment_progress");
+
         setIsLoading(false);
-        // handle navigation to result page or show success
+        router.push("/screening/symptoms-assessment-result");
       } catch (e) {
         console.error("Failed to submit symptoms assessment", e);
         setIsLoading(false);
         dispatch(
-          setError(e instanceof Error ? e.message : "Submission failed")
+          setSymptomsError(
+            e instanceof Error ? e.message : "Submission failed",
+          ),
         );
-        dispatch(setStatus("failed"));
+        dispatch(setSymptomsStatus("failed"));
         toast.error("Failed to submit assessment. Please try again.");
       }
     };

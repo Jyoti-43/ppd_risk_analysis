@@ -83,9 +83,6 @@ export const adminApi = createApi({
       // Invalidate posts cache when a post is deleted
       invalidatesTags: ["Articles"],
     }),
-
-   
-      
   }),
 });
 

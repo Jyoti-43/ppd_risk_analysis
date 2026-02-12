@@ -90,15 +90,6 @@ export default function RecommendedArticlesPage() {
             {recommendations.source_screening_type || "assessment"} screening.
           </p>
         </div>
-
-        <Button
-          variant="outline"
-          onClick={() => refetch()}
-          className="rounded-full border-primary/20 text-primary hover:bg-primary/5 font-bold h-11"
-        >
-          <RefreshCw className="h-4 w-4 mr-2" />
-          Refresh Latest
-        </Button>
       </div>
 
       {/* Articles Grid */}

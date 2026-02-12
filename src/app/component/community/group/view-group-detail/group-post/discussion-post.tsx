@@ -4,7 +4,10 @@ import { useAppDispatch, useAppSelector } from "@/src/app/Hooks/hook";
 import { setGroupPostLikes } from "@/src/app/redux/feature/community/groupPostSlice";
 import { useEffect, useState } from "react";
 import CreateCommentModal from "../../create-comment-modal";
-import { useGroupPostLikeMutation, useGetGroupPostsCommentsQuery } from "@/src/app/redux/services/groupPostApi";
+import {
+  useGroupPostLikeMutation,
+  useGetGroupPostsCommentsQuery,
+} from "@/src/app/redux/services/groupPostApi";
 interface DiscussionPostProps {
   id: string;
   author: string;
@@ -36,7 +39,7 @@ export function DiscussionPost({
   const dispatch = useAppDispatch();
   const [selectedLikedPostId, setSelectedLikedPostId] = useState("");
   const like = useAppSelector(
-    (state) => state.createGroupPost.likeByPostId[id]
+    (state) => state.createGroupPost.likeByPostId[id],
   );
 
   // Use Redux state if available, otherwise use props
@@ -64,7 +67,7 @@ export function DiscussionPost({
           id: id.replace(/^post_/, ""),
           likeCount: likeCount.toString(),
           hasLiked: typeof hasLiked === "boolean" ? hasLiked : false,
-        })
+        }),
       );
     }
   }, [id, dispatch, like, likeCount, hasLiked]);
@@ -86,7 +89,7 @@ export function DiscussionPost({
           id: response.id,
           likeCount: response.likeCount,
           hasLiked: response.hasLiked,
-        })
+        }),
       );
       console.log("Like/unlike response:", response);
       setLocalLikeCount(parseInt(response.likeCount));
@@ -95,7 +98,6 @@ export function DiscussionPost({
     }
   };
 
- 
   return (
     <>
       <div className="bg-card rounded-lg p-6 mb-6">
@@ -167,7 +169,10 @@ export function DiscussionPost({
             className="flex items-center gap-2 text-muted-foreground hover:text-primary transition"
           >
             <MessageCircle className="w-5 h-5" />
-            <span className="text-sm">{(comments ? comments.length : 0) + ` Comment${comments && comments.length === 1 ? "" : "s"}`}</span>
+            <span className="text-sm">
+              {(comments ? comments.length : 0) +
+                ` Comment${comments && comments.length === 1 ? "" : "s"}`}
+            </span>
           </button>
           <button className="flex items-center gap-2 text-muted-foreground hover:text-primary transition ml-auto">
             <Share2 className="w-5 h-5" />

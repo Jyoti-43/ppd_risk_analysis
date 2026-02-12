@@ -25,15 +25,16 @@ export const SymptomsQuestionCard = ({
 }: SymptomsQuestionCardProps) => {
   // Only show default/min for Age, otherwise empty until user selects
   const answerValue = (() => {
-    if (
-      currentAnswer !== undefined &&
-      currentAnswer !== null &&
-      currentAnswer !== ""
-    )
+    if (currentAnswer !== undefined && currentAnswer !== null)
       return currentAnswer;
+
+    // Only return fallback for new/untouched Age questions
     if (
-      question.type === "number" &&
-      (question.id === "Enter Age" || question.id === 17)
+      (question.type === "number" ||
+        String(question.label).toLowerCase().includes("age") ||
+        question.id === "Enter Age" ||
+        question.id === 17) &&
+      currentAnswer === undefined
     ) {
       if (question.default !== undefined) return question.default;
       if (question.min !== undefined) return question.min;
@@ -98,24 +99,22 @@ export const SymptomsQuestionCard = ({
               </SelectContent>
             </Select>
           </div>
-        ) : question.type === "number" ? (
-          <div className="space-y-2">
+        ) : question.type === "number" ||
+          String(question.label).toLowerCase().includes("age") ||
+          question.id === "Enter Age" ||
+          question.id === 17 ? (
+          <div className="space-y-4">
             <label className="text-sm font-semibold text-muted-foreground ml-1">
-              Please enter a number
+              Please enter your{" "}
+              {String(question.label).toLowerCase().includes("age")
+                ? "age"
+                : "number"}
             </label>
             <input
               type="number"
-              min={question.min}
-              max={question.max}
               value={answerValue}
               onChange={(e) => {
-                const value = Number(e.target.value);
-                if (
-                  (question.min === undefined || value >= question.min) &&
-                  (question.max === undefined || value <= question.max)
-                ) {
-                  onAnswer(question.id, value);
-                }
+                onAnswer(question.id, e.target.value);
               }}
               className="w-full h-14 px-6 rounded-2xl border-2 border-border hover:border-primary/50 focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all text-lg font-bold bg-secondary/30"
               placeholder={`e.g. ${question.min || 25}`}

@@ -1,6 +1,7 @@
 "use client"
 
 import { Button } from "@/components/ui/button"
+import Link from "next/link"
 
 export default function Sidebar() {
   return (
@@ -47,9 +48,11 @@ export default function Sidebar() {
         <p className="text-sm text-foreground mb-4">
           If you are feeling overwhelmed or unsafe, please reach out to a professional immediately.
         </p>
+        <Link href="/crisis-resources">
         <Button className="w-full bg-destructive hover:bg-destructive/90 text-destructive-foreground">
           Crisis Resources
         </Button>
+        </Link>
       </div>
     </div>
   )

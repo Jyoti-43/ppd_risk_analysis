@@ -15,6 +15,8 @@ const initialState: HybridResultState = {
   result: null,
   recommendedArticles: [],
   recommendationsStatus: "idle",
+  interpretation: null,
+  crisisResources: [],
 };
 
 export const HybridResultSlice = createSlice({
@@ -45,6 +47,14 @@ export const HybridResultSlice = createSlice({
       action: PayloadAction<HybridAssessmentResponse | null>,
     ) => {
       state.result = action.payload;
+      if (action.payload) {
+        state.interpretation = action.payload.interpretation;
+        state.crisisResources = action.payload.crisis_resources || [];
+        state.recommendedArticles = action.payload.recommended_articles || [];
+        state.recommendationsStatus =
+          action.payload.recommendations_status || "unavailable";
+        state.status = "succeeded";
+      }
     },
     setHybridRecommendedArticles: (
       state,
@@ -58,6 +68,17 @@ export const HybridResultSlice = createSlice({
     ) => {
       state.recommendationsStatus = action.payload;
     },
+    resetHybrid: (state) => {
+      state.epdsAnswers = null;
+      state.symptomsAnswers = null;
+      state.status = "idle";
+      state.error = null;
+      state.result = null;
+      state.recommendedArticles = [];
+      state.recommendationsStatus = "idle";
+      state.interpretation = null;
+      state.crisisResources = [];
+    },
   },
 });
 
@@ -68,6 +89,7 @@ export const {
   setHybridResult,
   setHybridRecommendedArticles,
   setHybridRecommendationsStatus,
+  resetHybrid,
 } = HybridResultSlice.actions;
 
 export const selectHybridResult = (state: RootState) =>
@@ -79,5 +101,9 @@ export const selectHybridRecommendedArticles = (state: RootState) =>
   state.hybridResult.recommendedArticles;
 export const selectHybridRecommendationsStatus = (state: RootState) =>
   state.hybridResult.recommendationsStatus;
+export const selectHybridInterpretation = (state: RootState) =>
+  state.hybridResult.interpretation;
+export const selectHybridCrisisResources = (state: RootState) =>
+  state.hybridResult.crisisResources;
 
 export default HybridResultSlice.reducer;

@@ -27,7 +27,7 @@ const PostDetailCard: React.FC<PostDetailCardProps> = ({ postId }) => {
     usePostCommentMutation();
   const [postLike] = usePostLikeMutation();
   const [commentLike] = useCommentLikeMutation();
-const dispatch = useAppDispatch();
+  const dispatch = useAppDispatch();
   const [commentBody, setCommentBody] = useState("");
   const [replyingTo, setReplyingTo] = useState<{
     id: string;
@@ -93,12 +93,13 @@ const dispatch = useAppDispatch();
         likeCount: newLikeCount,
         hasLiked: newHasLiked, // Pass the NEW state
       }).unwrap();
-       dispatch(
-              setPostLikes({
-                id: response.id,
-                likeCount: response.likeCount.toString(),
-                hasLiked: response.hasLiked,
-              }));
+      dispatch(
+        setPostLikes({
+          id: response.id,
+          likeCount: response.likeCount.toString(),
+          hasLiked: response.hasLiked,
+        }),
+      );
     } catch (err) {
       toast.error("Failed to like post");
       // Revert on error
@@ -209,12 +210,10 @@ const dispatch = useAppDispatch();
         </div>
 
         {/* Cover Image (if available) */}
-        {( post.imageUrl  || post.image) && (
+        {(post.imageUrl || post.image) && (
           <div className="mb-8">
             <img
-              src={
-                 post.imageUrl || post.image || "" 
-              }
+              src={post.imageUrl || post.image || ""}
               alt={post.title || "Post cover image"}
               className="w-full max-h-96 object-cover rounded-lg"
             />

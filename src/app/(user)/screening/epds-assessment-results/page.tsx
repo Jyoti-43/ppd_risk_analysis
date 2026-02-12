@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -12,6 +12,9 @@ import {
   selectEpdsStatus,
   selectRecommendedArticles,
   selectRecommendationsStatus,
+  selectEpdsRiskLevel,
+  selectEpdsInterpretation,
+  selectEpdsCrisisResources,
 } from "@/src/app/redux/feature/screening/epds/epdsSlice";
 import { selectCurrentUser } from "@/src/app/redux/feature/user/userSlice";
 import { Info, ExternalLink, BookOpen } from "lucide-react";
@@ -27,43 +30,83 @@ import { Badge } from "@/components/ui/badge";
 export default function ResultsPage() {
   const router = useRouter();
   const score = useAppSelector(selectEpdsScore);
-  const answers = useAppSelector(selectEpdsAnswers);
   const status = useAppSelector(selectEpdsStatus);
   const currentUser = useAppSelector(selectCurrentUser);
+  const apiRiskLevel = useAppSelector(selectEpdsRiskLevel);
+  const apiInterpretation = useAppSelector(selectEpdsInterpretation);
+  const apiCrisisResources = useAppSelector(selectEpdsCrisisResources);
   const recommendedArticles = useAppSelector(selectRecommendedArticles);
   const recommendationsStatus = useAppSelector(selectRecommendationsStatus);
+  const reduxAnswers = useAppSelector(selectEpdsAnswers);
 
-  console.log("EPDS Answers from Redux:", answers);
-  // Max score for EPDS is 30 (10 questions × 3 max points each)
+  // Persistence logic: Load from cache if Redux is empty (e.g., on refresh)
+  const [cachedResult, setCachedResult] = useState<any>(null);
+
+  useEffect(() => {
+    if (score === null || status !== "succeeded") {
+      const saved = localStorage.getItem("screeningResult");
+      if (saved) {
+        try {
+          setCachedResult(JSON.parse(saved));
+        } catch (e) {
+          console.error("Failed to parse cached EPDS result", e);
+        }
+      }
+    }
+  }, [score, status]);
+
+  // Unified data access
+  const displayScore = score ?? cachedResult?.result?.total_score ?? 0;
+  const displayRiskLevel = apiRiskLevel ?? cachedResult?.result?.risk_level;
+  const displayInterpretation =
+    apiInterpretation ?? cachedResult?.interpretation;
+  const displayCrisisResources =
+    apiCrisisResources?.length > 0
+      ? apiCrisisResources
+      : cachedResult?.crisis_resources || [];
+  const displayRecommendedArticles =
+    recommendedArticles?.length > 0
+      ? recommendedArticles
+      : cachedResult?.recommended_articles || [];
+  const displayRecommendationsStatus =
+    recommendationsStatus !== "idle"
+      ? recommendationsStatus
+      : cachedResult?.recommendations_status || "idle";
+
+  const answers = reduxAnswers || cachedResult?.answers;
   const maxScore = 30;
 
-  // Redirect to assessment if no score available
+  // Redirect to assessment if no data available anywhere
   useEffect(() => {
     if (score === null && status !== "succeeded") {
-      // Check localStorage as backup
-      const savedAnswers = localStorage.getItem("screeningAnswers");
-      if (!savedAnswers) {
-        router.push("/screening/assessment");
+      const savedResult = localStorage.getItem("screeningResult");
+      if (!savedResult) {
+        router.push("/screening/epds-assessment");
       }
     }
   }, [score, status, router]);
 
-  // Calculate score from localStorage if Redux state is empty
-  const displayScore =
-    score ??
-    (() => {
-      const savedAnswers = localStorage.getItem("screeningAnswers");
-      if (savedAnswers) {
-        const parsed = JSON.parse(savedAnswers);
-        return Object.values(parsed).reduce(
-          (sum: number, val) => sum + (val as number),
-          0,
-        );
-      }
-      return 0;
-    })();
-
   const getRiskLevel = (score: number) => {
+    // If API/Cache provided a risk level, use it (normalized to lowercase)
+    if (displayRiskLevel) {
+      const level = displayRiskLevel.toLowerCase();
+      return {
+        level: level.includes("low")
+          ? "low"
+          : level.includes("moderate")
+            ? "moderate"
+            : "high",
+        message:
+          displayInterpretation ||
+          (level.includes("low")
+            ? "Your responses suggest minimal symptoms of depression."
+            : level.includes("moderate")
+              ? "Your responses suggest some symptoms that may benefit from monitoring."
+              : "Your responses suggest symptoms that warrant professional attention."),
+      };
+    }
+
+    // Fallback to local calculation
     if (score <= 9)
       return {
         level: "low",
@@ -94,7 +137,7 @@ export default function ResultsPage() {
         </p>
       </div>
       <main className="flex-1 px-6 lg:px-10 py-6 lg:py-12">
-        <div className="max-w-4xl mx-auto space-y-8">
+        <div className="max-w-7xl mx-auto space-y-8">
           {/* Header */}
           <div className="text-center space-y-2 mx-auto">
             <h1 className="text-2xl md:text-3xl font-bold text-primary tracking-tight">
@@ -125,169 +168,282 @@ export default function ResultsPage() {
                     {currentUser?.email || "—"}
                   </p>
                 </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Risk Gauge Card */}
-          <div className="bg-white rounded-3xl p-8 lg:p-10 shadow-sm space-y-6">
-            <div className="grid grid-cols-1 items-center ">
-              {riskInfo.level === "low" ? (
-                <p className="text-green-700 pb-2 text-sm md:text-lg font-medium leading-relaxed italic text-center">
-                  " Your responses suggest GOOD emotional well-being."
-                </p>
-              ) : riskInfo.level === "moderate" ? (
-                <p className="text-orange-700 pb-2 text-sm md:text-lg font-medium leading-relaxed italic text-center">
-                  " You may be experiencing SOME emotional difficulties."
-                </p>
-              ) : (
-                <p className="text-red-700 pb-2 text-sm md:text-lg font-medium leading-relaxed italic text-center">
-                  "Your responses suggest HIGHER emotional distress."
-                </p>
-              )}
-              <h3 className="text-base font-semibold text-foreground pt-2">
-                EPDS Score
-              </h3>
-              <RiskGauge
-                score={displayScore}
-                maxScore={maxScore}
-                snapTo={riskInfo.level as "high" | "low" | "moderate"}
-                screening="epds"
-              />
-            </div>
-            <div
-              className={`flex items-center w-max mx-auto gap-2 px-4 py-1 rounded-full border-2  font-bold text-md uppercase tracking-wider print:mt-4 ${
-                riskInfo.level === "low"
-                  ? "text-green-700 bg-green-50 border border-green-200"
-                  : riskInfo.level === "moderate"
-                    ? "text-orange-700 bg-orange-50 border border-orange-200 "
-                    : "text-red-700 bg-red-50 border border-red-200"
-              }`}
-            >
-              {riskInfo.level} RISK
-            </div>
-
-            {/* Risk Message */}
-            <div
-              className={`p-5 rounded-2xl border-l-4 space-y-3 shadow-sm print:mt-10 ${
-                riskInfo.level === "low"
-                  ? "bg-green-50 border border-green-200"
-                  : riskInfo.level === "moderate"
-                    ? "bg-orange-50 border border-orange-200"
-                    : "bg-red-50 border border-red-200"
-              }`}
-            >
-              <h3
-                className={`text-lg font-bold  flex items-center gap-2 ${
-                  riskInfo.level === "low"
-                    ? "text-green-700"
-                    : riskInfo.level === "moderate"
-                      ? "text-orange-700"
-                      : "text-red-700"
-                }`}
-              >
-                <Info size={20} />
-                Suggested Next Step
-              </h3>
-              <p
-                className={`text-sm font-medium ${
-                  riskInfo.level === "low"
-                    ? "text-green-700"
-                    : riskInfo.level === "moderate"
-                      ? "text-orange-700"
-                      : "text-red-700"
-                }`}
-              >
-                {riskInfo.message}
-              </p>
-            </div>
-            {/* Disclaimer */}
-            <div className="pt-6 border-t border-gray-100 print:mt-20">
-              <p className="text-sm text-muted-foreground text-center italic">
-                This tool is here to help you check in on yourself, but it is{" "}
-                <strong>not a doctor's diagnosis</strong>. Please share these
-                results with your doctor, midwife, or nurse.
-              </p>
-            </div>
-          </div>
-
-          {/* Recommended Articles Section */}
-          {recommendationsStatus === "ok" && recommendedArticles.length > 0 && (
-            <div className="space-y-6 pt-6 no-print">
-              <div className="flex items-center gap-3">
-                <div className="p-2.5 bg-primary/10 rounded-xl">
-                  <BookOpen className="h-6 w-6 text-primary" />
-                </div>
                 <div>
-                  <h2 className="text-2xl font-bold text-gray-900">
-                    Recommended for You
-                  </h2>
-                  <p className="text-muted-foreground">
-                    Based on your risk level, these resources may be helpful
+                  <span className="text-muted-foreground block uppercase text-lg font-bold tracking-wider">
+                    Screening Date
+                  </span>
+                  <p className="font-semibold text-foreground text-md">
+                    {status === "succeeded"
+                      ? new Date().toLocaleDateString("en-US", {
+                          year: "numeric",
+                          month: "long",
+                          day: "numeric",
+                        })
+                      : "—"}
                   </p>
                 </div>
               </div>
+            </div>
+          </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pb-6">
-                {recommendedArticles.map((article) => (
-                  <Card
-                    key={article.article_id}
-                    className="group hover:shadow-xl transition-all duration-300 border-none shadow-md overflow-hidden flex flex-col bg-white rounded-3xl"
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+            <div className="lg:col-span-2 space-y-8 gap-6">
+              {/* Risk Gauge Card */}
+              <div className="bg-white rounded-3xl p-8 lg:p-10 shadow-sm space-y-6">
+                <div className="grid grid-cols-1 items-center ">
+                  {riskInfo.level === "low" ? (
+                    <p className="text-green-700 pb-2 text-sm md:text-lg font-medium leading-relaxed italic text-center">
+                      " Your responses suggest GOOD emotional well-being."
+                    </p>
+                  ) : riskInfo.level === "moderate" ? (
+                    <p className="text-orange-700 pb-2 text-sm md:text-lg font-medium leading-relaxed italic text-center">
+                      " You may be experiencing SOME emotional difficulties."
+                    </p>
+                  ) : (
+                    <p className="text-red-700 pb-2 text-sm md:text-lg font-medium leading-relaxed italic text-center">
+                      "Your responses suggest HIGHER emotional distress."
+                    </p>
+                  )}
+                  <h3 className="text-base font-semibold text-foreground pt-2">
+                    EPDS Score
+                  </h3>
+                  <RiskGauge
+                    score={displayScore}
+                    maxScore={maxScore}
+                    snapTo={riskInfo.level as "high" | "low" | "moderate"}
+                    screening="epds"
+                  />
+                </div>
+                <div
+                  className={`flex items-center w-max mx-auto gap-2 px-4 py-1 rounded-full border-2  font-bold text-md uppercase tracking-wider print:mt-4 ${
+                    riskInfo.level === "low"
+                      ? "text-green-700 bg-green-50 border border-green-200"
+                      : riskInfo.level === "moderate"
+                        ? "text-orange-700 bg-orange-50 border border-orange-200 "
+                        : "text-red-700 bg-red-50 border border-red-200"
+                  }`}
+                >
+                  {riskInfo.level} RISK
+                </div>
+
+                {/* Risk Message */}
+                <div
+                  className={`p-5 rounded-2xl border-l-4 space-y-3 shadow-sm print:mt-10 ${
+                    riskInfo.level === "low"
+                      ? "bg-green-50 border border-green-200"
+                      : riskInfo.level === "moderate"
+                        ? "bg-orange-50 border border-orange-200"
+                        : "bg-red-50 border border-red-200"
+                  }`}
+                >
+                  <h3
+                    className={`text-lg font-bold  flex items-center gap-2 ${
+                      riskInfo.level === "low"
+                        ? "text-green-700"
+                        : riskInfo.level === "moderate"
+                          ? "text-orange-700"
+                          : "text-red-700"
+                    }`}
                   >
-                    {article.imageUrl && (
-                      <div className="aspect-[16/9] w-full overflow-hidden">
-                        <img
-                          src={article.imageUrl}
-                          alt={article.title}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                        />
+                    <Info size={20} />
+                    Suggested Next Step
+                  </h3>
+                  <p
+                    className={`text-sm font-medium ${
+                      riskInfo.level === "low"
+                        ? "text-green-700"
+                        : riskInfo.level === "moderate"
+                          ? "text-orange-700"
+                          : "text-red-700"
+                    }`}
+                  >
+                    {riskInfo.message}
+                  </p>
+                </div>
+                {/* Disclaimer */}
+                <div className="pt-6 border-t border-gray-100 print:mt-20">
+                  <p className="text-sm text-muted-foreground text-center italic">
+                    This tool is here to help you check in on yourself, but it
+                    is <strong>not a doctor's diagnosis</strong>. Please share
+                    these results with your doctor, midwife, or nurse.
+                  </p>
+                </div>
+              </div>
+              <div className="flex flex-col">
+                {(displayRecommendationsStatus === "ok" ||
+                  displayRecommendationsStatus === "succeeded") &&
+                  displayRecommendedArticles.length > 0 && (
+                    <div className="space-y-6 pt-0 no-print">
+                      <div className="flex items-center gap-3">
+                        <div className="p-2.5 bg-primary/10 rounded-xl">
+                          <BookOpen className="h-5 w-5 text-primary" />
+                        </div>
+                        <div>
+                          <h2 className="text-2xl font-bold text-gray-900">
+                            Recommended for You
+                          </h2>
+                          <p className="text-muted-foreground">
+                            Based on your risk level, these resources may be
+                            helpful
+                          </p>
+                        </div>
                       </div>
-                    )}
-                    <CardHeader className="pb-2">
-                      <div className="flex justify-between items-start mb-2">
-                        <Badge
-                          variant="secondary"
-                          className="bg-primary/5 text-primary border-none rounded-lg text-[10px] font-bold uppercase tracking-wider"
-                        >
-                          {article.category || "Educational"}
-                        </Badge>
-                        {article.risk_level && (
-                          <Badge
-                            variant="outline"
-                            className="text-[10px] uppercase font-bold px-2 py-0.5 rounded-lg border-primary/20 text-primary/70"
+
+                      <div className="grid grid-cols-2 gap-6 pb-6">
+                        {displayRecommendedArticles.map((article: any) => (
+                          <Card
+                            key={article.article_id}
+                            className="group hover:shadow-xl transition-all duration-300 border-none shadow-md overflow-hidden flex flex-col bg-white rounded-3xl"
                           >
-                            {article.risk_level} Risk
-                          </Badge>
-                        )}
+                            {article.imageUrl && (
+                              <div className="aspect-[16/9] w-full overflow-hidden">
+                                <img
+                                  src={article.imageUrl}
+                                  alt={article.title}
+                                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                                />
+                              </div>
+                            )}
+                            <CardHeader className="pb-2">
+                              <div className="flex justify-between items-start mb-2">
+                                <Badge
+                                  variant="secondary"
+                                  className="bg-primary/5 text-primary border-none rounded-lg text-[10px] font-bold uppercase tracking-wider"
+                                >
+                                  {article.category || "Educational"}
+                                </Badge>
+                                {article.risk_level && (
+                                  <Badge
+                                    variant="outline"
+                                    className="text-[10px] uppercase font-bold px-2 py-0.5 rounded-lg border-primary/20 text-primary/70"
+                                  >
+                                    {article.risk_level} Risk
+                                  </Badge>
+                                )}
+                              </div>
+                              <CardTitle className="text-lg font-bold group-hover:text-primary transition-colors line-clamp-2 leading-tight">
+                                {article.title}
+                              </CardTitle>
+                            </CardHeader>
+                            <CardContent className="flex-1 pb-4">
+                              <p className="text-muted-foreground text-sm line-clamp-3 leading-relaxed italic">
+                                {article.preview
+                                  ? `"${article.preview}"`
+                                  : `Resources and guidance regarding ${article.category.toLowerCase()} health during your postpartum journey.`}
+                              </p>
+                            </CardContent>
+                            <CardFooter className="pt-0 pb-6 px-6">
+                              <Button
+                                className="w-full bg-primary/5 hover:bg-primary text-primary hover:text-white border-primary/20 hover:border-primary font-bold h-11 rounded-xl transition-all active:scale-95 flex items-center justify-center gap-2"
+                                variant="outline"
+                                onClick={() =>
+                                  window.open(article.external_url, "_blank")
+                                }
+                              >
+                                Read Full Article
+                                <ExternalLink className="h-4 w-4" />
+                              </Button>
+                            </CardFooter>
+                          </Card>
+                        ))}
                       </div>
-                      <CardTitle className="text-lg font-bold group-hover:text-primary transition-colors line-clamp-2 leading-tight">
-                        {article.title}
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent className="flex-1 pb-4">
-                      <p className="text-muted-foreground text-sm line-clamp-3 leading-relaxed italic">
-                        {article.preview
-                          ? `"${article.preview}"`
-                          : `Resources and guidance regarding ${article.category.toLowerCase()} health during your postpartum journey.`}
-                      </p>
-                    </CardContent>
-                    <CardFooter className="pt-0 pb-6 px-6">
-                      <Button
-                        className="w-full bg-primary/5 hover:bg-primary text-primary hover:text-white border-primary/20 hover:border-primary font-bold h-11 rounded-xl transition-all active:scale-95 flex items-center justify-center gap-2"
-                        variant="outline"
-                        onClick={() =>
-                          window.open(article.external_url, "_blank")
-                        }
-                      >
-                        Read Full Article
-                        <ExternalLink className="h-4 w-4" />
-                      </Button>
-                    </CardFooter>
-                  </Card>
-                ))}
+                    </div>
+                  )}
               </div>
             </div>
-          )}
+
+            <div className="flex flex-col gap-8">
+              {/* Emergency Crisis Resources Section */}
+              {displayCrisisResources && displayCrisisResources.length > 0 && (
+                <div className="space-y-4 pt-0 no-print">
+                  <div className="flex items-center gap-2">
+                    <div className="p-2 bg-red-100 rounded-xl">
+                      <span className="material-symbols-outlined text-red-600">
+                        emergency
+                      </span>
+                    </div>
+                    <div>
+                      <h2 className="text-xl font-bold text-gray-900 leading-tight">
+                        Immediate Support
+                      </h2>
+                      <p className="text-xs text-muted-foreground">
+                        Help near {answers?.city || "Kathmandu"}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 gap-2">
+                    {displayCrisisResources.map((resource: any) => (
+                      <Card
+                        key={resource.id}
+                        className="border-l-4 border-l-red-500 hover:shadow-lg transition-shadow bg-white rounded-2xl overflow-hidden pb-2 mb-0"
+                      >
+                        <CardHeader className="pb-0">
+                          <div className="flex justify-between items-start">
+                            <CardTitle className="text-base font-bold text-gray-900">
+                              {resource.name}
+                            </CardTitle>
+                            {resource.hotline && (
+                              <Badge className="bg-red-500 text-white border-none text-[10px] uppercase font-bold px-2 py-0.5 rounded-lg ml-2">
+                                Hotline
+                              </Badge>
+                            )}
+                          </div>
+                          <p className="text-xs text-muted-foreground">
+                            {resource.type.replace("_", " ")} • {resource.city}
+                          </p>
+                        </CardHeader>
+                        <CardContent className="pb-1 text-xs mb-0">
+                          <div className="space-y-2">
+                            <div className="flex items-center gap-2 text-muted-foreground">
+                              <span className="material-symbols-outlined text-sm">
+                                location_on
+                              </span>
+                              <span className="line-clamp-1">
+                                {resource.address}
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-4">
+                              <div className="flex items-center gap-2 text-primary font-semibold">
+                                <span className="material-symbols-outlined text-sm">
+                                  call
+                                </span>
+                                <span>{resource.phone}</span>
+                              </div>
+                              {resource.distance_km && (
+                                <div className="flex items-center gap-1 text-muted-foreground text-xs italic">
+                                  <span className="material-symbols-outlined text-xs">
+                                    distance
+                                  </span>
+                                  <span>
+                                    {resource.distance_km.toFixed(1)} km
+                                  </span>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+
+                  <div className="flex justify-center">
+                    <Button
+                      variant="link"
+                      className="text-red-600 font-bold p-0 h-auto"
+                      onClick={() => router.push("/crisis-resources")}
+                    >
+                      View All
+                      <span className="material-symbols-outlined ml-1">
+                        arrow_forward
+                      </span>
+                    </Button>
+                  </div>
+                </div>
+              )}
+            </div>
+            {/* Recommended Articles Section */}
+          </div>
 
           {/* Action Buttons */}
           <div className="flex flex-col sm:flex-row items-center justify-evenly gap-8">

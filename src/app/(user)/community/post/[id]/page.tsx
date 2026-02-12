@@ -13,9 +13,9 @@ const page = async ({ params }: PageProps) => {
   console.log(id);
   if (!id) return <div>Invalid post ID</div>;
   return (
-  <>
-    <PostDetailCard postId={id} />;
-  </>
+    <>
+      <PostDetailCard postId={id} />;
+    </>
   );
 };
 

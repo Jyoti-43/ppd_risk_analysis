@@ -91,7 +91,7 @@ export const groupPost = createApi({
       invalidatesTags: ["Comments"],
     }),
 
-     getGroupPostsComments: build.query<any, { postId: string }>({
+    getGroupPostsComments: build.query<any, { postId: string }>({
       query: ({ postId }) => ({
         url: `/group/comments/${postId}`,
         method: "GET",
@@ -99,7 +99,10 @@ export const groupPost = createApi({
       providesTags: ["Comments"],
     }),
 
-    groupCommentLike: build.mutation<any, { commentId: string; hasLiked: boolean }>({
+    groupCommentLike: build.mutation<
+      any,
+      { commentId: string; hasLiked: boolean }
+    >({
       query: ({ commentId, hasLiked }) => ({
         url: `/group/comments/${commentId}/toggle-like`,
         method: "POST",
@@ -108,9 +111,7 @@ export const groupPost = createApi({
       async onQueryStarted(
         { commentId, hasLiked },
         { dispatch, queryFulfilled },
-      ) {
-       
-      },
+      ) {},
       invalidatesTags: ["Comments"],
     }),
 

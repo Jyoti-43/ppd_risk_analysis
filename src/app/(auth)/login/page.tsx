@@ -250,6 +250,64 @@ const LoginForm = () => {
 
         checkPartnerStatus();
       } else if (userRoleAttr === "mother") {
+        // Request location permission for mother users
+        const requestLocation = async () => {
+          if ("geolocation" in navigator) {
+            try {
+              const position = await new Promise<GeolocationPosition>(
+                (resolve, reject) => {
+                  navigator.geolocation.getCurrentPosition(resolve, reject, {
+                    enableHighAccuracy: true,
+                    timeout: 5000,
+                    maximumAge: 0,
+                  });
+                },
+              );
+
+              const locationData = {
+                lat: position.coords.latitude,
+                lng: position.coords.longitude,
+                city: "Kathmandu", // Default city, can be enhanced with reverse geocoding
+                timestamp: new Date().toISOString(),
+              };
+
+              localStorage.setItem(
+                "userLocation",
+                JSON.stringify(locationData),
+              );
+              console.log("Location captured:", locationData);
+              toast.success("Location access granted for personalized support");
+            } catch (error) {
+              console.warn("Location access denied or failed:", error);
+              // Store default location
+              const defaultLocation = {
+                lat: 0,
+                lng: 0,
+                city: "Kathmandu",
+                timestamp: new Date().toISOString(),
+              };
+              localStorage.setItem(
+                "userLocation",
+                JSON.stringify(defaultLocation),
+              );
+              toast.info("Using default location for crisis resources");
+            }
+          } else {
+            console.warn("Geolocation not supported");
+            const defaultLocation = {
+              lat: 0,
+              lng: 0,
+              city: "Kathmandu",
+              timestamp: new Date().toISOString(),
+            };
+            localStorage.setItem(
+              "userLocation",
+              JSON.stringify(defaultLocation),
+            );
+          }
+        };
+
+        requestLocation();
         router.push((callbackUrl as string) || "/dashboard/mother");
       } else {
         router.push((callbackUrl as string) || "/");
@@ -265,7 +323,16 @@ const LoginForm = () => {
     if (error) {
       console.error(error);
     }
-  }, [isSuccess, isError, data, error, dispatch, router, callbackUrl]);
+  }, [
+    isSuccess,
+    isError,
+    data,
+    error,
+    dispatch,
+    router,
+    callbackUrl,
+    triggerGetLinkedMothers,
+  ]);
 
   return (
     <>

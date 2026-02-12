@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -10,6 +10,8 @@ import {
   selectHybridStatus,
   selectHybridRecommendedArticles,
   selectHybridRecommendationsStatus,
+  selectHybridInterpretation,
+  selectHybridCrisisResources,
 } from "@/src/app/redux/feature/screening/hybrid/hybridSlice";
 import { RootState } from "@/src/app/redux/store";
 import { selectCurrentUser } from "@/src/app/redux/feature/user/userSlice";
@@ -41,17 +43,56 @@ export default function HybridResultsPage() {
   const recommendationsStatus = useAppSelector(
     selectHybridRecommendationsStatus,
   );
+  const apiInterpretation = useAppSelector(selectHybridInterpretation);
+  const apiCrisisResources = useAppSelector(selectHybridCrisisResources);
+
   const symptomsAnswers = useAppSelector(
     (state: RootState) => state.hybridResult.symptomsAnswers,
   );
 
-  useEffect(() => {
-    if (!result && status !== "loading") {
-      router.push("/screening/select-screening-method");
-    }
-  }, [result, status, router]);
+  // Persistence logic: Load from cache if Redux is empty (e.g., on refresh)
+  const [cachedResult, setCachedResult] = useState<any>(null);
 
-  if (!result) {
+  useEffect(() => {
+    if (!result && status !== "succeeded") {
+      const saved = localStorage.getItem("hybrid_screening_result");
+      if (saved) {
+        try {
+          setCachedResult(JSON.parse(saved));
+        } catch (e) {
+          console.error("Failed to parse cached Hybrid result", e);
+        }
+      }
+    }
+  }, [result, status]);
+
+  // Unified data access
+  const activeResult = result || cachedResult;
+  const activeInterpretation =
+    apiInterpretation || activeResult?.interpretation;
+  const activeCrisisResources =
+    apiCrisisResources?.length > 0
+      ? apiCrisisResources
+      : activeResult?.crisis_resources || [];
+  const activeRecommendedArticles =
+    recommendedArticles?.length > 0
+      ? recommendedArticles
+      : activeResult?.recommended_articles || [];
+  const activeRecommendationsStatus =
+    recommendationsStatus !== "idle"
+      ? recommendationsStatus
+      : activeResult?.recommendations_status || "idle";
+
+  useEffect(() => {
+    if (!activeResult && status !== "loading" && status !== "succeeded") {
+      const saved = localStorage.getItem("hybrid_screening_result");
+      if (!saved) {
+        router.push("/screening/select-screening-method");
+      }
+    }
+  }, [activeResult, status, router]);
+
+  if (!activeResult) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#fef5f9]">
         <div className="animate-pulse text-primary font-semibold">
@@ -62,11 +103,12 @@ export default function HybridResultsPage() {
   }
 
   const showRecommendations =
-    recommendationsStatus === "ok" &&
-    recommendedArticles &&
-    recommendedArticles.length > 0;
+    (activeRecommendationsStatus === "ok" ||
+      activeRecommendationsStatus === "succeeded") &&
+    activeRecommendedArticles &&
+    activeRecommendedArticles.length > 0;
 
-  const articlesToDisplay = recommendedArticles || [];
+  const articlesToDisplay = activeRecommendedArticles || [];
 
   const {
     risk_label,
@@ -76,7 +118,7 @@ export default function HybridResultsPage() {
     final_probability,
     metrics,
     audit,
-  } = result;
+  } = activeResult;
 
   const getRiskStyles = (label: string) => {
     const lowerLabel = label.toLowerCase();
@@ -147,8 +189,8 @@ export default function HybridResultsPage() {
         </p>
       </div>
 
-      <main className="flex-1  px-6 ptint:pt-4 lg:px-10 py-6 lg:py-12">
-        <div className="max-w-4xl mx-auto space-y-8">
+      <main className="flex-1 px-6 print:pt-4 lg:px-10 py-6 lg:py-12">
+        <div className="max-w-7xl mx-auto space-y-8">
           {/* Header */}
           <div className="text-center space-y-3">
             <h1 className="text-2xl md:text-3xl font-bold text-primary tracking-tight">
@@ -181,108 +223,72 @@ export default function HybridResultsPage() {
               </div>
             </div>
           </div>
-
-          {/* Result Card */}
-          <div className="bg-white rounded-3xl p-8 lg:p-10 shadow-sm border border-pink-100/50 space-y-10">
-            {/* Risk Indicator Section */}
-            <div className="flex flex-col items-center text-center space-y-8">
-              {/* Caring Message */}
-              <div className="max-w-xl mx-auto">
-                <p className="text-sm md:text-lg font-medium text-foreground/80 leading-relaxed italic">
-                  "{styles.caringMessage}"
-                </p>
-              </div>
-
-              <div className="w-full max-w-2xl mx-auto print:mt-6">
-                <RiskGauge
-                  score={Math.round(final_probability * 100)}
-                  maxScore={100}
-                  snapTo={styles.gaugeSnap}
-                  screening="hybrid"
-                />
-              </div>
-
-              <div
-                className={`inline-flex items-center gap-2 px-4 py-1 rounded-full border-2 ${styles.bg} ${styles.border} ${styles.text} font-bold text-md uppercase tracking-wider print:mt-4`}
-              >
-                {styles.icon}
-                {risk_label} RISK
-              </div>
-            </div>
-
-            {/* Recommendation Box */}
-            <div
-              className={`p-5 rounded-2xl border-l-4 ${styles.bg} ${styles.border} space-y-3 shadow-sm print:mt-10`}
-            >
-              <h3
-                className={`text-lg font-bold ${styles.text} flex items-center gap-2`}
-              >
-                <Info size={20} />
-                Suggested Next Step
-              </h3>
-              <p className="text-foreground leading-relaxed font-medium text-lg text-left">
-                {clinical_recommendation}
-              </p>
-            </div>
-
-            {/* Disclaimer */}
-            <div className="pt-6 border-t border-gray-100 print:mt-20">
-              <p className="text-sm text-muted-foreground text-center italic">
-                This tool is here to help you check in on yourself, but it is{" "}
-                <strong>not a doctor's diagnosis</strong>. Please share these
-                results with your doctor, midwife, or nurse.
-              </p>
-            </div>
-
-            {/* Flash Cards Section */}
-            <div className="space-y-4 pt-4 print:break-before-page">
-              <h4 className="text-lg font-bold text-foreground flex items-center gap-2">
-                <Info size={18} className="text-primary" />
-                Understanding Your Result
-              </h4>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 print:gap-8 gap-4">
-                <div className="bg-violet-50/50 border border-violet-100 p-5 rounded-3xl shadow-sm">
-                  <span className="text-[10px] font-bold text-violet-600 uppercase tracking-widest block mb-1">
-                    Quick Summary
-                  </span>
-                  <p className="text-[14px] text-foreground font-medium leading-relaxed">
-                    {(() => {
-                      if (!explanation)
-                        return "We looked at both your mood and physical health to give you a full picture of how you're doing.";
-                      if (
-                        explanation.includes("Q10=3") ||
-                        explanation.includes("Q10 Override")
-                      ) {
-                        return "Your answers show you are going through a very hard time. Getting help from a professional is the most important thing right now.";
-                      }
-                      if (
-                        explanation.includes("EPDS >= 13") ||
-                        explanation.includes("Clinical Dominance")
-                      ) {
-                        return "Your emotional responses show patterns that are best shared with a doctor to help you feel better.";
-                      }
-                      if (explanation.toLowerCase().includes("discordant")) {
-                        return "You have a mix of different feelings and physical signs. Talking this through with someone you trust can help clear things up.";
-                      }
-                      return (
-                        explanation.replace(/^[A-Z0-9>=_\s:]+/, "").trim() ||
-                        "We looked at both your mood and physical health to give you a full picture of how you're doing."
-                      );
-                    })()}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+            {/* Result Card */}
+            <div className="lg:col-span-2 bg-white rounded-2xl p-6 lg:p-8 shadow-sm border border-pink-100/50 space-y-10">
+              {/* Risk Indicator Section */}
+              <div className="flex flex-col items-center text-center space-y-8">
+                {/* Caring Message */}
+                <div className="max-w-lg mx-auto">
+                  <p className="text-sm md:text-lg font-medium text-foreground/80 leading-relaxed italic">
+                    "{styles.caringMessage}"
                   </p>
                 </div>
 
-                <div className="bg-rose-50/50 border border-rose-100 p-5 rounded-3xl shadow-sm">
-                  <span className="text-[10px] font-bold text-rose-600 uppercase tracking-widest block mb-1">
-                    Emotional Check-in
-                  </span>
-                  <div className="text-[14px] text-foreground font-medium leading-relaxed">
-                    Your emotional score of{" "}
-                    <strong>{metrics?.epds_total ?? "—"}</strong> indicates a{" "}
-                    <strong>{metrics?.epds_risk ?? "reviewed"} risk</strong>{" "}
-                    level.
-                    <p className="text-[14px] text-foreground font-medium leading-relaxed mt-2">
+                <div className="w-full max-w-2xl mx-auto print:mt-6">
+                  <RiskGauge
+                    score={Math.round(final_probability * 100)}
+                    maxScore={100}
+                    snapTo={styles.gaugeSnap}
+                    screening="hybrid"
+                  />
+                </div>
+
+                <div
+                  className={`inline-flex items-center gap-2 px-4 py-1 rounded-full border-2 ${styles.bg} ${styles.border} ${styles.text} font-bold text-md uppercase tracking-wider print:mt-4`}
+                >
+                  {styles.icon}
+                  {risk_label} RISK
+                </div>
+              </div>
+
+              {/* Recommendation Box */}
+              <div
+                className={`p-5 rounded-2xl border-l-4 ${styles.bg} ${styles.border} space-y-3 shadow-sm print:mt-10`}
+              >
+                <h3
+                  className={`text-lg font-bold ${styles.text} flex items-center gap-2`}
+                >
+                  <Info size={20} />
+                  Suggested Next Step
+                </h3>
+                <p className="text-foreground leading-relaxed font-medium text-lg text-left whitespace-pre-line">
+                  {activeInterpretation || clinical_recommendation}
+                </p>
+              </div>
+
+              {/* Disclaimer */}
+              <div className="pt-6 border-t border-gray-100 print:mt-20">
+                <p className="text-sm text-muted-foreground text-center italic">
+                  This tool is here to help you check in on yourself, but it is{" "}
+                  <strong>not a doctor's diagnosis</strong>. Please share these
+                  results with your doctor, midwife, or nurse.
+                </p>
+              </div>
+
+              {/* Flash Cards Section */}
+              <div className="space-y-4 pt-4 print:break-before-page">
+                <h4 className="text-lg font-bold text-foreground flex items-center gap-2">
+                  <Info size={18} className="text-primary" />
+                  Understanding Your Result
+                </h4>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 print:gap-8 gap-4">
+                  <div className="bg-violet-50/50 border border-violet-100 p-5 rounded-3xl shadow-sm">
+                    <span className="text-[10px] font-bold text-violet-600 uppercase tracking-widest block mb-1">
+                      Quick Summary
+                    </span>
+                    <p className="text-[14px] text-foreground font-medium leading-relaxed">
                       {(() => {
                         if (!explanation)
                           return "We looked at both your mood and physical health to give you a full picture of how you're doing.";
@@ -290,13 +296,13 @@ export default function HybridResultsPage() {
                           explanation.includes("Q10=3") ||
                           explanation.includes("Q10 Override")
                         ) {
-                          return "Your answers for suicidal thoughts show you are going through a very hard time.";
+                          return "Your answers show you are going through a very hard time. Getting help from a professional is the most important thing right now.";
                         }
                         if (
                           explanation.includes("EPDS >= 13") ||
                           explanation.includes("Clinical Dominance")
                         ) {
-                          return "Your emotional responses show patterns that are best to shared with a doctor.";
+                          return "Your emotional responses show patterns that are best shared with a doctor to help you feel better.";
                         }
                         if (explanation.toLowerCase().includes("discordant")) {
                           return "You have a mix of different feelings and physical signs. Talking this through with someone you trust can help clear things up.";
@@ -308,133 +314,268 @@ export default function HybridResultsPage() {
                       })()}
                     </p>
                   </div>
-                </div>
 
-                <div className="bg-blue-50/50 border border-blue-100 p-5 rounded-3xl shadow-sm">
-                  <span className="text-[10px] font-bold text-blue-600 uppercase tracking-widest block mb-1">
-                    What we checked
-                  </span>
-                  <p className="text-[14px] text-foreground font-medium leading-relaxed">
-                    We combined a standard emotional scale with a check of your
-                    physical symptoms for a deeper analysis.
-                  </p>
-                </div>
-
-                <div className="bg-emerald-50/50 border border-emerald-100 p-5 rounded-3xl shadow-sm">
-                  <span className="text-[10px] font-bold text-emerald-600 uppercase tracking-widest block mb-1">
-                    Overall Finding
-                  </span>
-                  <p className="text-[14px] text-foreground font-medium leading-relaxed">
-                    There is a{" "}
-                    <strong>{metrics?.epds_risk ?? "reviewed"} Risk</strong>{" "}
-                    indication of the wellness factors being monitored in this
-                    checkup.
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Emergency Alert if Critical */}
-          {is_critical && (
-            <div className="bg-red-600 rounded-3xl p-6 text-white flex flex-col md:flex-row items-center gap-6 shadow-lg animate-bounce-subtle">
-              <div className="bg-white/20 p-4 rounded-full">
-                <PhoneCall size={32} />
-              </div>
-              <div className="flex-1 text-center md:text-left space-y-1">
-                <h4 className="text-xl font-bold">Immediate Support Needed</h4>
-                <p className="text-red-50 text-md opacity-90">
-                  Please reach out to crisis support or a medical professional
-                  immediately.
-                </p>
-              </div>
-              <Link href="/crisis-resources">
-                <Button className="bg-white text-red-600 hover:bg-red-50 border-none rounded-full h-12 px-8 font-bold text-md shadow-sm">
-                  Get Help Now
-                </Button>
-              </Link>
-            </div>
-          )}
-
-          {/* Recommended Articles Section */}
-          {showRecommendations && (
-            <div className="space-y-6 pt-6 no-print">
-              <div className="flex items-center gap-3">
-                <div className="p-2.5 bg-primary/10 rounded-xl">
-                  <BookOpen className="h-6 w-6 text-primary" />
-                </div>
-                <div>
-                  <h2 className="text-2xl font-bold text-gray-900">
-                    Recommended for You
-                  </h2>
-                  <p className="text-muted-foreground">
-                    Based on your hybrid analysis, these resources may be
-                    helpful
-                  </p>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pb-6">
-                {articlesToDisplay.map((article) => (
-                  <Card
-                    key={article.article_id}
-                    className="group hover:shadow-xl transition-all duration-300 border-none shadow-md overflow-hidden flex flex-col bg-white rounded-3xl"
-                  >
-                    {article.imageUrl && (
-                      <div className="aspect-[16/9] w-full overflow-hidden">
-                        <img
-                          src={article.imageUrl}
-                          alt={article.title}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                        />
-                      </div>
-                    )}
-                    <CardHeader className="pb-2">
-                      <div className="flex justify-between items-start mb-2">
-                        <Badge
-                          variant="secondary"
-                          className="bg-primary/5 text-primary border-none rounded-lg text-[10px] font-bold uppercase tracking-wider"
-                        >
-                          {article.category || "Educational"}
-                        </Badge>
-                        {article.risk_level && (
-                          <Badge
-                            variant="outline"
-                            className="text-[10px] uppercase font-bold px-2 py-0.5 rounded-lg border-primary/20 text-primary/70"
-                          >
-                            {article.risk_level} Risk
-                          </Badge>
-                        )}
-                      </div>
-                      <CardTitle className="text-lg font-bold group-hover:text-primary transition-colors line-clamp-2 leading-tight">
-                        {article.title}
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent className="flex-1 pb-4">
-                      <p className="text-muted-foreground text-sm line-clamp-3 leading-relaxed italic">
-                        {article.preview
-                          ? `"${article.preview}"`
-                          : `Comprehensive resources regarding ${article.category.toLowerCase()} wellness for your recovery.`}
+                  <div className="bg-rose-50/50 border border-rose-100 p-5 rounded-3xl shadow-sm">
+                    <span className="text-[10px] font-bold text-rose-600 uppercase tracking-widest block mb-1">
+                      Emotional Check-in
+                    </span>
+                    <div className="text-[14px] text-foreground font-medium leading-relaxed">
+                      Your emotional score of{" "}
+                      <strong>{metrics?.epds_total ?? "—"}</strong> indicates a{" "}
+                      <strong>{metrics?.epds_risk ?? "reviewed"} risk</strong>{" "}
+                      level.
+                      <p className="text-[14px] text-foreground font-medium leading-relaxed mt-2">
+                        {(() => {
+                          if (!explanation)
+                            return "We looked at both your mood and physical health to give you a full picture of how you're doing.";
+                          if (
+                            explanation.includes("Q10=3") ||
+                            explanation.includes("Q10 Override")
+                          ) {
+                            return "Your answers for suicidal thoughts show you are going through a very hard time.";
+                          }
+                          if (
+                            explanation.includes("EPDS >= 13") ||
+                            explanation.includes("Clinical Dominance")
+                          ) {
+                            return "Your emotional responses show patterns that are best to shared with a doctor.";
+                          }
+                          if (
+                            explanation.toLowerCase().includes("discordant")
+                          ) {
+                            return "You have a mix of different feelings and physical signs. Talking this through with someone you trust can help clear things up.";
+                          }
+                          return (
+                            explanation
+                              .replace(/^[A-Z0-9>=_\s:]+/, "")
+                              .trim() ||
+                            "We looked at both your mood and physical health to give you a full picture of how you're doing."
+                          );
+                        })()}
                       </p>
-                    </CardContent>
-                    <CardFooter className="pt-0 pb-6 px-6">
-                      <Button
-                        className="w-full bg-primary/5 hover:bg-primary text-primary hover:text-white border-primary/20 hover:border-primary font-bold h-11 rounded-xl transition-all active:scale-95 flex items-center justify-center gap-2"
-                        variant="outline"
-                        onClick={() =>
-                          window.open(article.external_url, "_blank")
-                        }
-                      >
-                        Read Full Article
-                        <ExternalLink className="h-4 w-4" />
-                      </Button>
-                    </CardFooter>
-                  </Card>
-                ))}
+                    </div>
+                  </div>
+
+                  <div className="bg-blue-50/50 border border-blue-100 p-5 rounded-3xl shadow-sm">
+                    <span className="text-[10px] font-bold text-blue-600 uppercase tracking-widest block mb-1">
+                      What we checked
+                    </span>
+                    <p className="text-[14px] text-foreground font-medium leading-relaxed">
+                      We combined a standard emotional scale with a check of
+                      your physical symptoms for a deeper analysis.
+                    </p>
+                  </div>
+
+                  <div className="bg-emerald-50/50 border border-emerald-100 p-5 rounded-3xl shadow-sm">
+                    <span className="text-[10px] font-bold text-emerald-600 uppercase tracking-widest block mb-1">
+                      Overall Finding
+                    </span>
+                    <p className="text-[14px] text-foreground font-medium leading-relaxed">
+                      There is a{" "}
+                      <strong>{metrics?.epds_risk ?? "reviewed"} Risk</strong>{" "}
+                      indication of the wellness factors being monitored in this
+                      checkup.
+                    </p>
+                  </div>
+                </div>
               </div>
             </div>
-          )}
 
+            <div className="flex flex-col gap-4  w-full">
+              {/* Emergency Alert if Critical */}
+              {is_critical && (
+                <div className="bg-red-600 rounded-3xl px-4 py-3 text-white flex flex-col items-center gap-2 shadow-lg animate-bounce-subtle">
+                  <div className="flex flex-row w-full items-center justify-center gap-4">
+                    <div className="bg-white/20 p-2 rounded-full">
+                      <PhoneCall size={32} />
+                    </div>
+                    <h4 className="text-xl font-bold">
+                      Immediate Support Needed
+                    </h4>
+                  </div>
+                  <div className="flex-1 text-center md:text-left space-y-1">
+                    <p className="text-red-50 text-md opacity-90">
+                      Please reach out to crisis support or a medical
+                      professional immediately.
+                    </p>
+                    <Link href="tel:1166">
+                      <Button className="bg-white text-red-600 hover:bg-red-50 border-none rounded-full h-12 px-8 font-bold text-md shadow-sm">
+                        1166
+                      </Button>
+                    </Link>
+                  </div>
+                </div>
+              )}
+
+              {/* Emergency Crisis Resources Section */}
+              {activeCrisisResources && activeCrisisResources.length > 0 && (
+                <div className="space-y-4 pt-4 no-print w-full">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2.5 bg-red-100 rounded-xl">
+                      <span className="material-symbols-outlined text-red-600">
+                        emergency
+                      </span>
+                    </div>
+                    <div>
+                      <h2 className="text-2xl font-bold text-gray-900">
+                        Immediate Support
+                      </h2>
+                      <p className="text-muted-foreground">
+                        Available help near you in{" "}
+                        {symptomsAnswers?.city || "Kathmandu"}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-1 gap-4 pb-2">
+                    {activeCrisisResources.map((resource: any) => (
+                      <Card
+                        key={resource.id}
+                        className="border-l-4 border-l-red-500 hover:shadow-lg transition-shadow bg-white rounded-2xl overflow-hidden shadow-sm"
+                      >
+                        <CardHeader className="pb-0">
+                          <div className="flex justify-between items-start">
+                            <CardTitle className="text-base font-bold text-gray-900">
+                              {resource.name}
+                            </CardTitle>
+                            {resource.hotline && (
+                              <Badge className="bg-red-500 text-white border-none text-[10px] uppercase font-bold px-2 py-0.5 rounded-lg ml-2">
+                                Hotline
+                              </Badge>
+                            )}
+                          </div>
+                          <p className="text-xs text-muted-foreground">
+                            {resource.type.replace("_", " ")} • {resource.city}
+                          </p>
+                        </CardHeader>
+                        <CardContent className="pb-1 pt-0">
+                          <div className="space-y-1 text-sm">
+                            <div className="flex items-center gap-2 text-muted-foreground">
+                              <span className="material-symbols-outlined text-sm">
+                                location_on
+                              </span>
+                              <span className="line-clamp-1">
+                                {resource.address}
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-4">
+                              <div className="flex items-center gap-2 text-primary font-semibold">
+                                <span className="material-symbols-outlined text-sm">
+                                  call
+                                </span>
+                                <span>{resource.phone}</span>
+                              </div>
+                              {resource.distance_km && (
+                                <div className="flex items-center gap-1 text-muted-foreground text-xs italic">
+                                  <span className="material-symbols-outlined text-xs">
+                                    distance
+                                  </span>
+                                  <span>
+                                    {resource.distance_km.toFixed(1)} km
+                                  </span>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+
+                  <div className="flex justify-center">
+                    <Button
+                      variant="link"
+                      className="text-red-600 font-bold"
+                      onClick={() => router.push("/crisis-resources")}
+                    >
+                      View All Crisis Resources
+                      <span className="material-symbols-outlined ml-1">
+                        arrow_forward
+                      </span>
+                    </Button>
+                  </div>
+                </div>
+              )}
+            </div>
+            {/* Recommended Articles Section */}
+            {showRecommendations && (
+              <div className="space-y-6 pt-6 no-print">
+                <div className="flex items-center gap-3">
+                  <div className="p-2.5 bg-primary/10 rounded-xl">
+                    <BookOpen className="h-6 w-6 text-primary" />
+                  </div>
+                  <div>
+                    <h2 className="text-2xl font-bold text-gray-900">
+                      Recommended for You
+                    </h2>
+                    <p className="text-muted-foreground">
+                      Based on your hybrid analysis, these resources may be
+                      helpful
+                    </p>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-1 gap-6 pb-6">
+                  {articlesToDisplay.map((article: any) => (
+                    <Card
+                      key={article.article_id}
+                      className="group hover:shadow-xl transition-all duration-300 border-none shadow-md overflow-hidden flex flex-col bg-white rounded-3xl"
+                    >
+                      {article.imageUrl && (
+                        <div className="aspect-[16/9] w-full overflow-hidden">
+                          <img
+                            src={article.imageUrl}
+                            alt={article.title}
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                          />
+                        </div>
+                      )}
+                      <CardHeader className="pb-2">
+                        <div className="flex justify-between items-start mb-2">
+                          <Badge
+                            variant="secondary"
+                            className="bg-primary/5 text-primary border-none rounded-lg text-[10px] font-bold uppercase tracking-wider"
+                          >
+                            {article.category || "Educational"}
+                          </Badge>
+                          {article.risk_level && (
+                            <Badge
+                              variant="outline"
+                              className="text-[10px] uppercase font-bold px-2 py-0.5 rounded-lg border-primary/20 text-primary/70"
+                            >
+                              {article.risk_level} Risk
+                            </Badge>
+                          )}
+                        </div>
+                        <CardTitle className="text-lg font-bold group-hover:text-primary transition-colors line-clamp-2 leading-tight">
+                          {article.title}
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="flex-1 pb-4">
+                        <p className="text-muted-foreground text-sm line-clamp-3 leading-relaxed italic">
+                          {article.preview
+                            ? `"${article.preview}"`
+                            : `Comprehensive resources regarding ${article.category.toLowerCase()} wellness for your recovery.`}
+                        </p>
+                      </CardContent>
+                      <CardFooter className="pt-0 pb-6 px-6">
+                        <Button
+                          className="w-full bg-primary/5 hover:bg-primary text-primary hover:text-white border-primary/20 hover:border-primary font-bold h-11 rounded-xl transition-all active:scale-95 flex items-center justify-center gap-2"
+                          variant="outline"
+                          onClick={() =>
+                            window.open(article.external_url, "_blank")
+                          }
+                        >
+                          Read Full Article
+                          <ExternalLink className="h-4 w-4" />
+                        </Button>
+                      </CardFooter>
+                    </Card>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
           {/* Action Buttons */}
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 no-print">
             <Button

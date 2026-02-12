@@ -5,6 +5,7 @@ import {
   EPDSQuestion,
   RecommendedArticle,
   SymptomsQuestion,
+  EPDSAssessmentResponse,
 } from "@/src/app/type";
 
 const initialState: EpdsResultState = {
@@ -14,6 +15,9 @@ const initialState: EpdsResultState = {
   recommendationsStatus: "idle",
   status: "idle",
   error: null,
+  riskLevel: null,
+  interpretation: null,
+  crisisResources: [],
 };
 
 export const EpdsResultSlice = createSlice({
@@ -47,6 +51,47 @@ export const EpdsResultSlice = createSlice({
     setError: (state, action: PayloadAction<string | null>) => {
       state.error = action.payload;
     },
+    setRiskLevelBase: (state, action: PayloadAction<string | null>) => {
+      state.riskLevel = action.payload;
+    },
+    setInterpretation: (state, action: PayloadAction<string | null>) => {
+      state.interpretation = action.payload;
+    },
+    setCrisisResources: (state, action: PayloadAction<any[]>) => {
+      state.crisisResources = action.payload;
+    },
+    setEpdsResult: (state, action: PayloadAction<any | null>) => {
+      const data = action.payload;
+      if (data) {
+        state.score =
+          data.result?.total_score ?? data.total_score ?? data.score ?? 0;
+        state.riskLevel =
+          data.result?.risk_level ??
+          data.risk_level ??
+          data.riskLevel ??
+          data.risk_label ??
+          "Low";
+        state.interpretation =
+          data.interpretation ?? data.result?.interpretation ?? "";
+        state.recommendedArticles =
+          data.recommended_articles ??
+          data.recommendedArticles ??
+          data.result?.recommended_articles ??
+          [];
+        state.recommendationsStatus =
+          data.recommendations_status ??
+          data.recommendationsStatus ??
+          data.result?.recommendations_status ??
+          "ok";
+        state.answers = data.result?.answers ?? data.answers ?? null;
+        state.crisisResources =
+          data.crisis_resources ??
+          data.crisisResources ??
+          data.result?.crisis_resources ??
+          [];
+        state.status = "succeeded";
+      }
+    },
   },
 });
 
@@ -59,6 +104,12 @@ export const selectRecommendationsStatus = (state: RootState) =>
   state.epdsResult.recommendationsStatus;
 export const selectEpdsStatus = (state: RootState) => state.epdsResult.status;
 export const selectEpdsError = (state: RootState) => state.epdsResult.error;
+export const selectEpdsRiskLevel = (state: RootState) =>
+  state.epdsResult.riskLevel;
+export const selectEpdsInterpretation = (state: RootState) =>
+  state.epdsResult.interpretation;
+export const selectEpdsCrisisResources = (state: RootState) =>
+  state.epdsResult.crisisResources;
 
 export const {
   setAnswers,
@@ -67,6 +118,10 @@ export const {
   setRecommendationsStatus,
   setStatus,
   setError,
+  setRiskLevelBase,
+  setInterpretation,
+  setCrisisResources,
+  setEpdsResult,
 } = EpdsResultSlice.actions;
 
 export default EpdsResultSlice.reducer;

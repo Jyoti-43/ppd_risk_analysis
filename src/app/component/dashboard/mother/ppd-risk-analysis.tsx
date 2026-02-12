@@ -62,8 +62,8 @@ import {
   setAnswers as setEpdsAnswers,
 } from "@/src/app/redux/feature/screening/epds/epdsSlice";
 import {
-  setResult as setSymptomsResult,
-  setStatus as setSymptomsStatus,
+  setSymptomsResult,
+  setSymptomsStatus,
 } from "@/src/app/redux/feature/screening/symptoms/symptomsSlice";
 import {
   setHybridResult,

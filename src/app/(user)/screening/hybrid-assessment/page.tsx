@@ -47,12 +47,13 @@ export default function HybridAssessmentPage() {
     Record<string, string | number>
   >({});
 
-  // Effect to load questions from cache initially
+  // Effect to load questions and progress from cache initially
   useEffect(() => {
-    const cached = localStorage.getItem("symptomsQuestions");
-    if (cached) {
+    // 1. Load questions
+    const cachedQuestions = localStorage.getItem("symptomsQuestions");
+    if (cachedQuestions) {
       try {
-        const parsed = JSON.parse(cached);
+        const parsed = JSON.parse(cachedQuestions);
         if (Array.isArray(parsed) && parsed.length > 0) {
           setQuestions(parsed);
           console.log("Loaded symptoms questions from cache:", parsed.length);
@@ -61,7 +62,34 @@ export default function HybridAssessmentPage() {
         console.error("Failed to parse cached symptoms questions", e);
       }
     }
+
+    // 2. Load assessment progress
+    const savedProgress = localStorage.getItem("hybrid_assessment_progress");
+    if (savedProgress) {
+      try {
+        const { step, epds, symptoms } = JSON.parse(savedProgress);
+        if (step !== undefined) setCurrentStep(step);
+        if (epds) setEpdsAnswers(epds);
+        if (symptoms) setSymptomsAnswers(symptoms);
+        console.log("Restored hybrid assessment progress");
+      } catch (e) {
+        console.error("Failed to restore hybrid progress", e);
+      }
+    }
   }, []);
+
+  // Save progress to local storage when state changes
+  useEffect(() => {
+    const progress = {
+      step: currentStep,
+      epds: epdsAnswers,
+      symptoms: symptomsAnswers,
+    };
+    localStorage.setItem(
+      "hybrid_assessment_progress",
+      JSON.stringify(progress),
+    );
+  }, [currentStep, epdsAnswers, symptomsAnswers]);
 
   // Effect to handle API questions and update cache
   useEffect(() => {
@@ -125,12 +153,17 @@ export default function HybridAssessmentPage() {
   };
 
   const handleSubmit = async () => {
-    // Format EPDS scores into a simple array [q1, q2, ..., q10]
+    // Format EPDS scores into a simple list of values [val1, val2, ...]
     const epdsResponses = EPDS_QUESTIONS.map((q) => epdsAnswers[q.id] ?? 0);
 
     const payload = {
       epds_responses: epdsResponses,
       ...symptomsAnswers,
+      include_crisis_resources: true,
+      city: "Kathmandu",
+      lat: 27.7172,
+      lng: 85.324,
+      limit: 3,
     };
 
     console.log("Submitting Hybrid Assessment Payload:", payload);
@@ -138,29 +171,37 @@ export default function HybridAssessmentPage() {
     try {
       dispatch(setHybridStatus("loading"));
       const res = await submitHybrid(payload).unwrap();
+
+      // The setHybridResult reducer now handles setting recommended articles, crisis resources, etc.
       dispatch(setHybridResult(res));
 
-      // Store recommended articles and status from API
-      if (res.recommended_articles) {
-        dispatch(setHybridRecommendedArticles(res.recommended_articles));
-      }
-      if (res.recommendations_status) {
-        dispatch(setHybridRecommendationsStatus(res.recommendations_status));
-      }
-
-      dispatch(setHybridStatus("succeeded"));
       console.log("Hybrid Assessment Submitted Successfully:", res);
 
+      // Save result to localStorage for persistence on result page
+      localStorage.setItem("hybrid_screening_result", JSON.stringify(res));
+
+      // Clear progress on successful submission
+      localStorage.removeItem("hybrid_assessment_progress");
+
       router.push("/screening/hybrid-assessment-results");
-    } catch (error) {
+    } catch (error: any) {
       console.error("Submission failed", error);
       dispatch(setHybridStatus("failed"));
-      dispatch(
-        setHybridError(
-          error instanceof Error ? error.message : "Submission failed",
-        ),
-      );
-      toast.error("Failed to submit assessment. Please try again.");
+
+      let errorMessage = "Failed to submit assessment. Please try again.";
+
+      if (error?.status === "PARSING_ERROR") {
+        errorMessage =
+          "Server error: The backend returned an invalid response. Please contact support.";
+        console.error("Parsing Error Data:", error.data);
+      } else if (error?.data?.detail) {
+        errorMessage = error.data.detail;
+      } else if (error instanceof Error) {
+        errorMessage = error.message;
+      }
+
+      dispatch(setHybridError(errorMessage));
+      toast.error(errorMessage);
     }
   };
 

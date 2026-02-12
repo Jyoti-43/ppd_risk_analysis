@@ -129,6 +129,11 @@ export interface EPDSQuestion {
   q8: number;
   q9: number;
   q10: number;
+  include_crisis_resources?: boolean;
+  city?: string;
+  lat?: number;
+  lng?: number;
+  limit?: number;
 }
 
 export interface RecommendedArticle {
@@ -140,13 +145,34 @@ export interface RecommendedArticle {
   score: number;
   imageUrl?: string;
   preview?: string;
+  access_type?: string;
 }
 
 export interface EPDSAssessmentResponse {
-  score: number;
-  risk_level: string;
+  message: string;
+  result: {
+    id: number;
+    total_score: number;
+    risk_level: string;
+    answers: {
+      q1: number;
+      q2: number;
+      q3: number;
+      q4: number;
+      q5: number;
+      q6: number;
+      q7: number;
+      q8: number;
+      q9: number;
+      q10: number;
+    };
+    created_at: string;
+  };
+  interpretation: string;
   recommended_articles: RecommendedArticle[];
   recommendations_status: "ok" | "unavailable";
+  risk_level_standard: string;
+  crisis_resources?: CrisisResource[];
 }
 
 export interface EpdsResultState {
@@ -156,6 +182,9 @@ export interface EpdsResultState {
   recommendationsStatus: "ok" | "unavailable" | "idle";
   status: "idle" | "loading" | "succeeded" | "failed";
   error: string | null;
+  riskLevel: string | null;
+  interpretation: string | null;
+  crisisResources: CrisisResource[];
 }
 
 // Symptoms types
@@ -184,9 +213,15 @@ export interface SymptomsResultState {
   score: number | null;
   status: "idle" | "loading" | "succeeded" | "failed";
   error: string | null;
+  interpretation: string | null;
+  crisisResources: CrisisResource[];
+  recommendedArticles: RecommendedArticle[];
+  recommendationsStatus: "ok" | "unavailable" | "idle";
+  result: SymptomsAssessmentResponse | null;
 }
 
 export interface SymptomsAssessmentResponse {
+  message: string;
   id: string;
   createdAt: string;
   result: {
@@ -196,9 +231,14 @@ export interface SymptomsAssessmentResponse {
     clinical_note?: string;
     threshold_used?: number;
   };
+  interpretation: string;
+  recommended_articles: RecommendedArticle[];
+  recommendations_status: "ok" | "unavailable";
+  crisis_resources?: CrisisResource[];
 }
 
 export interface HybridAssessmentResponse {
+  message: string;
   audit: {
     decision_path: string;
     is_discordant: boolean;
@@ -220,6 +260,8 @@ export interface HybridAssessmentResponse {
   system_disclaimer: string;
   recommended_articles: RecommendedArticle[];
   recommendations_status: "ok" | "unavailable";
+  interpretation: string;
+  crisis_resources?: CrisisResource[];
 }
 
 export interface HybridResultState {
@@ -230,6 +272,8 @@ export interface HybridResultState {
   result: HybridAssessmentResponse | null;
   recommendedArticles: RecommendedArticle[];
   recommendationsStatus: "ok" | "unavailable" | "idle";
+  interpretation: string | null;
+  crisisResources: CrisisResource[];
 }
 
 export interface DashboardRecommendationsResponse {

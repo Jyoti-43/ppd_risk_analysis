@@ -15,7 +15,7 @@ export const QuestionCard =({ question, onAnswer, currentAnswer }: QuestionCardP
       <div className="space-y-2">
         <div className="inline-flex items-center gap-1 px-3 py-1 bg-secondary rounded-full text-xs font-bold text-primary">
           <span className="material-symbols-outlined text-[16px]">help</span>
-          Question {question.id}
+          Question {question.id} /10
         </div>
         <h2 className="text-xl lg:text-2xl font-semibold text-foreground leading-tight">{question.text}</h2>
         <p className="text-muted-foreground text-sm">

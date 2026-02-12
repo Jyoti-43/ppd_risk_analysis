@@ -83,13 +83,14 @@ export const communityPost = createApi({
       async onQueryStarted(
         { commentId, hasLiked },
         { dispatch, queryFulfilled },
-      ) {
-       
-      },
+      ) {},
       invalidatesTags: ["Comments"],
     }),
 
-    postLike: build.mutation<any, { id: string; likeCount: number; hasLiked: boolean }>({
+    postLike: build.mutation<
+      any,
+      { id: string; likeCount: number; hasLiked: boolean }
+    >({
       query: ({ id, likeCount, hasLiked }) => ({
         url: `/community/toggle-like/${id}`,
         method: "POST",
@@ -98,13 +99,9 @@ export const communityPost = createApi({
       async onQueryStarted(
         { id, likeCount, hasLiked },
         { dispatch, queryFulfilled },
-      ) {
-       
-      },
+      ) {},
       invalidatesTags: ["Posts"],
     }),
-
-
 
     getCategory: build.query<any, void>({
       query: () => ({

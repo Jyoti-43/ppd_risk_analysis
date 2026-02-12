@@ -68,13 +68,13 @@ export function DiscussionsSection() {
         const likeCount = like
           ? parseInt(like.likeCount)
           : post.like
-          ? parseInt(post.like.likeCount)
-          : 0;
+            ? parseInt(post.like.likeCount)
+            : 0;
         const hasLiked = like
           ? like.hasLiked
           : post.like && typeof post.like.hasLiked === "boolean"
-          ? post.like.hasLiked
-          : false;
+            ? post.like.hasLiked
+            : false;
 
         return (
           <DiscussionPost

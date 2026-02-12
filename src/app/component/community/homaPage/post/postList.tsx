@@ -110,8 +110,8 @@ export const PostsList = ({
         {activeFilter === "My Posts"
           ? "You haven't created any posts yet."
           : searchQuery
-          ? `No posts found matching "${searchQuery}"`
-          : "No posts found."}
+            ? `No posts found matching "${searchQuery}"`
+            : "No posts found."}
       </div>
     );
   }

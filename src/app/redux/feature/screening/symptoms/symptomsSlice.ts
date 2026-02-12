@@ -6,11 +6,15 @@ import {
   SymptomsAssessmentResponse,
 } from "@/src/app/type";
 
-const initialState: SymptomsResultState & { result?: SymptomsAssessmentResponse | null } = {
+const initialState: SymptomsResultState = {
   answers: null,
   score: null,
   status: "idle",
   error: null,
+  interpretation: null,
+  crisisResources: [],
+  recommendedArticles: [],
+  recommendationsStatus: "idle",
   result: null,
 };
 
@@ -18,26 +22,48 @@ export const SymptomsResultSlice = createSlice({
   name: "symptomsResult",
   initialState,
   reducers: {
-    setAnswers: (state, action: PayloadAction<SymptomsQuestion | null>) => {
+    setSymptomsAnswers: (
+      state,
+      action: PayloadAction<Record<string, any> | null>,
+    ) => {
       state.answers = action.payload;
     },
-    setScore: (state, action: PayloadAction<number | null>) => {
+    setSymptomsScore: (state, action: PayloadAction<number | null>) => {
       state.score = action.payload;
     },
-    setStatus: (
+    setSymptomsStatus: (
       state,
-      action: PayloadAction<"idle" | "loading" | "succeeded" | "failed">
+      action: PayloadAction<"idle" | "loading" | "succeeded" | "failed">,
     ) => {
       state.status = action.payload;
     },
-    setError: (state, action: PayloadAction<string | null>) => {
+    setSymptomsError: (state, action: PayloadAction<string | null>) => {
       state.error = action.payload;
     },
-    setResult: (
+    setSymptomsResult: (
       state,
-      action: PayloadAction<SymptomsAssessmentResponse | undefined | null>
+      action: PayloadAction<SymptomsAssessmentResponse | null>,
     ) => {
-      state.result = action.payload ?? null;
+      state.result = action.payload;
+      if (action.payload) {
+        state.interpretation = action.payload.interpretation;
+        state.crisisResources = action.payload.crisis_resources || [];
+        state.recommendedArticles = action.payload.recommended_articles || [];
+        state.recommendationsStatus =
+          action.payload.recommendations_status || "unavailable";
+        state.status = "succeeded";
+      }
+    },
+    resetSymptoms: (state) => {
+      state.answers = null;
+      state.score = null;
+      state.status = "idle";
+      state.error = null;
+      state.interpretation = null;
+      state.crisisResources = [];
+      state.recommendedArticles = [];
+      state.recommendationsStatus = "idle";
+      state.result = null;
     },
   },
 });
@@ -53,8 +79,22 @@ export const selectSymptomsError = (state: RootState) =>
   state.symptomsResult.error;
 export const selectSymptomsResult = (state: RootState) =>
   state.symptomsResult.result;
+export const selectSymptomsInterpretation = (state: RootState) =>
+  state.symptomsResult.interpretation;
+export const selectSymptomsCrisisResources = (state: RootState) =>
+  state.symptomsResult.crisisResources;
+export const selectSymptomsRecommendedArticles = (state: RootState) =>
+  state.symptomsResult.recommendedArticles;
+export const selectSymptomsRecommendationsStatus = (state: RootState) =>
+  state.symptomsResult.recommendationsStatus;
 
-export const { setAnswers, setScore, setStatus, setError, setResult } =
-  SymptomsResultSlice.actions;
+export const {
+  setSymptomsAnswers,
+  setSymptomsScore,
+  setSymptomsStatus,
+  setSymptomsError,
+  setSymptomsResult,
+  resetSymptoms,
+} = SymptomsResultSlice.actions;
 
 export default SymptomsResultSlice.reducer;
