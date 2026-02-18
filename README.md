@@ -87,7 +87,7 @@ Assess your mental health through scientifically-backed screening methods:
 <img width="1917" height="966" alt="home" src="https://github.com/user-attachments/assets/7b0e1353-c892-4b0e-a4ee-5efeb5271505" />
 
 <img width="1913" height="957" alt="home_resource" src="https://github.com/user-attachments/assets/019547c4-60a2-43cf-8771-b0f46821771c" />
-<img width="1913" height="959" alt="home_screening" src="https://github.com/user-attachments/assets/53a45ab6-629c-4c56-95de-5246d543d8ce" />
+
 
 <img width="1910" height="981" alt="home_user" src="https://github.com/user-attachments/assets/407b9b50-9bfd-41da-8e30-99a57e72ea3a" />
 
