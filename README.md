@@ -1,4 +1,4 @@
-<img width="1917" height="966" alt="home" src="https://github.com/user-attachments/assets/1f762322-2478-431b-8909-1c530c50f18e" /># MotherCare - Postpartum Depression (PPD) Risk Analysis Platform
+# MotherCare - Postpartum Depression (PPD) Risk Analysis Platform
 
 MotherCare is a modern web application designed to provide a safe, non-judgmental, and secure space for mothers to assess their postpartum health. The platform offers multiple screening methods for Postpartum Depression (PPD) and provides resources and community support to help mothers navigate their journey.
 
@@ -80,13 +80,24 @@ Assess your mental health through scientifically-backed screening methods:
 - `src/lib`: Shared utility functions and configurations.
 - `public`: Static assets like images and fonts.
 ## 📂 Appendix
-<img width="1920" height="955" alt="home_contributor" src="https://github.com/user-attachments/assets/6ae3b5d0-bda1-43e8-b74b-4d03ff1052d9" />
-<img width="1920" height="954" alt="home_login" src="https://github.com/user-attachments/assets/55530d9d-f51e-45a7-b209-b86132533800" />
-<img width="1920" height="1080" alt="Screenshot (211)" src="https://github.com/user-attachments/assets/99b77885-053b-4412-8338-c37f0b7aeaad" />
-<img width="1910" height="981" alt="home_user" src="https://github.com/user-attachments/assets/e532ba81-01b3-4b0d-a18d-4b570dddc3e9" />
-<img width="1913" height="957" alt="home_resource" src="https://github.com/user-attachments/assets/2dfe010d-9ddd-4de3-acc4-9d995282bfc4" />
 
-<img width="1917" height="966" alt="home" src="https://github.com/user-attachments/assets/7b42c5ae-68eb-496b-a9e3-4762c195daaa" />
+<img width="1920" height="954" alt="home_login" src="https://github.com/user-attachments/assets/3bf0c02b-6e1d-47cc-83dc-e5e1f99b5899" />
+
+
+<img width="1917" height="966" alt="home" src="https://github.com/user-attachments/assets/7b0e1353-c892-4b0e-a4ee-5efeb5271505" />
+
+<img width="1913" height="957" alt="home_resource" src="https://github.com/user-attachments/assets/019547c4-60a2-43cf-8771-b0f46821771c" />
+<img width="1913" height="959" alt="home_screening" src="https://github.com/user-attachments/assets/53a45ab6-629c-4c56-95de-5246d543d8ce" />
+
+<img width="1910" height="981" alt="home_user" src="https://github.com/user-attachments/assets/407b9b50-9bfd-41da-8e30-99a57e72ea3a" />
+
+<img width="1920" height="955" alt="home_contributor" src="https://github.com/user-attachments/assets/01a9ce22-4539-439b-8ca2-541a5a173ead" />
+<img width="1887" height="961" alt="appendix1" src="https://github.com/user-attachments/assets/b7caec45-761c-48df-8d5f-263821e80d71" />
+<img width="1917" height="982" alt="Screenshot (211)" src="https://github.com/user-attachments/assets/81b27bc8-d988-4870-a742-e5f1526a3fd3" />
+
+
+
+
 
 ## 📄 Credits & License
 
