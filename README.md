@@ -1,4 +1,4 @@
-# MotherCare - Postpartum Depression (PPD) Risk Analysis Platform
+<img width="1917" height="966" alt="home" src="https://github.com/user-attachments/assets/1f762322-2478-431b-8909-1c530c50f18e" /># MotherCare - Postpartum Depression (PPD) Risk Analysis Platform
 
 MotherCare is a modern web application designed to provide a safe, non-judgmental, and secure space for mothers to assess their postpartum health. The platform offers multiple screening methods for Postpartum Depression (PPD) and provides resources and community support to help mothers navigate their journey.
 
@@ -79,6 +79,14 @@ Assess your mental health through scientifically-backed screening methods:
 - `src/Hooks`: Custom React hooks.
 - `src/lib`: Shared utility functions and configurations.
 - `public`: Static assets like images and fonts.
+## 📂 Appendix
+<img width="1920" height="955" alt="home_contributor" src="https://github.com/user-attachments/assets/6ae3b5d0-bda1-43e8-b74b-4d03ff1052d9" />
+<img width="1920" height="954" alt="home_login" src="https://github.com/user-attachments/assets/55530d9d-f51e-45a7-b209-b86132533800" />
+<img width="1920" height="1080" alt="Screenshot (211)" src="https://github.com/user-attachments/assets/99b77885-053b-4412-8338-c37f0b7aeaad" />
+<img width="1910" height="981" alt="home_user" src="https://github.com/user-attachments/assets/e532ba81-01b3-4b0d-a18d-4b570dddc3e9" />
+<img width="1913" height="957" alt="home_resource" src="https://github.com/user-attachments/assets/2dfe010d-9ddd-4de3-acc4-9d995282bfc4" />
+
+<img width="1917" height="966" alt="home" src="https://github.com/user-attachments/assets/7b42c5ae-68eb-496b-a9e3-4762c195daaa" />
 
 ## 📄 Credits & License
 
